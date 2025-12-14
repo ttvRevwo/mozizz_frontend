@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import './registerlogin.css';
+import backgroundImage from '../src/imgs/3.png';
+
 
 export default function Register() {
   const [fullname, setFullname] = useState('');
@@ -56,7 +58,30 @@ export default function Register() {
   };
 
   return (
+    <div 
+      className="app-container" 
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+        width: '100%',         // 100vw helyett 100%, hogy ne legyen vízszintes csúszka
+        height: '100vh',       // min-height helyett fix height
+        overflow: 'hidden',    // Letiltja a görgetést ezen a szinten
+      }}
+    >
     <div className="register-container">
+      {/* Vissza a főoldalra gomb */}
+      <a href="/" className="back-to-home">
+        {/* Ikon a nyílhoz */}
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} width={20} height={20}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+        </svg>
+        {/* Szöveg a gombhoz */}
+        Vissza a főoldalra
+      </a>
+      {/* Főablak */}
       <h2 className="register-title">Regisztráció</h2>
       <div className="register-welcome">
         <div className="register-logo">
@@ -87,9 +112,10 @@ export default function Register() {
           <button type="submit" className="reg-button">Regisztráció</button>
         </div>
         <div className='login-link-wrapper'>
-          Már van fiókod? <a href="#" className="login-link">Jelentkezz be!</a>
+          Már van fiókod? <a href="../login" className="login-link">Jelentkezz be!</a>
         </div>
       </form>
+    </div>
     </div>
   );
 }
