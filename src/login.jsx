@@ -13,11 +13,11 @@ export default function Login() {
     event.preventDefault();
     setMessage('');
 
-    // **IDE JÖN MAJD A BACKEND KOMMUNIKÁCIÓ**
+    // IDE JÖN MAJD A BACKEND KOMMUNIKÁCIÓ
     
     try {
         setMessage(`Sikeres Bejelentkezés! Üdvözlünk, ${username}!`);
-        // Itt mentheted az autentikációs tokent (pl. localStorage-ba) és átirányíthatsz.
+        // Autentikációs token mentés
         setUsername('');
         setPassword('');
     } catch (error) {
@@ -40,9 +40,9 @@ export default function Login() {
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         backgroundAttachment: 'fixed',
-        width: '100%',         // 100vw helyett 100%, hogy ne legyen vízszintes csúszka
-        height: '100vh',       // min-height helyett fix height
-        overflow: 'hidden',    // Letiltja a görgetést ezen a szinten
+        width: '100%',
+        height: '100vh',
+        overflow: 'hidden',
       }}
     >
     <div className="register-container">
@@ -69,7 +69,7 @@ export default function Login() {
         </div>
       </div>
       <form className="register-form" onSubmit={handleSubmit}>
-        {/* Csak a Felhasználónév/emiail és Jelszó mezők kellenek bejelentkezéshez már */}
+        {/* Csak a Felhasználónév/email és Jelszó mezők kellenek bejelentkezéshez már */}
         <input 
           type="text" 
           placeholder="Felhasználónév vagy Email" 

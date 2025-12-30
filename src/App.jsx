@@ -16,8 +16,15 @@ function MainPage() {
       </nav>
 
       <div className="home-content">
-        <h1 className="home-title">Főoldal</h1>
-        <p className="home-subtitle">Üdvözöljük az Mozizz.hu-n!</p>
+        <h1 className="home-subtitle">Mozizz.hu - Élmény, ami összeköt!</h1>
+      </div>
+
+      <div className="home-icon">
+        <img src="/vite.svg" alt="Logo" className="home-icon"/>
+      </div>
+
+      <div>
+        <input type="text" placeholder="Keresés..." className="search-bar"></input>
       </div>
     </div>
   );

@@ -66,9 +66,9 @@ export default function Register() {
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         backgroundAttachment: 'fixed',
-        width: '100%',         // 100vw helyett 100%, hogy ne legyen vízszintes csúszka
-        height: '100vh',       // min-height helyett fix height
-        overflow: 'hidden',    // Letiltja a görgetést ezen a szinten
+        width: '100%',
+        height: '100vh',
+        overflow: 'hidden',
       }}
     >
     <div className="register-container">
