@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import './registerlogin.css';
-import backgroundImage from '../src/imgs/3.png';
+import '../registerlogin.css';
+import backgroundImage from '../../src/imgs/3.png';
 
 
 export default function Register() {
@@ -72,13 +72,10 @@ export default function Register() {
       }}
     >
     <div className="register-container">
-      {/* Vissza a főoldalra gomb */}
       <a href="/" className="back-to-home">
-        {/* Ikon a nyílhoz */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} width={20} height={20}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
         </svg>
-        {/* Szöveg a gombhoz */}
         Vissza a főoldalra
       </a>
       {/* Főablak */}

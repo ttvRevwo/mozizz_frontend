@@ -92,13 +92,20 @@ html, body, #root {
 }
 
 .search-bar{
-    border: solid gray 3px;
     top: 3%;
     left: 7%;
     position: absolute;
     height: 30px;
     width: 130px;
     text-align: left;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding-left: 5px;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    transition: border-color 0.25s;
 }
 
 @keyframes fadeIn {
