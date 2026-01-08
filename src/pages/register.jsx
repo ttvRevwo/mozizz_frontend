@@ -2,6 +2,26 @@ import { useState } from 'react';
 import '../registerlogin.css';
 import backgroundImage from '../../src/imgs/4.png';
 
+const WaveInput = ({ type, placeholder, value, onChange, required = true }) => {
+  return (
+    <div className="input-group">
+      <input 
+        type={type} 
+        className={`form-input ${value && value.length > 0 ? 'active' : ''}`}        
+        value={value} 
+        onChange={onChange} 
+        required={required} 
+      />
+      <label className="floating-label">
+        {placeholder.split('').map((char, index) => (
+          <span key={index} style={{ transitionDelay: `${index * 50}ms` }}>
+            {char === ' ' ? '\u00A0' : char}
+          </span>
+        ))}
+      </label>
+    </div>
+  );
+};
 
 export default function Register() {
   const [fullname, setFullname] = useState('');
@@ -48,7 +68,7 @@ export default function Register() {
     }
 
     setMessage(`Sikeres Validáció! Üdv, ${username}! A regisztrációt a rendszer feldolgozza.`);
-
+    
     setFullname('');
     setUsername('');
     setEmail('');
@@ -78,8 +98,9 @@ export default function Register() {
         </svg>
         Vissza a főoldalra
       </a>
-      {/* Főablak */}
+      
       <h2 className="register-title">Regisztráció</h2>
+      
       <div className="register-welcome">
         <div className="register-logo">
           <svg xmlns="http://www.w3.org/2000/svg" className="logo-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} width={36} height={36}>
@@ -90,17 +111,50 @@ export default function Register() {
           Üdvözlünk a mozizz.hu-n! Regisztrálj a legjobb filmélményekért és exkluzív ajánlatokért.
         </div>
       </div>
+
       <form className="register-form" onSubmit={handleSubmit}>
-        <input type="text" placeholder="Teljes név" value={fullname} onChange={e => setFullname(e.target.value)} required className="form-input" />
-        <input type="text" placeholder="Felhasználónév" value={username} onChange={e => setUsername(e.target.value)} required className="form-input" />
-        <input type="email" placeholder="Email cím" value={email} onChange={e => setEmail(e.target.value)} required className="form-input" />
-        <input type="number" placeholder="Telefonszám (pl. 06701234567)" value={phonenumber} onChange={e => setPhonenumber(e.target.value)} required className="form-input" />
-        <input type="password" placeholder="Jelszó" value={password} onChange={e => setPassword(e.target.value)} required className="form-input" />
+        
+        <WaveInput 
+          type="text" 
+          placeholder="Teljes név" 
+          value={fullname} 
+          onChange={e => setFullname(e.target.value)} 
+        />
+        
+        <WaveInput 
+          type="text" 
+          placeholder="Felhasználónév" 
+          value={username} 
+          onChange={e => setUsername(e.target.value)} 
+        />
+        
+        <WaveInput 
+          type="email" 
+          placeholder="Email cím" 
+          value={email} 
+          onChange={e => setEmail(e.target.value)} 
+        />
+        
+        <WaveInput 
+          type="number" 
+          placeholder="Telefonszám" 
+          value={phonenumber} 
+          onChange={e => setPhonenumber(e.target.value)} 
+        />
+        
+        <WaveInput 
+          type="password" 
+          placeholder="Jelszó" 
+          value={password} 
+          onChange={e => setPassword(e.target.value)} 
+        />
+
         {message && (
           <div className={`register-message ${message.startsWith('Sikeres') ? 'success' : 'error'}`}>
             {message}
           </div>
         )}
+
         <div className="register-bottom-row">
           <label className="aszf-label">
             <input type="checkbox" checked={agreedToTerms} onChange={e => setAgreedToTerms(e.target.checked)} required className="aszf-checkbox" />
@@ -108,6 +162,7 @@ export default function Register() {
           </label>
           <button type="submit" className="reg-button">Regisztráció</button>
         </div>
+        
         <div className='login-link-wrapper'>
           Már van fiókod? <a href="../login" className="login-link">Jelentkezz be!</a>
         </div>

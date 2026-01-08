@@ -2,12 +2,31 @@ import { useState } from 'react';
 import '../registerlogin.css';
 import backgroundImage from '../../src/imgs/4.png';
 
+const WaveInput = ({ type, placeholder, value, onChange, required = true }) => {
+  return (
+    <div className="input-group">
+      <input 
+        type={type} 
+        className={`form-input ${value && value.length > 0 ? 'active' : ''}`}        
+        value={value} 
+        onChange={onChange} 
+        required={required} 
+      />
+      <label className="floating-label">
+        {placeholder.split('').map((char, index) => (
+          <span key={index} style={{ transitionDelay: `${index * 50}ms` }}>
+            {char === ' ' ? '\u00A0' : char}
+          </span>
+        ))}
+      </label>
+    </div>
+  );
+};
+
 export default function Login() {
-  // Csak a bejelentkezéshez szükséges állapotok
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -16,18 +35,13 @@ export default function Login() {
     // IDE JÖN MAJD A BACKEND KOMMUNIKÁCIÓ
     
     try {
-        setMessage(`Sikeres Bejelentkezés! Üdvözlünk, ${username}!`);
-        // Autentikációs token mentés
+        // Ideiglenes logikák...
+        setMessage(`Sikeres Bejelentkezési Űrlap Küldés! Felhasználónév: ${username}`);
         setUsername('');
         setPassword('');
     } catch (error) {
       console.error('Login error:', error);
     }
-    
-    // Ideiglenes üzenet backend nélkül:
-    setMessage(`Sikeres Bejelentkezési Űrlap Küldés! Felhasználónév: ${username}`);
-    setUsername('');
-    setPassword('');
   };
 
   return (
@@ -51,8 +65,9 @@ export default function Login() {
         </svg>
         Vissza a főoldalra
       </a>
-      {/* Főablak */}
+      
       <h2 className="register-title">Bejelentkezés</h2>
+      
       <div className="register-welcome">
         <div className="register-logo">
           <svg xmlns="http://www.w3.org/2000/svg" className="logo-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} width={36} height={36}>
@@ -63,35 +78,35 @@ export default function Login() {
           Üdvözlünk a mozizz.hu-n! Jelentkezz be a legjobb filmélményekért és exkluzív ajánlatokért.
         </div>
       </div>
+
       <form className="register-form" onSubmit={handleSubmit}>
-        {/* Csak a Felhasználónév/email és Jelszó mezők kellenek bejelentkezéshez */}
-        <input 
+        
+        <WaveInput 
           type="text" 
           placeholder="Felhasználónév vagy Email" 
           value={username} 
           onChange={e => setUsername(e.target.value)} 
-          required 
-          className="form-input" 
         />
-        <input 
+
+        <WaveInput 
           type="password" 
           placeholder="Jelszó" 
           value={password} 
           onChange={e => setPassword(e.target.value)} 
-          required 
-          className="form-input" 
         />
+
         {message && (
           <div className={`register-message ${message.startsWith('Sikeres') ? 'success' : 'error'}`}>
             {message}
           </div>
         )}
+
         <div className="register-bottom-row">
         <a href="#" className="login-link">Elfelejtett jelszó kérése </a>
           <button type="submit" className="reg-button">Bejelentkezés</button>
         </div>
+        
         <div className='login-link-wrapper'>
-          {/* Hozzáadjuk a regisztrációs oldal linket, ha valaki mégis regisztrálni szeretne */}
           Nincs még fiókod? <a href="../register" className="login-link">Regisztrálj!</a>
         </div>
       </form>
