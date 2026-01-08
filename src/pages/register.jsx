@@ -2,16 +2,13 @@ import { useState } from 'react';
 import '../registerlogin.css';
 import backgroundImage from '../../src/imgs/4.png';
 
-// A módosított WaveInput
 const WaveInput = ({ type, placeholder, value, onChange, validate, required = true }) => {
   
   let statusClass = '';
   
-  // Csak akkor vizsgáljuk, ha van benne szöveg
   if (value && value.length > 0) {
-    statusClass = 'active'; // Ez emeli fel a szöveget
+    statusClass = 'active'; 
 
-    // Ha adtunk át validáló függvényt, akkor lefuttatjuk
     if (validate) {
       const isValid = validate(value);
       statusClass += isValid ? ' valid' : ' invalid';
@@ -22,7 +19,6 @@ const WaveInput = ({ type, placeholder, value, onChange, validate, required = tr
     <div className="input-group">
       <input 
         type={type} 
-        // Itt fűzzük össze a stílusokat: form-input + active + valid/invalid
         className={`form-input ${statusClass}`} 
         value={value} 
         onChange={onChange} 
@@ -112,7 +108,7 @@ export default function Register() {
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} width={20} height={20}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
         </svg>
-        Vissza a főoldalra
+        Vissza
       </a>
       
       <h2 className="register-title">Regisztráció</h2>
