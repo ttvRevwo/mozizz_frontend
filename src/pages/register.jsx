@@ -2,15 +2,31 @@ import { useState } from 'react';
 import '../registerlogin.css';
 import backgroundImage from '../../src/imgs/4.png';
 
-const WaveInput = ({ type, placeholder, value, onChange, required = true }) => {
+// A módosított WaveInput
+const WaveInput = ({ type, placeholder, value, onChange, validate, required = true }) => {
+  
+  let statusClass = '';
+  
+  // Csak akkor vizsgáljuk, ha van benne szöveg
+  if (value && value.length > 0) {
+    statusClass = 'active'; // Ez emeli fel a szöveget
+
+    // Ha adtunk át validáló függvényt, akkor lefuttatjuk
+    if (validate) {
+      const isValid = validate(value);
+      statusClass += isValid ? ' valid' : ' invalid';
+    }
+  }
+
   return (
     <div className="input-group">
       <input 
         type={type} 
-        className={`form-input ${value && value.length > 0 ? 'active' : ''}`}        
+        // Itt fűzzük össze a stílusokat: form-input + active + valid/invalid
+        className={`form-input ${statusClass}`} 
         value={value} 
         onChange={onChange} 
-        required={required} 
+        required={required}
       />
       <label className="floating-label">
         {placeholder.split('').map((char, index) => (
@@ -118,7 +134,8 @@ export default function Register() {
           type="text" 
           placeholder="Teljes név" 
           value={fullname} 
-          onChange={e => setFullname(e.target.value)} 
+          onChange={e => setFullname(e.target.value)}
+          validate={validateFullname}
         />
         
         <WaveInput 
@@ -126,6 +143,7 @@ export default function Register() {
           placeholder="Felhasználónév" 
           value={username} 
           onChange={e => setUsername(e.target.value)} 
+          validate={validateUsername}
         />
         
         <WaveInput 
@@ -133,6 +151,7 @@ export default function Register() {
           placeholder="Email cím" 
           value={email} 
           onChange={e => setEmail(e.target.value)} 
+          validate={validateEmail}
         />
         
         <WaveInput 
@@ -140,6 +159,7 @@ export default function Register() {
           placeholder="Telefonszám" 
           value={phonenumber} 
           onChange={e => setPhonenumber(e.target.value)} 
+          validate={validatePhone}
         />
         
         <WaveInput 
@@ -147,6 +167,7 @@ export default function Register() {
           placeholder="Jelszó" 
           value={password} 
           onChange={e => setPassword(e.target.value)} 
+          validate={validatePassword}
         />
 
         {message && (

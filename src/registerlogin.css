@@ -295,3 +295,36 @@ html, body, #root {
     width: auto;
   }
 }
+
+/* --- VALIDÁCIÓS SZÍNEK (ÚJ) --- */
+
+/* 1. HIBA (INVALID) - PIROS */
+/* Ha van benne szöveg (.active) ÉS rajta van az .invalid osztály */
+.form-input.active.invalid {
+  border-color: #ef4444; /* Élénk piros */
+}
+
+.form-input.active.invalid:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5); /* Piros aura */
+}
+
+/* A felirat is legyen piros */
+.form-input.active.invalid + .floating-label span {
+  color: #ef4444;
+}
+
+
+/* 2. HELYES (VALID) - ZÖLD */
+/* Ha van benne szöveg (.active) ÉS rajta van a .valid osztály */
+.form-input.active.valid {
+  border-color: #22c55e; /* Élénk zöld */
+}
+
+.form-input.active.valid:focus {
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.5); /* Zöld aura */
+}
+
+/* A felirat is legyen zöld */
+.form-input.active.valid + .floating-label span {
+  color: #22c55e;
+}
