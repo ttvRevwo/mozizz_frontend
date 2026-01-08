@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import '../registerlogin.css';
-import backgroundImage from '../../src/imgs/3.png';
+import backgroundImage from '../../src/imgs/4.png';
 
 
 export default function Register() {

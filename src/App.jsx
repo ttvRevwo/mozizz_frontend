@@ -18,15 +18,16 @@ function MainPage() {
         <Link to="/login">
           <button className="nav-button">Bejelentkezés</button>
         </Link>
+        <div>
+          <input type="text" placeholder="Keresés..." className="search-bar"></input>
+        </div>
       </nav>
 
       <div className="home-icon">
         <img src="/vite.svg" alt="Logo" className="home-icon"/>
       </div>
 
-      <div>
-        <input type="text" placeholder="Keresés..." className="search-bar"></input>
-      </div>
+      
 
       <div className="home-content">
         <h1 className="home-subtitle">Mozizz.hu - Élmény, ami összeköt!</h1>
