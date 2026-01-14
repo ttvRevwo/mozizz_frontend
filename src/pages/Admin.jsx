@@ -3,25 +3,27 @@ import { Link } from "react-router-dom";
 import '../App.css';
 
 const UsersComponent = ({ users }) => {
-    return ( 
-        <ol className="list-group list-group-numbered">
+    return (
+        <div className="user-list-container">
             {users.map((user) => (
-                <li key={user.userId} className="list-group-item d-flex justify-content-between align-items-start" style={{background: '#3A3A3A', color: '#E0E0E0', borderColor: '#c79c0f', marginBottom: '10px'}}>
-                    <div className="ms-2 me-auto text-start">
-                        <div className="fw-bold" style={{color: '#c79c0f'}}>
+                <div key={user.userId} className="user-card">
+                    <div className="user-info">
+                        <div className="user-name">
                             {user.name || user.username}
                         </div>
-                        <span style={{fontSize: '0.9rem'}}>Email: {user.email}</span>
+                        <div className="user-email">
+                            {user.email}
+                        </div>
                     </div>
                     
-                    <Link to={`/user/${user.userId}`}>
-                        <button className="nav-button" style={{padding: '5px 10px', fontSize: '0.8rem'}}>
+                    <Link to={`/user/${user.userId}`} className="details-link">
+                        <button className="details-button">
                             Részletek
                         </button>
                     </Link>
-                </li>
+                </div>
             ))}
-        </ol>
+        </div>
     );
 };
 
@@ -46,32 +48,29 @@ export const UsersList = () => {
     }, []);
 
     if(loading) { 
-        return <div className="spinner-border text-danger m-5">Betöltés...</div>; 
+        return <div className="loading-text">Betöltés...</div>; 
     }
         
     if(!users.length) { 
         return (
-            <div className="container">
-                <h3 className="m-4">Felhasználók listája</h3>
-                <div className="alert alert-info">Nincs megjeleníthető elem.</div>
+            <div className="admin-panel">
+                <h3 className="admin-title">Felhasználók listája</h3>
+                <div className="empty-message">Nincs megjeleníthető elem.</div>
             </div>
         );
     }
     
     return(
-        <div className="container">
-            <div className="row m-5 p-5 border" style={{backgroundColor: '#1a0606', color: 'white'}}>
-                <h3 className="mb-4" style={{color: '#c79c0f'}}>Felhasználók listája ({users.length} db)</h3>
-                <UsersComponent users={users} />
-            </div>
+        <div className="admin-panel">
+            <h3 className="admin-title">Felhasználók listája ({users.length} db)</h3>
+            <UsersComponent users={users} />
         </div>
     );
 };
 
 function Admin() {
   return (
-    <div className="app-container" style={{flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '50px'}}>
-       
+    <div className="app-container admin-view">
        <Link to="/" className="back-to-home">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} width={20} height={20}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
@@ -80,7 +79,6 @@ function Admin() {
       </Link>
       
       <UsersList />
-
     </div>
   );
 }

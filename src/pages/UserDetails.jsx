@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import '../App.css';
 
 function UserDetails() {
     const { userId } = useParams();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState(null);
     const [originalData, setOriginalData] = useState(null);
@@ -98,6 +99,29 @@ function UserDetails() {
         });
     };
 
+    const handleDelete = () => {
+        if (window.confirm("Biztosan törölni szeretnéd ezt a felhasználót?")) {
+            fetch(`http://localhost:5083/api/User/DelUser?id=${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Felhasználó sikeresen törölve!");
+                    navigate('/admin');
+                } else {
+                    alert("Hiba történt a törlés során.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Hálózati hiba történt.");
+            });
+        }
+    };
+
     if (loading) {
         return (
             <div className="app-container">
@@ -188,9 +212,16 @@ function UserDetails() {
                 <button 
                     onClick={handleSave}
                     className="reg-button" 
-                    style={{ fontSize: '1.1rem' }}
+                    style={{ fontSize: '1.1rem', marginBottom: '15px' }}
                 >
                     Mentés
+                </button>
+
+                <button 
+                    onClick={handleDelete}
+                    className="delete-button"
+                >
+                    Felhasználó törlése
                 </button>
             </div>
         </div>
