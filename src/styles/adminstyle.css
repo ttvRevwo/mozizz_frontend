@@ -1,0 +1,164 @@
+/* ==========================================
+   ADMIN PANEL FŐ KERET ÉS LAYOUT
+   ========================================== */
+
+.app-container.admin-view {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow-y: auto; /* A teljes oldal görgetése, ha kis képernyőn vagyunk */
+}
+
+.admin-panel {
+    width: 90%;
+    max-width: 800px;
+    
+    /* A FŐ DOBOZ FIX MÉRETEI */
+    height: 80vh;       /* Mindig a képernyő 80%-a */
+    max-height: 800px;  /* De maximum 800 pixel */
+    
+    display: flex;
+    flex-direction: column; /* Fentről lefelé rendezés */
+    
+    /* EZ TARTJA BENT A TARTALMAT */
+    overflow: hidden; 
+    
+    padding: 30px;
+    background-color: #1a0606;
+    border: 2px solid #E0AA3E;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* --- TAB MENÜ (FELSŐ GOMBOK) --- */
+.admin-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    flex-shrink: 0; /* A menü mérete fix, nem nyomódhat össze */
+}
+
+/* ==========================================
+   A TARTALOM (LISTÁK) KEZELÉSE - A JAVÍTÁS
+   ========================================== */
+
+/* EZ AZ ÚJ SZABÁLY:
+   Megfogja a React által beillesztett tartalmat (ami a tabok alatt van),
+   és kényszeríti, hogy töltse ki a maradék helyet, de NE nőjön tovább.
+*/
+.admin-panel > div:not(.admin-tabs) {
+    display: flex;
+    flex-direction: column;
+    flex: 1;          /* Kitölti a maradék helyet */
+    min-height: 0;    /* KULCSFONTOSSÁGÚ: Ez engedi működni a belső görgetést */
+    overflow: hidden; /* Biztos, ami biztos */
+    width: 100%;
+}
+
+.admin-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #c79c0f;
+    margin-bottom: 25px;
+    margin-top: 0;
+    text-align: center;
+    border-bottom: 1px solid #3A3A3A;
+    padding-bottom: 15px;
+    flex-shrink: 0; /* A cím ne csússzon össze görgetéskor */
+}
+
+/* A KONKRÉT LISTA TÁROLÓJA */
+.user-list-container {
+    /* Ez a rész fog görgetni */
+    flex: 1;            /* Kitölti a helyet a cím alatt */
+    overflow-y: auto;   /* ITT VAN A GÖRGETÉS */
+    
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-right: 10px;
+    padding-bottom: 20px;
+    margin-top: 5px;
+}
+
+/* ==========================================
+   STÍLUS ELEMEK (KÁRTYÁK, GOMBOK)
+   ========================================== */
+
+/* Egyedi görgetősáv */
+.user-list-container::-webkit-scrollbar { width: 8px; }
+.user-list-container::-webkit-scrollbar-track { background: #1a0606; }
+.user-list-container::-webkit-scrollbar-thumb { background: #c79c0f; border-radius: 4px; }
+
+.user-card {
+    background-color: #3A3A3A;
+    border: 1px solid #555;
+    border-radius: 10px;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0; /* A kártya ne nyomódjon össze */
+}
+
+.user-card:hover {
+    border-color: #c79c0f;
+    background-color: #444;
+    transform: translateX(5px);
+}
+
+.user-info { display: flex; flex-direction: column; }
+.user-name { color: #c79c0f; font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
+.user-email { color: #aaa; font-size: 0.9rem; }
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.details-button {
+    background-color: transparent;
+    border: 1px solid #c79c0f;
+    color: #c79c0f;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+}
+
+.details-button:hover, .details-button.active { 
+    background-color: #c79c0f; 
+    color: #1a0606; 
+}
+
+.loading-text, .empty-message {
+    text-align: center;
+    color: #E0E0E0;
+    font-size: 1.2rem;
+    margin-top: 20px;
+}
+
+.back-to-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #c79c0f;
+    text-decoration: none;
+    font-weight: bold;
+    z-index: 10;
+}

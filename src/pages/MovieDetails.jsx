@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import '../App.css';
+import '../styles/detailpagestyles.css';
 
 function MovieDetails() {
     const { id } = useParams(); 
@@ -17,7 +17,8 @@ function MovieDetails() {
         duration: '',
         rating: '',
         description: '',
-        release_date: ''
+        release_date: '',
+        created_at: '' 
     });
 
     useEffect(() => {
@@ -30,23 +31,30 @@ function MovieDetails() {
             })
             .then(data => {
                 const movie = data.data || data;
+                
+                console.log("Szervertől kapott nyers adat:", movie);
+
                 setOriginalData(movie);
                 
+                const loadedId = movie.movieId || movie.movie_id || movie.MovieId || movie.id || '';
+
+                const rawDate = movie.release_date || movie.ReleaseDate || movie.releaseDate;
                 let formattedDate = '';
-                if (movie.release_date) {
-                    formattedDate = movie.release_date.split('T')[0];
-                } else if (movie.ReleaseDate) {
-                    formattedDate = movie.ReleaseDate.split('T')[0];
+                if (rawDate) {
+                    formattedDate = rawDate.split('T')[0];
                 }
 
+                const rawCreated = movie.created_at || movie.CreatedAt || movie.createdAt;
+
                 setMovieData({
-                    movie_id: movie.movie_id || movie.MovieId || movie.id,
+                    movie_id: loadedId, 
                     title: movie.title || movie.Title || '',
                     genre: movie.genre || movie.Genre || '',
                     duration: movie.duration || movie.Duration || '',
                     rating: movie.rating || movie.Rating || '',
                     description: movie.description || movie.Description || '',
-                    release_date: formattedDate
+                    release_date: formattedDate,
+                    created_at: rawCreated
                 });
             })
             .catch(err => {
@@ -67,10 +75,9 @@ function MovieDetails() {
     const handleSave = () => {
         if (!originalData) return;
 
-        let finalDateToSend = "2000-01-01T00:00:00";
-
+        let finalReleaseDate = "2000-01-01T00:00:00";
         if (movieData.release_date) {
-            finalDateToSend = `${movieData.release_date}T00:00:00`;
+            finalReleaseDate = `${movieData.release_date}T00:00:00`;
         }
 
         const bodyToSend = {
@@ -80,7 +87,8 @@ function MovieDetails() {
             Duration: parseInt(movieData.duration) || 0,
             Rating: movieData.rating,
             Description: movieData.description,
-            ReleaseDate: finalDateToSend
+            ReleaseDate: finalReleaseDate,
+            CreatedAt: movieData.created_at 
         };
 
         console.log("Küldött adat (JSON):", JSON.stringify(bodyToSend)); 
@@ -92,12 +100,10 @@ function MovieDetails() {
         })
         .then(async response => {
             if (response.ok) {
-                // Sikeres válasz (200 OK)
                 const textResp = await response.text(); 
                 setMessage({ type: 'success', text: textResp || 'Sikeres mentés!' });
                 setTimeout(() => setMessage(null), 3000);
             } else {
-                // Hiba válasz (400 Bad Request)
                 const errorText = await response.text();
                 console.error("Backend hiba:", errorText);
                 setMessage({ type: 'error', text: `Hiba: ${errorText}` });
@@ -136,6 +142,8 @@ function MovieDetails() {
             </div>
         );
     }
+
+    const displayCreatedAt = movieData.created_at ? movieData.created_at.replace('T', ' ').substring(0, 19) : '-';
 
     return (
         <div className="app-container" style={{ flexDirection: 'column', justifyContent: 'center', padding: '40px 0' }}>
@@ -230,7 +238,7 @@ function MovieDetails() {
                     </div>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: '30px' }}>
+                <div className="form-group" style={{ marginBottom: '20px' }}>
                     <label style={{ color: '#c79c0f', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Leírás</label>
                     <textarea
                         name="description"
@@ -238,6 +246,19 @@ function MovieDetails() {
                         onChange={handleInputChange}
                         className="form-input"
                         style={{ minHeight: '120px', resize: 'vertical', fontFamily: 'inherit', lineHeight: '1.5' }}
+                    />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '30px' }}>
+                    <label style={{ color: '#888', fontSize: '0.9rem', display: 'block', marginBottom: '5px' }}>
+                        Rendszeradat: Létrehozva (Nem módosítható)
+                    </label>
+                    <input
+                        type="text"
+                        value={displayCreatedAt}
+                        disabled
+                        className="form-input"
+                        style={{ backgroundColor: '#1a1a1a', color: '#888', borderColor: '#333', fontSize: '0.9rem', cursor: 'default' }}
                     />
                 </div>
 

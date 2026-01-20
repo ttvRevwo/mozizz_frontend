@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import '../registerlogin.css';
+import '../styles/registerlogin.css';
 import backgroundImage from '../../src/imgs/4.png';
 
 const WaveInput = ({ type, placeholder, value, onChange, required = true }) => {
