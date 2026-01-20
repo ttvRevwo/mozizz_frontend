@@ -5,6 +5,7 @@ import Login from './pages/login'
 import Admin from './pages/Admin'
 import UserDetails from "./pages/UserDetails"
 import MovieDetails from './pages/MovieDetails';
+import NewMovie from './pages/NewMovie';
 import './App.css'
 
 import img1 from './imgs/film1.jpg'; 
@@ -125,6 +126,7 @@ function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/user/:userId" element={<UserDetails />} />
         <Route path="/movie/:id" element={<MovieDetails />} />
+        <Route path="/movie/new" element={<NewMovie />} />
       </Routes>
     </BrowserRouter>
   );
