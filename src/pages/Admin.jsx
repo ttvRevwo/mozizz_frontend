@@ -36,7 +36,7 @@ const UsersList = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('http://localhost:5083/api/User/User')
+        fetch('http://localhost:5083/api/User/GetAllUsers')
         .then(response => response.json())
         .then(tartalom => {
             if(Array.isArray(tartalom)){
@@ -114,13 +114,11 @@ const MoviesList = () => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Filmek betöltése
     const fetchMovies = () => {
         setLoading(true);
         fetch('http://localhost:5083/api/Movie/GetMovies')
         .then(response => response.json())
         .then(data => {
-            // Ellenőrizzük az adatszerkezetet, mint a usernél
             if(Array.isArray(data)){
                 setMovies(data);
             } else if (data && data.data) {
@@ -137,16 +135,15 @@ const MoviesList = () => {
         fetchMovies();
     }, []);
 
-    // Film törlése
     const handleDelete = (id) => {
         if(window.confirm("Biztosan törölni szeretnéd ezt a filmet?")) {
             fetch(`http://localhost:5083/api/Movie/DelMovie?id=${id}`, {
-                method: 'DELETE' // Vagy 'POST', ha a backend úgy kéri, de REST szerint DELETE illik
+                method: 'DELETE'
             })
             .then(res => {
                 if(res.ok) {
                     alert("Film sikeresen törölve!");
-                    fetchMovies(); // Lista frissítése törlés után
+                    fetchMovies(); 
                 } else {
                     alert("Hiba történt a törlés során.");
                 }
@@ -162,7 +159,6 @@ const MoviesList = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h3 className="admin-title" style={{ margin: 0 }}>Filmek listája ({movies.length} db)</h3>
                 
-                {/* ÚJ FILM FELVITELE GOMB */}
                 <Link to="/movie/new">
                     <button className="details-button" style={{ backgroundColor: '#28a745', fontSize: '1rem', padding: '10px 20px' }}>
                         + Új Film Felvétele
@@ -179,12 +175,8 @@ const MoviesList = () => {
     );
 };
 
-// ==========================================
-// 3. FŐ ADMIN KOMPONENS
-// ==========================================
-
 function Admin() {
-  const [activeTab, setActiveTab] = useState('users'); // 'users' vagy 'movies'
+  const [activeTab, setActiveTab] = useState('users');
 
   return (
     <div className="app-container admin-view">
@@ -196,7 +188,6 @@ function Admin() {
       </Link>
       
       <div className="admin-panel">
-          {/* TAB VÁLASZTÓ GOMBOK */}
           <div className="admin-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #444', paddingBottom: '10px' }}>
               <button 
                 className={`details-button ${activeTab === 'users' ? 'active' : ''}`}
@@ -221,7 +212,6 @@ function Admin() {
               </button>
           </div>
 
-          {/* TARTALOM MEGJELENÍTÉSE A TAB ALAPJÁN */}
           {activeTab === 'users' ? <UsersList /> : <MoviesList />}
       </div>
     </div>

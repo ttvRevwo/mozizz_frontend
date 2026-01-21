@@ -6,14 +6,13 @@ const NewMovie = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     
-    // Az űrlap adatai
     const [formData, setFormData] = useState({
         Title: '',
         Description: '',
         Genre: '',
         ReleaseDate: '',
         Director: '',
-        Rating: '' // Most már szöveges lesz (pl. "R")
+        Rating: ''
     });
 
     const handleChange = (e) => {
@@ -28,15 +27,11 @@ const NewMovie = () => {
         e.preventDefault();
         setLoading(true);
 
-        // Adatok előkészítése
         const payload = {
             ...formData,
-            // Dátum formázása: YYYY-MM-DD -> YYYY-MM-DDT00:00:00
             ReleaseDate: formData.ReleaseDate ? `${formData.ReleaseDate}T00:00:00` : null,
-            // A Rating most már sima string, nem kell átalakítani
         };
 
-        // API hívás
         fetch('http://localhost:5083/api/Movie/NewMovie', { 
             method: 'POST',
             headers: {
@@ -64,7 +59,6 @@ const NewMovie = () => {
 
                 <form onSubmit={handleSubmit} className="new-movie-form">
                     
-                    {/* Cím */}
                     <div className="form-group">
                         <label>Cím</label>
                         <input 
@@ -77,7 +71,6 @@ const NewMovie = () => {
                         />
                     </div>
 
-                    {/* Műfaj */}
                     <div className="form-group">
                         <label>Műfaj</label>
                         <input 
@@ -90,7 +83,6 @@ const NewMovie = () => {
                         />
                     </div>
 
-                    {/* Rendező */}
                     <div className="form-group">
                         <label>Rendező</label>
                         <input 
@@ -103,7 +95,6 @@ const NewMovie = () => {
                         />
                     </div>
 
-                    {/* Rating (Korhatár) - JAVÍTVA: Szöveges mező */}
                     <div className="form-group">
                         <label>Korhatár besorolás (Rating)</label>
                         <input 
@@ -116,7 +107,6 @@ const NewMovie = () => {
                         />
                     </div>
 
-                    {/* Megjelenés Dátuma */}
                     <div className="form-group full-width-mobile">
                         <label>Megjelenés dátuma</label>
                         <input 
@@ -128,7 +118,6 @@ const NewMovie = () => {
                         />
                     </div>
 
-                    {/* Leírás */}
                     <div className="form-group full-width">
                         <label>Leírás</label>
                         <textarea 
@@ -141,7 +130,6 @@ const NewMovie = () => {
                         />
                     </div>
 
-                    {/* Gombok */}
                     <div className="button-group">
                         <Link to="/admin" className="cancel-btn">
                             Mégse

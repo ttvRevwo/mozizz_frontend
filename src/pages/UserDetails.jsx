@@ -17,7 +17,7 @@ function UserDetails() {
     });
 
     useEffect(() => {
-        const url = `http://localhost:5083/api/User/UserById?id=${userId}`;
+        const url = `http://localhost:5083/api/User/UserById/${userId}`;
         
         fetch(url)
             .then(res => {
@@ -101,7 +101,7 @@ function UserDetails() {
 
     const handleDelete = () => {
         if (window.confirm("Biztosan törölni szeretnéd ezt a felhasználót?")) {
-            fetch(`http://localhost:5083/api/User/DelUser?id=${userId}`, {
+            fetch(`http://localhost:5083/api/User/DeleteUser/${userId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'

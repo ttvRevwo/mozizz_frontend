@@ -225,6 +225,7 @@ export default function Register() {
              <div className="register-welcome">
                 <div className="register-welcome-text" style={{textAlign: 'center'}}>
                   Elküldtünk egy 6 jegyű kódot a(z) <strong>{email}</strong> címre.<br/>
+                  A kód 5 percig érvényes.<br/>
                   Kérjük, írd be a folytatáshoz!
                 </div>
              </div>
