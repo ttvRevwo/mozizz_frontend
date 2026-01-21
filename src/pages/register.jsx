@@ -2,7 +2,7 @@ import { useState } from 'react';
 import '../styles/registerlogin.css';
 import backgroundImage from '../../src/imgs/4.png';
 
-const WaveInput = ({ type, placeholder, value, onChange, validate, required = true }) => {
+const WaveInput = ({ type, placeholder, value, onChange, validate, required = true, maxLength }) => {
   let statusClass = '';
   
   if (value && value.length > 0) {
@@ -15,13 +15,14 @@ const WaveInput = ({ type, placeholder, value, onChange, validate, required = tr
   }
 
   return (
-    <div className="input-group">
+    <div className="input-group" style={{ width: '100%' }}>
       <input 
         type={type} 
         className={`form-input ${statusClass}`} 
         value={value} 
         onChange={onChange} 
         required={required}
+        maxLength={maxLength}
       />
       <label className="floating-label">
         {placeholder.split('').map((char, index) => (
@@ -37,7 +38,10 @@ const WaveInput = ({ type, placeholder, value, onChange, validate, required = tr
 export default function Register() {
   const [fullname, setFullname] = useState('');
   const [email, setEmail] = useState('');
-  const [phonenumber, setPhonenumber] = useState('');
+  
+  const [countryCode, setCountryCode] = useState('+36');
+  const [localPhone, setLocalPhone] = useState('');
+
   const [password, setPassword] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   
@@ -48,17 +52,26 @@ export default function Register() {
 
   const validateFullname = (name) => /^[A-Za-zÁÉÍÓÖŐÚÜŰáéíóöőúüű]+ [A-Za-zÁÉÍÓÖŐÚÜŰáéíóöőúüű]+$/.test(name);
   const validateEmail = (mail) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail);
-  const validatePhone = (phone) => /^(?:\+36|06)[0-9\s\-\#]{9}$/.test(phone);
+  
+  const validateLocalPhone = (phone) => /^[0-9]{9}$/.test(phone);
+  
   const validatePassword = (pass) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(pass);
+
+  const handleLocalPhoneChange = (e) => {
+    const onlyNums = e.target.value.replace(/\D/g, '');
+    setLocalPhone(onlyNums);
+  };
 
   const handleRegisterSubmit = async (event) => {
     event.preventDefault();
     setMessage('');
 
+    const fullPhoneNumber = `${countryCode}${localPhone}`;
+
     if (!agreedToTerms) { setMessage("El kell fogadnod az ÁSZF-et a regisztrációhoz!"); return; }
     if (!validateFullname(fullname)) { setMessage("A teljes név két szóból álljon, csak betűk."); return; }
     if (!validateEmail(email)) { setMessage("Érvényes email címet adj meg."); return; }
-    if (!validatePhone(phonenumber)) { setMessage("Helyes telefonszám formátum szükséges."); return; }
+    if (!validateLocalPhone(localPhone)) { setMessage("A telefonszám formátuma nem megfelelő (9 számjegy szükséges)."); return; }
     if (!validatePassword(password)) { setMessage("Gyenge jelszó."); return; }
 
     setIsLoading(true);
@@ -66,7 +79,7 @@ export default function Register() {
     const registerDto = {
       Name: fullname,
       Email: email,
-      Phone: phonenumber,
+      Phone: fullPhoneNumber,
       Password: password
     };
 
@@ -97,10 +110,12 @@ export default function Register() {
     setMessage('');
     setIsLoading(true);
 
+    const fullPhoneNumber = `${countryCode}${localPhone}`;
+
     const registerDto = {
       Name: fullname,
       Email: email,
-      Phone: phonenumber,
+      Phone: fullPhoneNumber,
       Password: password
     };
 
@@ -126,6 +141,20 @@ export default function Register() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const selectStyle = {
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '2px solid #fff',
+    color: '#fff',
+    padding: '10px 5px',
+    fontSize: '16px',
+    outline: 'none',
+    cursor: 'pointer',
+    width: '80px',
+    height: '100%',
+    marginTop: '0px'
   };
 
   return (
@@ -185,13 +214,35 @@ export default function Register() {
                 validate={validateEmail} 
               />
               
-              <WaveInput 
-                type="text" 
-                placeholder="Telefonszám" 
-                value={phonenumber} 
-                onChange={e => setPhonenumber(e.target.value)} 
-                validate={validatePhone} 
-              />
+              <div className="phone-input-container">
+                <div>
+                    <select 
+                        value={countryCode} 
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        className="country-select"
+                    >
+                        <option value="+36">+36</option>
+                        <option value="+40">+40</option>
+                        <option value="+421">+421</option>
+                        <option value="+43">+43</option>
+                        <option value="+380">+380</option>
+                        <option value="+381">+381</option>
+                        <option value="+385">+385</option>
+                        <option value="+386">+386</option>
+                    </select>
+                </div>
+
+                <div className="phone-number-wrapper">
+                    <WaveInput 
+                        type="text" 
+                        placeholder="Telefonszám" 
+                        value={localPhone} 
+                        onChange={handleLocalPhoneChange} 
+                        validate={validateLocalPhone} 
+                        maxLength={9} 
+                    />
+                </div>
+              </div>
               
               <WaveInput 
                 type="password" 
