@@ -2,10 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import '../styles/adminstyle.css';
 
-// ==========================================
-// 1. FELHASZNÁLÓK LISTA KOMPONENSEK
-// ==========================================
-
 const UsersComponent = ({ users }) => {
     return (
         <div className="user-list-container">
@@ -69,18 +65,14 @@ const UsersList = () => {
     );
 };
 
-// ==========================================
-// 2. FILMEK LISTA KOMPONENSEK (ÚJ RÉSZ)
-// ==========================================
-
 const MoviesComponent = ({ movies, onDelete }) => {
     return (
-        <div className="user-list-container"> {/* Újrahasznosítjuk a CSS osztályokat */}
+        <div className="user-list-container">
             {movies.map((movie) => (
                 <div key={movie.id || movie.movieId} className="user-card" style={{ borderColor: '#ffd700' }}>
                     <div className="user-info">
                         <div className="user-name">
-                            {movie.title} {/* Feltételezzük, hogy 'title' a mező neve */}
+                            {movie.title}
                         </div>
                         <div className="user-email">
                             {movie.genre ? movie.genre : 'Nincs műfaj megadva'}
@@ -88,14 +80,12 @@ const MoviesComponent = ({ movies, onDelete }) => {
                     </div>
                     
                     <div className="action-buttons" style={{ display: 'flex', gap: '10px' }}>
-                        {/* Részletek / Szerkesztés gomb */}
                         <Link to={`/movie/${movie.id || movie.movieId}`} className="details-link">
                             <button className="details-button">
                                 Részletek
                             </button>
                         </Link>
 
-                        {/* Törlés gomb (Opcionális, ha itt akarod törölni) */}
                         <button 
                             className="details-button" 
                             style={{ backgroundColor: '#ff4444', color: 'white' }}

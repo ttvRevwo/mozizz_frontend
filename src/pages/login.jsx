@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import '../styles/registerlogin.css';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../styles/LoginStyle.css';
 import backgroundImage from '../../src/imgs/4.png';
 
 const WaveInput = ({ type, placeholder, value, onChange, required = true }) => {
@@ -24,23 +25,62 @@ const WaveInput = ({ type, placeholder, value, onChange, required = true }) => {
 };
 
 export default function Login() {
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(''); // Ez lesz az Email a DTO-ban
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  
+  const navigate = useNavigate(); // Hook az átirányításhoz
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setMessage('');
 
-    // IDE JÖN MAJD A BACKEND KOMMUNIKÁCIÓ
-    
+    // Adatok előkészítése a Backendnek (LoginDto szerkezet)
+    const payload = {
+        Email: username,
+        Password: password
+    };
+
     try {
-        // Ideiglenes logikák...
-        setMessage(`Sikeres Bejelentkezési Űrlap Küldés! Felhasználónév: ${username}`);
-        setUsername('');
-        setPassword('');
+        // CÍM ELLENŐRZÉSE: Ha a Controllered neve pl. AuthController, akkor api/Auth/Login
+        // Ha UserController, akkor api/User/Login. 
+        const response = await fetch('http://localhost:5083/api/User/Login', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            
+            // SIKERES BEJELENTKEZÉS
+            setMessage(`Sikeres bejelentkezés! Üdv, ${data.name}!`);
+            
+            // Adatok mentése a böngészőbe (hogy később tudjuk, ki van bejelentkezve és admin-e)
+            localStorage.setItem('userId', data.userId);
+            localStorage.setItem('userName', data.name);
+            localStorage.setItem('userEmail', data.email);
+            localStorage.setItem('roleId', data.roleId); // Ez kell majd az Admin joghoz!
+
+            // Kis késleltetés, majd átirányítás a főoldalra
+            setTimeout(() => {
+                navigate('/'); 
+                // Vagy ha az admin oldalra akarod irányítani az admint:
+                // if (data.roleId === 1) navigate('/admin'); else navigate('/');
+            }, 1000);
+
+        } else {
+            // HIBAKEZELÉS (pl. rossz jelszó)
+            // Mivel a backend BadRequest("Szöveg")-et küld, itt text-ként olvassuk ki
+            const errorText = await response.text();
+            setMessage(errorText || 'Hiba történt a bejelentkezés során.');
+        }
+
     } catch (error) {
       console.error('Login error:', error);
+      setMessage('Nem sikerült csatlakozni a szerverhez.');
     }
   };
 
@@ -83,7 +123,7 @@ export default function Login() {
         
         <WaveInput 
           type="text" 
-          placeholder="Felhasználónév vagy Email" 
+          placeholder="Email cím" // Átírtam, mert a Backend Emailt vár
           value={username} 
           onChange={e => setUsername(e.target.value)} 
         />
@@ -96,7 +136,7 @@ export default function Login() {
         />
 
         {message && (
-          <div className={`register-message ${message.startsWith('Sikeres') ? 'success' : 'error'}`}>
+          <div className={`register-message ${message.includes('Sikeres') ? 'success' : 'error'}`}>
             {message}
           </div>
         )}
@@ -107,10 +147,10 @@ export default function Login() {
         </div>
         
         <div className='login-link-wrapper'>
-          Nincs még fiókod? <a href="../register" className="login-link">Regisztrálj!</a>
+          Nincs még fiókod? <a href="/register" className="login-link">Regisztrálj!</a>
         </div>
       </form>
     </div>
     </div>
   );
-}
+} 

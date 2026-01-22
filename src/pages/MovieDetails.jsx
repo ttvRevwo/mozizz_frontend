@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import '../styles/detailpagestyles.css';
+import '../styles/MovieDetailsStyle.css';
 
-// A Backend Cloudinary logikája alapján (publicId.format) a megjelenítéshez kell az alap URL
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
 
 function MovieDetails() {
@@ -12,7 +11,6 @@ function MovieDetails() {
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState(null);
     
-    // Külön tároljuk a kiválasztott fájlt (objektumként) és a preview URL-t
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -74,55 +72,42 @@ function MovieDetails() {
         }));
     };
 
-    // --- ÚJ LOGIKA: Fájl kiválasztása és előnézet ---
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             setSelectedFile(file);
-            // Készítünk egy ideiglenes URL-t a böngészőben, hogy lássuk a képet feltöltés előtt
             setPreviewUrl(URL.createObjectURL(file));
         }
     };
 
-    // --- MENTÉS: FormData küldése a Backendnek ---
     const handleSave = () => {
-        // FormData kell, mert fájlt is küldünk (multipart/form-data)
         const formData = new FormData();
 
-        // Adatok hozzáfűzése (a kulcsoknak egyeznie kell a C# Movie osztály property neveivel!)
         formData.append('MovieId', movieData.movie_id);
         formData.append('Title', movieData.title);
         formData.append('Genre', movieData.genre);
         formData.append('Duration', movieData.duration);
         formData.append('Rating', movieData.rating);
         formData.append('Description', movieData.description);
-        formData.append('Img', movieData.img); // A régi képnevet is elküldjük, bár a backend felülírja ha van új
+        formData.append('Img', movieData.img);
         
-        // Dátum formázása C# számára
         let finalReleaseDate = "2000-01-01T00:00:00";
         if (movieData.release_date) {
             finalReleaseDate = `${movieData.release_date}T00:00:00`;
         }
         formData.append('ReleaseDate', finalReleaseDate);
 
-        // CreatedAt megőrzése
         if (movieData.created_at) {
              formData.append('CreatedAt', movieData.created_at);
         }
 
-        // --- ITT A LÉNYEG: Ha van új fájl, hozzácsapjuk ---
-        // A kulcs neve 'imageFile' kell legyen, mert a C# Controller ezt várja: (IFormFile? imageFile)
         if (selectedFile) {
             formData.append('imageFile', selectedFile);
         }
 
-        // Debug: mit küldünk?
-        // for (var pair of formData.entries()) { console.log(pair[0]+ ', ' + pair[1]); }
-
         fetch('http://localhost:5083/api/Movie/ModifyMovie', {
             method: 'PUT',
-            // FIGYELEM: NEM szabad beállítani a 'Content-Type': 'application/json'-t!
-            // A fetch automatikusan beállítja a multipart/form-data boundary-t.
+
             body: formData
         })
         .then(async response => {
@@ -130,10 +115,9 @@ function MovieDetails() {
                 const jsonResp = await response.json(); 
                 setMessage({ type: 'success', text: jsonResp.üzenet || 'Sikeres mentés!' });
                 
-                // Ha jött vissza új fájlnév, frissítsük a state-et
                 if (jsonResp.uj_fajlnev) {
                     setMovieData(prev => ({ ...prev, img: jsonResp.uj_fajlnev }));
-                    setPreviewUrl(null); // Töröljük a preview-t, mert már a szerverről jön a kép
+                    setPreviewUrl(null);
                     setSelectedFile(null);
                 }
 
@@ -179,14 +163,10 @@ function MovieDetails() {
 
     const displayCreatedAt = movieData.created_at ? movieData.created_at.replace('T', ' ').substring(0, 19) : '-';
 
-    // Megjelenítési logika:
-    // 1. Ha van 'previewUrl' (most választotta ki a user), azt mutatjuk.
-    // 2. Ha nincs, akkor összerakjuk a Cloudinary URL-t a szerverről jött fájlnévvel.
     let imageSrc = null;
     if (previewUrl) {
         imageSrc = previewUrl;
     } else if (movieData.img) {
-        // Ellenőrizzük, hogy teljes URL-e vagy csak fájlnév
         if (movieData.img.startsWith('http')) {
              imageSrc = movieData.img;
         } else {
@@ -214,7 +194,6 @@ function MovieDetails() {
                     </div>
                 )}
 
-                {/* --- KÉP KEZELÉSE --- */}
                 <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', alignItems: 'flex-start' }}>
                     <div style={{ 
                         width: '120px', 
@@ -357,7 +336,6 @@ function MovieDetails() {
                     />
                 </div>
 
-                {/* --- EZT A RÉSZT ILLESZD BE, HA HIÁNYZIK: --- */}
                 <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
                     <button 
                         onClick={handleSave}
@@ -375,10 +353,9 @@ function MovieDetails() {
                         Film törlése
                     </button>
                 </div>
-                {/* ------------------------------------------- */}
 
-            </div> {/* Itt záródik a register-container */}
-        </div> /* Itt záródik az app-container */
+            </div>
+        </div>
     );
 }
 

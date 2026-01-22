@@ -6,7 +6,6 @@ const NewMovie = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     
-    // Kép kezelése
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -17,7 +16,7 @@ const NewMovie = () => {
         ReleaseDate: '',
         Director: '',
         Rating: '',
-        Duration: '' // Új mező: Hossz
+        Duration: ''
     });
 
     const handleChange = (e) => {
@@ -28,7 +27,6 @@ const NewMovie = () => {
         }));
     };
 
-    // Kép kiválasztás kezelése
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -41,7 +39,6 @@ const NewMovie = () => {
         e.preventDefault();
         setLoading(true);
 
-        // FormData összeállítása a fájlküldéshez
         const data = new FormData();
         
         data.append('Title', formData.Title);
@@ -49,22 +46,18 @@ const NewMovie = () => {
         data.append('Genre', formData.Genre);
         data.append('Director', formData.Director);
         data.append('Rating', formData.Rating);
-        data.append('Duration', formData.Duration); // Hossz küldése
+        data.append('Duration', formData.Duration);
 
-        // Dátum formázása
         if (formData.ReleaseDate) {
             data.append('ReleaseDate', `${formData.ReleaseDate}T00:00:00`);
         }
 
-        // Ha van kiválasztott kép, csatoljuk 'imageFile' néven (ez a backend paraméter neve)
         if (selectedFile) {
             data.append('imageFile', selectedFile);
         }
 
         fetch('http://localhost:5083/api/Movie/NewMovie', { 
             method: 'POST',
-            // Fontos: Itt NEM szabad beállítani a Content-Type: application/json-t!
-            // A fetch automatikusan beállítja a multipart/form-data típust a boundary-val.
             body: data
         })
         .then(response => {
@@ -90,7 +83,6 @@ const NewMovie = () => {
 
                 <form onSubmit={handleSubmit} className="new-movie-form">
                     
-                    {/* --- ÚJ: Képfeltöltés mező --- */}
                     <div className="form-group" style={{textAlign: 'center', marginBottom: '20px'}}>
                         <label style={{display:'block', marginBottom:'10px'}}>Borítókép</label>
                         
@@ -108,7 +100,7 @@ const NewMovie = () => {
                             type="file" 
                             accept="image/*"
                             onChange={handleFileChange}
-                            required // Ha kötelező a kép, hagyd benne
+                            required
                             style={{color: '#fff'}}
                         />
                     </div>
@@ -137,7 +129,6 @@ const NewMovie = () => {
                         />
                     </div>
 
-                    {/* --- ÚJ: Hossz (perc) mező --- */}
                     <div className="form-group">
                         <label>Hossz (perc)</label>
                         <input 

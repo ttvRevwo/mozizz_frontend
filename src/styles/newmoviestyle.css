@@ -1,27 +1,24 @@
-/* TELJES OLDAL HÁTTÉR */
 .new-movie-page {
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #0f0f0f; /* Sötét háttér az oldalnak */
+    background-color: #0f0f0f;
     padding: 40px 20px;
     box-sizing: border-box;
 }
 
-/* A KÖZÉPSŐ DOBOZ (KÁRTYA) */
 .new-movie-container {
     width: 100%;
     max-width: 700px;
-    background-color: #1a0606; /* A megszokott sötétvörös/fekete */
-    border: 2px solid #E0AA3E; /* Arany keret */
+    background-color: #1a0606;
+    border: 2px solid #E0AA3E;
     border-radius: 16px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
     padding: 40px;
     color: #ffffff;
 }
 
-/* CÍM */
 .new-movie-title {
     text-align: center;
     color: #E0AA3E;
@@ -34,19 +31,18 @@
     padding-bottom: 15px;
 }
 
-/* FORM ELRENDEZÉS */
 .new-movie-form {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Két oszlop */
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
-/* Teljes szélességű elemek (pl. Leírás) */
+
 .full-width {
     grid-column: span 2;
 }
 
-/* INPUT MEZŐK CSOPORTJA */
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -54,7 +50,7 @@
 
 .form-group label {
     margin-bottom: 8px;
-    color: #c79c0f; /* Arany színű címkék */
+    color: #c79c0f;
     font-weight: 600;
     font-size: 0.9rem;
 }
@@ -79,13 +75,11 @@
     background-color: #333;
 }
 
-/* Dátum mező ikonjának sötét módba állítása */
 .form-group input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;
 }
 
-/* GOMBOK */
 .button-group {
     grid-column: span 2;
     display: flex;
@@ -111,7 +105,7 @@
 }
 
 .save-btn {
-    background-color: #28a745; /* Zöld */
+    background-color: #28a745;
     color: white;
     border: none;
     min-width: 120px;
@@ -142,10 +136,9 @@
     border-color: #fff;
 }
 
-/* MOBIL NÉZET */
 @media (max-width: 600px) {
     .new-movie-form {
-        grid-template-columns: 1fr; /* Mobilon minden egy oszlop */
+        grid-template-columns: 1fr;
     }
     
     .full-width {
@@ -153,7 +146,7 @@
     }
     
     .button-group {
-        flex-direction: column-reverse; /* Gombok egymás alá */
+        flex-direction: column-reverse;
     }
     
     .save-btn, .cancel-btn {
