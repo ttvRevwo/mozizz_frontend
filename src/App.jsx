@@ -22,7 +22,7 @@ function MainPage() {
       image: img1, 
     },
     {
-      id: 2,
+      id: 2,  
       title: "Dűne: Második Rész",
       genre: "Sci-Fi / Kaland",
       description: "Paul Atreides bosszút áll az összeesküvőkön, akik elpusztították a családját.",

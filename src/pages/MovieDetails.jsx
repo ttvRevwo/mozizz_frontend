@@ -2,14 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import '../styles/detailpagestyles.css';
 
+// A Backend Cloudinary logikája alapján (publicId.format) a megjelenítéshez kell az alap URL
+const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
+
 function MovieDetails() {
     const { id } = useParams(); 
     const navigate = useNavigate();
     
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState(null);
-    const [originalData, setOriginalData] = useState(null);
     
+    // Külön tároljuk a kiválasztott fájlt (objektumként) és a preview URL-t
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+
     const [movieData, setMovieData] = useState({
         movie_id: '',
         title: '',
@@ -18,11 +24,12 @@ function MovieDetails() {
         rating: '',
         description: '',
         release_date: '',
-        created_at: '' 
+        created_at: '',
+        img: '' 
     });
 
     useEffect(() => {
-        const url = `http://localhost:5083/api/Movie/MovieById?id=${id}`;
+        const url = `http://localhost:5083/api/Movie/MovieById/${id}`;
         
         fetch(url)
             .then(res => {
@@ -32,18 +39,12 @@ function MovieDetails() {
             .then(data => {
                 const movie = data.data || data;
                 
-                console.log("Szervertől kapott nyers adat:", movie);
-
-                setOriginalData(movie);
-                
                 const loadedId = movie.movieId || movie.movie_id || movie.MovieId || movie.id || '';
-
                 const rawDate = movie.release_date || movie.ReleaseDate || movie.releaseDate;
                 let formattedDate = '';
                 if (rawDate) {
                     formattedDate = rawDate.split('T')[0];
                 }
-
                 const rawCreated = movie.created_at || movie.CreatedAt || movie.createdAt;
 
                 setMovieData({
@@ -54,7 +55,8 @@ function MovieDetails() {
                     rating: movie.rating || movie.Rating || '',
                     description: movie.description || movie.Description || '',
                     release_date: formattedDate,
-                    created_at: rawCreated
+                    created_at: rawCreated,
+                    img: movie.img || movie.Img || '' 
                 });
             })
             .catch(err => {
@@ -72,36 +74,69 @@ function MovieDetails() {
         }));
     };
 
-    const handleSave = () => {
-        if (!originalData) return;
+    // --- ÚJ LOGIKA: Fájl kiválasztása és előnézet ---
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            // Készítünk egy ideiglenes URL-t a böngészőben, hogy lássuk a képet feltöltés előtt
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
 
+    // --- MENTÉS: FormData küldése a Backendnek ---
+    const handleSave = () => {
+        // FormData kell, mert fájlt is küldünk (multipart/form-data)
+        const formData = new FormData();
+
+        // Adatok hozzáfűzése (a kulcsoknak egyeznie kell a C# Movie osztály property neveivel!)
+        formData.append('MovieId', movieData.movie_id);
+        formData.append('Title', movieData.title);
+        formData.append('Genre', movieData.genre);
+        formData.append('Duration', movieData.duration);
+        formData.append('Rating', movieData.rating);
+        formData.append('Description', movieData.description);
+        formData.append('Img', movieData.img); // A régi képnevet is elküldjük, bár a backend felülírja ha van új
+        
+        // Dátum formázása C# számára
         let finalReleaseDate = "2000-01-01T00:00:00";
         if (movieData.release_date) {
             finalReleaseDate = `${movieData.release_date}T00:00:00`;
         }
+        formData.append('ReleaseDate', finalReleaseDate);
 
-        const bodyToSend = {
-            MovieId: parseInt(movieData.movie_id), 
-            Title: movieData.title,
-            Genre: movieData.genre,
-            Duration: parseInt(movieData.duration) || 0,
-            Rating: movieData.rating,
-            Description: movieData.description,
-            ReleaseDate: finalReleaseDate,
-            CreatedAt: movieData.created_at 
-        };
+        // CreatedAt megőrzése
+        if (movieData.created_at) {
+             formData.append('CreatedAt', movieData.created_at);
+        }
 
-        console.log("Küldött adat (JSON):", JSON.stringify(bodyToSend)); 
+        // --- ITT A LÉNYEG: Ha van új fájl, hozzácsapjuk ---
+        // A kulcs neve 'imageFile' kell legyen, mert a C# Controller ezt várja: (IFormFile? imageFile)
+        if (selectedFile) {
+            formData.append('imageFile', selectedFile);
+        }
+
+        // Debug: mit küldünk?
+        // for (var pair of formData.entries()) { console.log(pair[0]+ ', ' + pair[1]); }
 
         fetch('http://localhost:5083/api/Movie/ModifyMovie', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bodyToSend)
+            // FIGYELEM: NEM szabad beállítani a 'Content-Type': 'application/json'-t!
+            // A fetch automatikusan beállítja a multipart/form-data boundary-t.
+            body: formData
         })
         .then(async response => {
             if (response.ok) {
-                const textResp = await response.text(); 
-                setMessage({ type: 'success', text: textResp || 'Sikeres mentés!' });
+                const jsonResp = await response.json(); 
+                setMessage({ type: 'success', text: jsonResp.üzenet || 'Sikeres mentés!' });
+                
+                // Ha jött vissza új fájlnév, frissítsük a state-et
+                if (jsonResp.uj_fajlnev) {
+                    setMovieData(prev => ({ ...prev, img: jsonResp.uj_fajlnev }));
+                    setPreviewUrl(null); // Töröljük a preview-t, mert már a szerverről jön a kép
+                    setSelectedFile(null);
+                }
+
                 setTimeout(() => setMessage(null), 3000);
             } else {
                 const errorText = await response.text();
@@ -117,9 +152,8 @@ function MovieDetails() {
 
     const handleDelete = () => {
         if (window.confirm("Biztosan törölni szeretnéd ezt a filmet?")) {
-            fetch(`http://localhost:5083/api/Movie/DelMovie?id=${id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' }
+            fetch(`http://localhost:5083/api/Movie/DelMovie/${id}`, {
+                method: 'DELETE'
             })
             .then(response => {
                 if (response.ok) {
@@ -145,6 +179,21 @@ function MovieDetails() {
 
     const displayCreatedAt = movieData.created_at ? movieData.created_at.replace('T', ' ').substring(0, 19) : '-';
 
+    // Megjelenítési logika:
+    // 1. Ha van 'previewUrl' (most választotta ki a user), azt mutatjuk.
+    // 2. Ha nincs, akkor összerakjuk a Cloudinary URL-t a szerverről jött fájlnévvel.
+    let imageSrc = null;
+    if (previewUrl) {
+        imageSrc = previewUrl;
+    } else if (movieData.img) {
+        // Ellenőrizzük, hogy teljes URL-e vagy csak fájlnév
+        if (movieData.img.startsWith('http')) {
+             imageSrc = movieData.img;
+        } else {
+             imageSrc = `${CLOUDINARY_BASE}${movieData.img}`;
+        }
+    }
+
     return (
         <div className="app-container" style={{ flexDirection: 'column', justifyContent: 'center', padding: '40px 0' }}>
             <Link to="/admin" className="back-to-home" style={{ position: 'absolute', top: '20px', left: '20px' }}>
@@ -164,6 +213,52 @@ function MovieDetails() {
                         {message.text}
                     </div>
                 )}
+
+                {/* --- KÉP KEZELÉSE --- */}
+                <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', alignItems: 'flex-start' }}>
+                    <div style={{ 
+                        width: '120px', 
+                        height: '180px', 
+                        backgroundColor: '#111', 
+                        border: '1px solid #444', 
+                        borderRadius: '8px', 
+                        overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        position: 'relative'
+                    }}>
+                        {imageSrc ? (
+                            <img 
+                                src={imageSrc} 
+                                alt="Borítókép" 
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                onError={(e) => {e.target.style.display='none'}} 
+                            />
+                        ) : (
+                            <span style={{color: '#666', fontSize: '0.8rem'}}>Nincs kép</span>
+                        )}
+                    </div>
+
+                    <div className="form-group" style={{ flex: 1 }}>
+                        <label style={{ color: '#c79c0f', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>
+                            Borítókép cseréje
+                        </label>
+                        
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            className="form-input"
+                            style={{ padding: '10px' }}
+                        />
+                        
+                        <small style={{color: '#888', marginTop: '5px', display: 'block'}}>
+                            Válassz új képet a cseréhez. A mentés gomb megnyomásakor kerül feltöltésre a szerverre.
+                        </small>
+                    </div>
+                </div>
 
                 <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
                     <div className="form-group" style={{ flex: 1 }}>
@@ -262,6 +357,7 @@ function MovieDetails() {
                     />
                 </div>
 
+                {/* --- EZT A RÉSZT ILLESZD BE, HA HIÁNYZIK: --- */}
                 <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
                     <button 
                         onClick={handleSave}
@@ -279,8 +375,10 @@ function MovieDetails() {
                         Film törlése
                     </button>
                 </div>
-            </div>
-        </div>
+                {/* ------------------------------------------- */}
+
+            </div> {/* Itt záródik a register-container */}
+        </div> /* Itt záródik az app-container */
     );
 }
 

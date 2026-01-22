@@ -6,13 +6,18 @@ const NewMovie = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     
+    // Kép kezelése
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+
     const [formData, setFormData] = useState({
         Title: '',
         Description: '',
         Genre: '',
         ReleaseDate: '',
         Director: '',
-        Rating: ''
+        Rating: '',
+        Duration: '' // Új mező: Hossz
     });
 
     const handleChange = (e) => {
@@ -23,31 +28,57 @@ const NewMovie = () => {
         }));
     };
 
+    // Kép kiválasztás kezelése
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
 
-        const payload = {
-            ...formData,
-            ReleaseDate: formData.ReleaseDate ? `${formData.ReleaseDate}T00:00:00` : null,
-        };
+        // FormData összeállítása a fájlküldéshez
+        const data = new FormData();
+        
+        data.append('Title', formData.Title);
+        data.append('Description', formData.Description);
+        data.append('Genre', formData.Genre);
+        data.append('Director', formData.Director);
+        data.append('Rating', formData.Rating);
+        data.append('Duration', formData.Duration); // Hossz küldése
+
+        // Dátum formázása
+        if (formData.ReleaseDate) {
+            data.append('ReleaseDate', `${formData.ReleaseDate}T00:00:00`);
+        }
+
+        // Ha van kiválasztott kép, csatoljuk 'imageFile' néven (ez a backend paraméter neve)
+        if (selectedFile) {
+            data.append('imageFile', selectedFile);
+        }
 
         fetch('http://localhost:5083/api/Movie/NewMovie', { 
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload)
+            // Fontos: Itt NEM szabad beállítani a Content-Type: application/json-t!
+            // A fetch automatikusan beállítja a multipart/form-data típust a boundary-val.
+            body: data
         })
         .then(response => {
             if (response.ok) {
                 alert('Film sikeresen létrehozva!');
                 navigate('/admin');
             } else {
-                alert('Hiba történt a mentés során.');
+                return response.text().then(text => { throw new Error(text) });
             }
         })
-        .catch(error => console.error('Hiba:', error))
+        .catch(error => {
+            console.error('Hiba:', error);
+            alert('Hiba történt a mentés során: ' + error.message);
+        })
         .finally(() => setLoading(false));
     };
 
@@ -59,6 +90,29 @@ const NewMovie = () => {
 
                 <form onSubmit={handleSubmit} className="new-movie-form">
                     
+                    {/* --- ÚJ: Képfeltöltés mező --- */}
+                    <div className="form-group" style={{textAlign: 'center', marginBottom: '20px'}}>
+                        <label style={{display:'block', marginBottom:'10px'}}>Borítókép</label>
+                        
+                        {previewUrl && (
+                            <div style={{marginBottom: '15px'}}>
+                                <img 
+                                    src={previewUrl} 
+                                    alt="Előnézet" 
+                                    style={{maxWidth: '150px', maxHeight: '200px', borderRadius: '8px', border: '1px solid #E0AA3E'}} 
+                                />
+                            </div>
+                        )}
+                        
+                        <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            required // Ha kötelező a kép, hagyd benne
+                            style={{color: '#fff'}}
+                        />
+                    </div>
+
                     <div className="form-group">
                         <label>Cím</label>
                         <input 
@@ -83,15 +137,17 @@ const NewMovie = () => {
                         />
                     </div>
 
+                    {/* --- ÚJ: Hossz (perc) mező --- */}
                     <div className="form-group">
-                        <label>Rendező</label>
+                        <label>Hossz (perc)</label>
                         <input 
-                            type="text" 
-                            name="Director" 
-                            value={formData.Director} 
+                            type="number" 
+                            name="Duration" 
+                            value={formData.Duration} 
                             onChange={handleChange} 
                             required 
-                            placeholder="Rendező neve"
+                            placeholder="Pl. 120"
+                            min="1"
                         />
                     </div>
 
@@ -136,7 +192,7 @@ const NewMovie = () => {
                         </Link>
                         
                         <button type="submit" className="save-btn" disabled={loading}>
-                            {loading ? 'Mentés...' : 'Mentés'}
+                            {loading ? 'Feltöltés...' : 'Mentés'}
                         </button>
                     </div>
                 </form>

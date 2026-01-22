@@ -57,7 +57,6 @@ function UserDetails() {
         let roleName = "User";
         if (selectedRoleId === 1) roleName = "Admin";
         else if (selectedRoleId === 2) roleName = "User";
-        else if (selectedRoleId === 3) roleName = "Guest";
 
         const bodyToSend = {
             ...originalData,
@@ -172,7 +171,6 @@ function UserDetails() {
                     >
                         <option value="1">Adminisztrátor</option>
                         <option value="2">Felhasználó</option>
-                        <option value="3">Vendég</option>
                     </select>
                 </div>
 
