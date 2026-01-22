@@ -136,7 +136,7 @@ function MovieDetails() {
 
     const handleDelete = () => {
         if (window.confirm("Biztosan törölni szeretnéd ezt a filmet?")) {
-            fetch(`http://localhost:5083/api/Movie/DelMovie/${id}`, {
+            fetch(`http://localhost:5083/api/Movie/DeleteMovie/${id}`, {
                 method: 'DELETE'
             })
             .then(response => {
