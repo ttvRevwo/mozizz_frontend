@@ -11,9 +11,7 @@ import Catalog from './pages/Catalog';
 import Profile from './pages/Profile';
 import './App.css'
 
-import img1 from './imgs/film1.jpg'; 
-import img2 from './imgs/film2.jpg';
-import img3 from './imgs/film3.jpg';
+const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
 
 function Navigation() {
   const navigate = useNavigate();
@@ -96,42 +94,78 @@ function Navigation() {
 }
 
 function MainPage() {
-  const movies = [
-    { id: 1, title: "Oppenheimer", genre: "Életrajzi / Dráma", description: "Egy elméleti fizikus története...", image: img1 },
-    { id: 2, title: "Dűne: Második Rész", genre: "Sci-Fi / Kaland", description: "Paul Atreides bosszút áll...", image: img2 },
-    { id: 3, title: "Batman", genre: "Akció / Krimi", description: "Amikor a Riddler sorozatgyilkos...", image: img3 }
-  ];
-
+  const [movies, setMovies] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetch('http://localhost:5083/api/Movie/GetMovies')
+      .then(res => res.json())
+      .then(data => {
+        const moviesList = data.data || data;
+        
+
+        setMovies(moviesList.slice(0, 6));
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Hiba a filmek betöltésekor:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (movies.length === 0) return;
+
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev === movies.length - 1 ? 0 : prev + 1));
     }, 10000); 
+    
     return () => clearInterval(slideInterval);
   }, [movies.length]);
+
+  if (loading) {
+    return <div className="main-page-container"><p style={{color:'white', textAlign:'center', paddingTop:'100px'}}>Filmek betöltése...</p></div>;
+  }
+
+  if (movies.length === 0) {
+    return <div className="main-page-container"><p style={{color:'white', textAlign:'center', paddingTop:'100px'}}>Nincsenek kiemelt filmek.</p></div>;
+  }
 
   return (
     <div className="main-page-container">
       <div className="hero-slider-box">
-        {movies.map((movie, index) => (
-          <div 
-            key={movie.id} 
-            className={`hero-slide ${index === currentSlide ? 'active' : ''}`}
-            style={{ backgroundImage: `url(${movie.image})` }}
-          >
-            <div className="hero-overlay"></div>
-            <div className="hero-content-slider">
-              <span className="movie-genre">{movie.genre}</span>
-              <h2 className="movie-title">{movie.title}</h2>
-              <p className="movie-description">{movie.description}</p>
-              <div className="hero-buttons">
-                <button className="btn-primary">Jegyfoglalás</button>
-                <button className="btn-secondary">Részletek</button>
+        {movies.map((movie, index) => {
+
+            let imageUrl = '';
+            if (movie.img && movie.img.startsWith('http')) {
+                imageUrl = movie.img;
+            } else if (movie.img) {
+                imageUrl = `${CLOUDINARY_BASE}${movie.img}`;
+            }
+
+            return (
+              <div 
+                key={movie.id || movie.movieId}
+                className={`hero-slide ${index === currentSlide ? 'active' : ''}`}
+                style={{ backgroundImage: `url(${imageUrl})` }}
+              >
+                <div className="hero-overlay"></div>
+                <div className="hero-content-slider">
+                  <span className="movie-genre">{movie.genre || movie.Genre}</span>
+                  <h2 className="movie-title">{movie.title || movie.Title}</h2>
+                  <p className="movie-description">{movie.description || movie.Description}</p>
+                  <div className="hero-buttons">
+                    <button className="btn-primary">Jegyfoglalás</button>
+                    <Link to={`/movie/${movie.id || movie.movieId}`}>
+                        <button className="btn-secondary">Részletek</button>
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            );
+        })}
+        
         <div className="slider-dots">
           {movies.map((_, index) => (
             <div key={index} className={`dot ${index === currentSlide ? 'active' : ''}`} onClick={() => setCurrentSlide(index)}></div>
@@ -149,7 +183,6 @@ const SimpleLayout = ({ children }) => (
     {children}
   </div>
 );
-
 
 const AdminRoute = ({ children }) => {
   const roleId = localStorage.getItem('roleId');
