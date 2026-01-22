@@ -1,84 +1,118 @@
 import { useState, useEffect } from 'react'; 
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, Navigate } from "react-router-dom"
 import Register from './pages/register'
 import Login from './pages/login'
 import Admin from './pages/Admin'
 import UserDetails from "./pages/UserDetails"
 import MovieDetails from './pages/MovieDetails';
 import NewMovie from './pages/NewMovie';
+import Buffet from './pages/Buffet';
+import Catalog from './pages/Catalog';
+import Profile from './pages/Profile';
 import './App.css'
 
 import img1 from './imgs/film1.jpg'; 
 import img2 from './imgs/film2.jpg';
 import img3 from './imgs/film3.jpg';
 
+function Navigation() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const userId = localStorage.getItem('userId');
+  const roleIdFromStorage = localStorage.getItem('roleId');
+  const userName = localStorage.getItem('userName');
+  
+  const isLoggedIn = !!userId;
+  const isAdmin = parseInt(roleIdFromStorage) === 1;
+
+  if (location.pathname !== '/') {
+    return null;
+  }
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setShowDropdown(false);
+    navigate('/');
+    window.location.reload();
+  };
+
+  return (
+    <nav className="top-nav">
+      <div className="nav-left">
+        <Link to="/" className="logo-link">
+             <img src="/vite.svg" alt="Logo" className="nav-logo"/>
+        </Link>
+        <input type="text" placeholder="Keresés..." className="search-bar" />
+      </div>
+
+      <div className="nav-center">
+        <h1 className="nav-slogan">Mozizz.hu - Élmény, ami összeköt!</h1>
+      </div>
+
+      <div className="nav-right">
+        <div className="nav-links-container">
+          {isLoggedIn && (
+            <>
+              <Link to="/Catalog"><button className="nav-button">Filmek</button></Link>
+              <Link to="/Buffet"><button className="nav-button">Büfé</button></Link>
+            </>
+          )}
+
+          {isAdmin && (
+            <Link to="/admin"><button className="nav-button admin-btn">Admin Panel</button></Link>
+          )}
+
+          {!isLoggedIn && (
+            <>
+              <Link to="/register"><button className="nav-button">Regisztráció</button></Link>
+              <Link to="/login"><button className="nav-button">Bejelentkezés</button></Link>
+            </>
+          )}
+        </div>
+
+        {isLoggedIn && (
+          <div className="profile-container">
+            <div className="profile-icon" onClick={() => setShowDropdown(!showDropdown)}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="user-svg">
+                <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
+              </svg>
+            </div>
+
+            {showDropdown && (
+              <div className="dropdown-menu">
+                <div className="user-info-header">{userName}</div>
+                <div className="dropdown-divider"></div>
+                <Link to="/Profile" onClick={() => setShowDropdown(false)} className="dropdown-item">Profil</Link>
+                <button onClick={handleLogout} className="dropdown-item logout-item">Kijelentkezés</button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+}
+
 function MainPage() {
   const movies = [
-    {
-      id: 1,
-      title: "Oppenheimer",
-      genre: "Életrajzi / Dráma",
-      description: "Egy elméleti fizikus története, aki segített létrehozni az atombombát.",
-      image: img1, 
-    },
-    {
-      id: 2,  
-      title: "Dűne: Második Rész",
-      genre: "Sci-Fi / Kaland",
-      description: "Paul Atreides bosszút áll az összeesküvőkön, akik elpusztították a családját.",
-      image: img2,
-    },
-    {
-      id: 3,
-      title: "Batman",
-      genre: "Akció / Krimi",
-      description: "Amikor a Riddler sorozatgyilkos elkezd politikai alakokat meggyilkolni.",
-      image: img3,
-    }
+    { id: 1, title: "Oppenheimer", genre: "Életrajzi / Dráma", description: "Egy elméleti fizikus története...", image: img1 },
+    { id: 2, title: "Dűne: Második Rész", genre: "Sci-Fi / Kaland", description: "Paul Atreides bosszút áll...", image: img2 },
+    { id: 3, title: "Batman", genre: "Akció / Krimi", description: "Amikor a Riddler sorozatgyilkos...", image: img3 }
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const slideInterval = setInterval(() => {
-      setCurrentSlide((prevIndex) => 
-        prevIndex === movies.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 10000); //10000 ms = 10mp
-
+      setCurrentSlide((prev) => (prev === movies.length - 1 ? 0 : prev + 1));
+    }, 10000); 
     return () => clearInterval(slideInterval);
   }, [movies.length]);
 
   return (
-    <div className="app-container">
-      <nav className="top-nav">
-        <div className="nav-links-container">
-            <Link to="/Admin">
-            <button className="nav-button">Admin</button>
-            </Link>
-            <Link to="/register">
-            <button className="nav-button">Regisztráció</button>
-            </Link>
-            <Link to="/login">
-            <button className="nav-button">Bejelentkezés</button>
-            </Link>
-        </div>
-        <div>
-          <input type="text" placeholder="Keresés..." className="search-bar"></input>
-        </div>
-      </nav>
-
-      <div className="home-icon">
-        <Link to="/">
-             <img src="/vite.svg" alt="Logo" className="home-icon-img"/>
-        </Link>
-      </div>
-
-      <div className="home-content">
-        <h1 className="home-subtitle">Mozizz.hu - Élmény, ami összeköt!</h1>
-      </div>
-
-
+    <div className="main-page-container">
       <div className="hero-slider-box">
         {movies.map((movie, index) => (
           <div 
@@ -87,12 +121,10 @@ function MainPage() {
             style={{ backgroundImage: `url(${movie.image})` }}
           >
             <div className="hero-overlay"></div>
-            
             <div className="hero-content-slider">
               <span className="movie-genre">{movie.genre}</span>
               <h2 className="movie-title">{movie.title}</h2>
               <p className="movie-description">{movie.description}</p>
-              
               <div className="hero-buttons">
                 <button className="btn-primary">Jegyfoglalás</button>
                 <button className="btn-secondary">Részletek</button>
@@ -100,34 +132,76 @@ function MainPage() {
             </div>
           </div>
         ))}
-
         <div className="slider-dots">
           {movies.map((_, index) => (
-            <div 
-              key={index} 
-              className={`dot ${index === currentSlide ? 'active' : ''}`}
-              onClick={() => setCurrentSlide(index)} 
-            ></div>
+            <div key={index} className={`dot ${index === currentSlide ? 'active' : ''}`} onClick={() => setCurrentSlide(index)}></div>
           ))}
         </div>
       </div>
-
     </div>
   );
 }
 
+const AuthLayout = ({ children }) => <div className="auth-full-page">{children}</div>;
+
+const SimpleLayout = ({ children }) => (
+  <div style={{ width: '100%', minHeight: '100vh', padding: '20px' }}>
+    {children}
+  </div>
+);
+
+
+const AdminRoute = ({ children }) => {
+  const roleId = localStorage.getItem('roleId');
+  
+  if (parseInt(roleId) !== 1) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/user/:userId" element={<UserDetails />} />
-        <Route path="/movie/:id" element={<MovieDetails />} />
-        <Route path="/movie/new" element={<NewMovie />} />
-      </Routes>
+      <div className="app-container">
+        <Navigation />
+        
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
+          <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
+          
+          <Route path="/Catalog" element={<SimpleLayout><Catalog /></SimpleLayout>} />
+          <Route path="/Buffet" element={<SimpleLayout><Buffet /></SimpleLayout>} />
+          <Route path="/Profile" element={<SimpleLayout><Profile /></SimpleLayout>} />
+
+          <Route path="/admin" element={
+            <AdminRoute>
+              <SimpleLayout><Admin /></SimpleLayout>
+            </AdminRoute>
+          } />
+
+          <Route path="/user/:userId" element={
+            <AdminRoute>
+              <SimpleLayout><UserDetails /></SimpleLayout>
+            </AdminRoute>
+          } />
+
+          <Route path="/movie/:id" element={
+            <AdminRoute>
+              <SimpleLayout><MovieDetails /></SimpleLayout>
+            </AdminRoute>
+          } />
+
+          <Route path="/movie/new" element={
+            <AdminRoute>
+              <SimpleLayout><NewMovie /></SimpleLayout>
+            </AdminRoute>
+          } />
+
+        </Routes>
+      </div>
     </BrowserRouter>
   );
 }
