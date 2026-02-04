@@ -9,6 +9,7 @@ import NewMovie from './pages/NewMovie';
 import Buffet from './pages/Buffet';
 import Catalog from './pages/Catalog';
 import Profile from './pages/Profile';
+import ViewMovie from './pages/ViewMovie';
 import './App.css'
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
@@ -103,8 +104,6 @@ function MainPage() {
       .then(res => res.json())
       .then(data => {
         const moviesList = data.data || data;
-        
-
         setMovies(moviesList.slice(0, 6));
         setLoading(false);
       })
@@ -209,6 +208,9 @@ function App() {
           <Route path="/Buffet" element={<SimpleLayout><Buffet /></SimpleLayout>} />
           <Route path="/Profile" element={<SimpleLayout><Profile /></SimpleLayout>} />
 
+          <Route path="/movie/:id" element={<ViewMovie />} />
+
+          {/* ADMIN ÚTVONALAK */}
           <Route path="/admin" element={
             <AdminRoute>
               <SimpleLayout><Admin /></SimpleLayout>
@@ -221,7 +223,8 @@ function App() {
             </AdminRoute>
           } />
 
-          <Route path="/movie/:id" element={
+          {/* ADMIN  NÉZET (../admin/movie/id) */}
+          <Route path="/admin/movie/:id" element={
             <AdminRoute>
               <SimpleLayout><MovieDetails /></SimpleLayout>
             </AdminRoute>

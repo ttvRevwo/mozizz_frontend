@@ -80,9 +80,10 @@ const MoviesComponent = ({ movies, onDelete }) => {
                     </div>
                     
                     <div className="action-buttons" style={{ display: 'flex', gap: '10px' }}>
-                        <Link to={`/movie/${movie.id || movie.movieId}`} className="details-link">
+                        
+                        <Link to={`/admin/movie/${movie.id || movie.movieId}`} className="details-link">
                             <button className="details-button">
-                                Részletek
+                                Szerkesztés
                             </button>
                         </Link>
 
@@ -127,7 +128,7 @@ const MoviesList = () => {
 
     const handleDelete = (id) => {
         if(window.confirm("Biztosan törölni szeretnéd ezt a filmet?")) {
-            fetch(`http://localhost:5083/api/Movie/DelMovie?id=${id}`, {
+            fetch(`http://localhost:5083/api/Movie/DeleteMovie/${id}`, {
                 method: 'DELETE'
             })
             .then(res => {
