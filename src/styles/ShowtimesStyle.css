@@ -1,0 +1,141 @@
+.st-page {
+    min-height: 100vh;
+    background-color: #000;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 20px;
+}
+
+.st-container {
+    width: 100%;
+    max-width: 600px;
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.st-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 15px;
+}
+
+.st-header h2 {
+    margin: 0;
+    color: #ffd700;
+    font-size: 1.5rem;
+}
+
+.st-back-btn {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 5px 12px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.st-back-btn:hover {
+    color: #fff;
+    border-color: #fff;
+    background-color: #333;
+}
+
+.st-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group.half {
+    width: 48%;
+    display: inline-block;
+}
+
+.st-form::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.st-form .form-group.half:nth-of-type(3) {
+    float: left;
+}
+.st-form .form-group.half:nth-of-type(4) {
+    float: right;
+}
+
+label {
+    font-weight: 600;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+input, select {
+    padding: 12px;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input:focus, select:focus {
+    border-color: #ffd700;
+    background-color: #333;
+}
+
+.st-save-btn {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: #ffd700;
+    color: #000;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: transform 0.2s;
+    clear: both;
+    width: 100%;
+    text-transform: uppercase;
+}
+
+.st-save-btn:hover:not(:disabled) {
+    background-color: #e6c200;
+    transform: scale(1.02);
+}
+
+.st-save-btn:disabled {
+    background-color: #555;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.st-error {
+    background-color: rgba(255, 85, 85, 0.1);
+    color: #ff5555;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #ff5555;
+    text-align: center;
+}

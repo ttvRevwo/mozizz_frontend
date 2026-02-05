@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'; 
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, Navigate } from "react-router-dom"
+
 import Register from './pages/register'
 import Login from './pages/login'
 import Admin from './pages/Admin'
@@ -10,6 +11,10 @@ import Buffet from './pages/Buffet';
 import Catalog from './pages/Catalog';
 import Profile from './pages/Profile';
 import ViewMovie from './pages/ViewMovie';
+import Showtimes from './pages/Showtimes';
+import ShowtimeDetails from './pages/ShowtimeDetails';
+import NewShowtime from './pages/NewShowtime';
+
 import './App.css'
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
@@ -211,6 +216,7 @@ function App() {
           <Route path="/movie/:id" element={<ViewMovie />} />
 
           {/* ADMIN ÚTVONALAK */}
+          
           <Route path="/admin" element={
             <AdminRoute>
               <SimpleLayout><Admin /></SimpleLayout>
@@ -223,7 +229,6 @@ function App() {
             </AdminRoute>
           } />
 
-          {/* ADMIN  NÉZET (../admin/movie/id) */}
           <Route path="/admin/movie/:id" element={
             <AdminRoute>
               <SimpleLayout><MovieDetails /></SimpleLayout>
@@ -235,6 +240,20 @@ function App() {
               <SimpleLayout><NewMovie /></SimpleLayout>
             </AdminRoute>
           } />
+
+          {/* VETÍTÉSSEL KAPCSOLATOS*/}
+          <Route path="/admin/showtime/new" element={
+            <AdminRoute>
+              <SimpleLayout><NewShowtime /></SimpleLayout>
+            </AdminRoute>
+          } />
+
+          <Route path="/admin/showtime/:id" element={
+            <AdminRoute>
+              <SimpleLayout><ShowtimeDetails /></SimpleLayout>
+            </AdminRoute>
+          } />
+
 
         </Routes>
       </div>

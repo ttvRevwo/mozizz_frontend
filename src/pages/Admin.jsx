@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import '../styles/adminstyle.css';
+import '../Styles/AdminStyle.css';
 
 const UsersComponent = ({ users }) => {
     return (
@@ -8,18 +8,11 @@ const UsersComponent = ({ users }) => {
             {users.map((user) => (
                 <div key={user.userId} className="user-card">
                     <div className="user-info">
-                        <div className="user-name">
-                            {user.name || user.username}
-                        </div>
-                        <div className="user-email">
-                            {user.email}
-                        </div>
+                        <div className="user-name">{user.name || user.username}</div>
+                        <div className="user-email">{user.email}</div>
                     </div>
-                    
                     <Link to={`/user/${user.userId}`} className="details-link">
-                        <button className="details-button">
-                            Részletek
-                        </button>
+                        <button className="details-button">Részletek</button>
                     </Link>
                 </div>
             ))}
@@ -35,27 +28,16 @@ const UsersList = () => {
         fetch('http://localhost:5083/api/User/GetAllUsers')
         .then(response => response.json())
         .then(tartalom => {
-            if(Array.isArray(tartalom)){
-                setUsers(tartalom);
-            } else if (tartalom && tartalom.data) {
-                setUsers(Object.values(tartalom.data));
-            } else {
-                setUsers([]);
-            }
+            if(Array.isArray(tartalom)) setUsers(tartalom);
+            else if (tartalom && tartalom.data) setUsers(Object.values(tartalom.data));
+            else setUsers([]);
         })
         .catch(error => console.log(error))
         .finally(() => setLoading(false));
     }, []);
 
     if(loading) return <div className="loading-text">Felhasználók betöltése...</div>; 
-        
-    if(!users.length) { 
-        return (
-            <div className="admin-sub-panel">
-                <div className="empty-message">Nincs megjeleníthető felhasználó.</div>
-            </div>
-        );
-    }
+    if(!users.length) return <div className="admin-sub-panel"><div className="empty-message">Nincs felhasználó.</div></div>;
     
     return(
         <div className="admin-sub-panel">
@@ -71,27 +53,14 @@ const MoviesComponent = ({ movies, onDelete }) => {
             {movies.map((movie) => (
                 <div key={movie.id || movie.movieId} className="user-card" style={{ borderColor: '#ffd700' }}>
                     <div className="user-info">
-                        <div className="user-name">
-                            {movie.title}
-                        </div>
-                        <div className="user-email">
-                            {movie.genre ? movie.genre : 'Nincs műfaj megadva'}
-                        </div>
+                        <div className="user-name">{movie.title}</div>
+                        <div className="user-email">{movie.genre || 'Nincs műfaj'}</div>
                     </div>
-                    
                     <div className="action-buttons" style={{ display: 'flex', gap: '10px' }}>
-                        
                         <Link to={`/admin/movie/${movie.id || movie.movieId}`} className="details-link">
-                            <button className="details-button">
-                                Szerkesztés
-                            </button>
+                            <button className="details-button">Szerkesztés</button>
                         </Link>
-
-                        <button 
-                            className="details-button" 
-                            style={{ backgroundColor: '#ff4444', color: 'white' }}
-                            onClick={() => onDelete(movie.id || movie.movieId)}
-                        >
+                        <button className="details-button" style={{ backgroundColor: '#650f0f', color: 'white' }} onClick={() => onDelete(movie.id || movie.movieId)}>
                             Törlés
                         </button>
                     </div>
@@ -108,38 +77,25 @@ const MoviesList = () => {
     const fetchMovies = () => {
         setLoading(true);
         fetch('http://localhost:5083/api/Movie/GetMovies')
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            if(Array.isArray(data)){
-                setMovies(data);
-            } else if (data && data.data) {
-                setMovies(Object.values(data.data));
-            } else {
-                setMovies([]);
-            }
+            if(Array.isArray(data)) setMovies(data);
+            else if (data && data.data) setMovies(Object.values(data.data));
+            else setMovies([]);
         })
-        .catch(error => console.log("Hiba a filmek lekérésekor:", error))
+        .catch(err => console.log(err))
         .finally(() => setLoading(false));
     };
 
-    useEffect(() => {
-        fetchMovies();
-    }, []);
+    useEffect(() => { fetchMovies(); }, []);
 
     const handleDelete = (id) => {
         if(window.confirm("Biztosan törölni szeretnéd ezt a filmet?")) {
-            fetch(`http://localhost:5083/api/Movie/DeleteMovie/${id}`, {
-                method: 'DELETE'
-            })
+            fetch(`http://localhost:5083/api/Movie/DeleteMovie/${id}`, { method: 'DELETE' })
             .then(res => {
-                if(res.ok) {
-                    alert("Film sikeresen törölve!");
-                    fetchMovies(); 
-                } else {
-                    alert("Hiba történt a törlés során.");
-                }
-            })
-            .catch(err => console.error(err));
+                if(res.ok) { alert("Sikeres törlés!"); fetchMovies(); }
+                else alert("Hiba a törlés során.");
+            });
         }
     };
 
@@ -149,18 +105,102 @@ const MoviesList = () => {
         <div className="admin-sub-panel">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h3 className="admin-title" style={{ margin: 0 }}>Filmek listája ({movies.length} db)</h3>
-                
                 <Link to="/movie/new">
-                    <button className="details-button" style={{ backgroundColor: '#28a745', fontSize: '1rem', padding: '10px 20px' }}>
-                        + Új Film Felvétele
+                    <button className="details-button" style={{ backgroundColor: '#115420', fontSize: '1rem', padding: '10px 20px' }}>+ Új Film</button>
+                </Link>
+            </div>
+            {!movies.length ? <div className="empty-message">Nincs film.</div> : <MoviesComponent movies={movies} onDelete={handleDelete} />}
+        </div>
+    );
+};
+
+const ShowtimesComponent = ({ showtimes, onDelete }) => {
+    return (
+        <div className="user-list-container">
+            {showtimes.map((st) => {
+                const id = st.showtimeId || st.ShowtimeId;
+                
+                return (
+                    <div key={id} className="user-card" style={{ borderColor: '#00d2ff' }}>
+                        <div className="user-info">
+                            <div className="user-name">{st.movieTitle || st.MovieTitle}</div>
+                            <div className="user-email" style={{ color: '#ccc' }}>
+                                {st.date || st.Date} - {st.time || st.Time} | <strong>{st.hallName || st.HallName}</strong>
+                            </div>
+                        </div>
+                        
+                        <div className="action-buttons" style={{ display: 'flex', gap: '10px' }}>
+                            <Link to={`/admin/showtime/${id}`} className="details-link">
+                                <button className="details-button">Szerkesztés</button>
+                            </Link>
+                            <button 
+                                className="details-button" 
+                                style={{ backgroundColor: '#650f0f', color: 'white' }}
+                                onClick={() => onDelete(id)}
+                            >
+                                Törlés
+                            </button>
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+};
+
+const ShowtimesList = () => {
+    const [showtimes, setShowtimes] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchShowtimes = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('http://localhost:5083/api/Showtime/GetAllShowtimes');
+            const data = await res.json();
+            
+            const list = Array.isArray(data) ? data : (data.data || []);
+            setShowtimes(list);
+
+        } catch (error) {
+            console.error("Hiba az adatok betöltésekor:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchShowtimes(); }, []);
+
+    const handleDelete = (id) => {
+        if(window.confirm("Biztosan törölni akarod ezt a vetítést?")) {
+            fetch(`http://localhost:5083/api/Showtime/DeleteShowtime/${id}`, { method: 'DELETE' })
+            .then(res => {
+                if(res.ok) { alert("Sikeres törlés!"); fetchShowtimes(); }
+                else alert("Hiba történt (Lehet nincs megírva a Delete végpont a C# kódban?)");
+            })
+            .catch(err => alert("Szerver hiba: " + err));
+        }
+    };
+
+    if(loading) return <div className="loading-text">Vetítések betöltése...</div>;
+
+    return (
+        <div className="admin-sub-panel">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 className="admin-title" style={{ margin: 0 }}>Vetítések ({showtimes.length} db)</h3>
+                <Link to="/admin/showtime/new">
+                    <button className="details-button" style={{ backgroundColor: '#005f73', fontSize: '1rem', padding: '10px 20px' }}>
+                        + Új Vetítés
                     </button>
                 </Link>
             </div>
 
-            {!movies.length ? (
-                <div className="empty-message">Nincs megjeleníthető film.</div>
+            {!showtimes.length ? (
+                <div className="empty-message">Nincs rögzített vetítés.</div>
             ) : (
-                <MoviesComponent movies={movies} onDelete={handleDelete} />
+                <ShowtimesComponent 
+                    showtimes={showtimes} 
+                    onDelete={handleDelete} 
+                />
             )}
         </div>
     );
@@ -182,28 +222,32 @@ function Admin() {
           <div className="admin-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #444', paddingBottom: '10px' }}>
               <button 
                 className={`details-button ${activeTab === 'users' ? 'active' : ''}`}
-                style={{ 
-                    backgroundColor: activeTab === 'users' ? '#b8860b' : 'transparent',
-                    border: '1px solid #b8860b'
-                }}
+                style={{ backgroundColor: activeTab === 'users' ? '#b8860b' : 'transparent', border: '1px solid #b8860b' }}
                 onClick={() => setActiveTab('users')}
               >
-                  Felhasználók kezelése
+                  Felhasználók
               </button>
 
               <button 
                 className={`details-button ${activeTab === 'movies' ? 'active' : ''}`}
-                style={{ 
-                    backgroundColor: activeTab === 'movies' ? '#b8860b' : 'transparent',
-                    border: '1px solid #b8860b'
-                }}
+                style={{ backgroundColor: activeTab === 'movies' ? '#b8860b' : 'transparent', border: '1px solid #b8860b' }}
                 onClick={() => setActiveTab('movies')}
               >
-                  Filmek kezelése
+                  Filmek
+              </button>
+
+              <button 
+                className={`details-button ${activeTab === 'showtimes' ? 'active' : ''}`}
+                style={{ backgroundColor: activeTab === 'showtimes' ? '#b8860b' : 'transparent', border: '1px solid #b8860b' }}
+                onClick={() => setActiveTab('showtimes')}
+              >
+                  Vetítések
               </button>
           </div>
 
-          {activeTab === 'users' ? <UsersList /> : <MoviesList />}
+          {activeTab === 'users' && <UsersList />}
+          {activeTab === 'movies' && <MoviesList />}
+          {activeTab === 'showtimes' && <ShowtimesList />}
       </div>
     </div>
   );
