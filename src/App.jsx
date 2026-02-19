@@ -133,27 +133,25 @@ function MainPage() {
       });
   }, []);
 
-  const getShowtimeIdForMovie = (movie) => {
-    const movieIds = [movie.movieId, movie.MovieId, movie.movie_id]
-      .filter((value) => value !== undefined && value !== null && String(value).trim() !== '')
-      .map((value) => String(value));
-    const movieTitle = (movie.title || movie.Title || '').toLowerCase().trim();
+  const getShowtimeIdFromList = (movieData) => {
+    const movieTitle = (movieData?.title || movieData?.Title || movieData?.movie?.title || movieData?.movie?.Title || '').trim();
 
-    const byTitle = showtimes.find((st) => {
-      const stTitle = (st.movieTitle || st.MovieTitle || st.movie?.title || st.movie?.Title || '').toLowerCase().trim();
-      return stTitle && movieTitle && stTitle === movieTitle;
+    if (!movieTitle) return null;
+
+    const exactMatch = showtimes.find((st) => {
+      const stTitle = (st.movieTitle || st.MovieTitle || st.movie?.title || st.movie?.Title || st.Movie?.title || st.Movie?.Title || '').trim();
+      return stTitle === movieTitle;
     });
 
-    if (byTitle) return byTitle.showtimeId || byTitle.ShowtimeId;
-
-    const byMovieId = showtimes.find((st) => {
-      const stMovieId = st.movieId || st.MovieId || st.movie?.movieId || st.movie?.MovieId || st.movie?.id;
-      return stMovieId && movieIds.includes(String(stMovieId));
-    });
-
-    if (byMovieId) return byMovieId.showtimeId || byMovieId.ShowtimeId;
+    if (exactMatch) {
+      return exactMatch.showtimeId || exactMatch.ShowtimeId;
+    }
 
     return null;
+  };
+
+  const getShowtimeIdForMovie = async (movie) => {
+    return getShowtimeIdFromList(movie);
   };
 
   useEffect(() => {
@@ -186,10 +184,12 @@ function MainPage() {
                 imageUrl = `${CLOUDINARY_BASE}${movie.img}`;
             }
 
+            const isActive = index === currentSlide;
+
             return (
               <div 
                 key={movie.movieId || movie.MovieId || movie.movie_id || movie.id}
-                className={`hero-slide ${index === currentSlide ? 'active' : ''}`}
+                className={`hero-slide ${isActive ? 'active' : ''}`}
                 style={{ backgroundImage: `url(${imageUrl})` }}
               >
                 <div className="hero-overlay"></div>
@@ -200,8 +200,10 @@ function MainPage() {
                   <div className="hero-buttons">
                     <button
                       className="btn-primary"
-                      onClick={() => {
-                        const showtimeId = getShowtimeIdForMovie(movie);
+                      onClick={async () => {
+                        if (index !== currentSlide) return;
+                        const currentMovie = movies[currentSlide];
+                        const showtimeId = await getShowtimeIdForMovie(currentMovie);
                         if (!showtimeId) {
                           alert('Ehhez a filmhez jelenleg nincs elérhető vetítés.');
                           return;
@@ -211,7 +213,14 @@ function MainPage() {
                     >
                       Jegyfoglalás
                     </button>
-                    <Link to={`/movie/${movie.movieId || movie.MovieId || movie.movie_id || movie.id}`}>
+                    <Link 
+                      to={`/movie/${movie.movieId || movie.MovieId || movie.movie_id || movie.id}`}
+                      onClick={(e) => {
+                        if (index !== currentSlide) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
                         <button className="btn-secondary">Részletek</button>
                     </Link>
                   </div>
