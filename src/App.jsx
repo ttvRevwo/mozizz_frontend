@@ -14,6 +14,7 @@ import ViewMovie from './pages/ViewMovie';
 import Showtimes from './pages/Showtimes';
 import ShowtimeDetails from './pages/ShowtimeDetails';
 import NewShowtime from './pages/NewShowtime';
+import SeatBooking from './pages/SeatBooking';
 
 import './App.css'
 
@@ -100,7 +101,9 @@ function Navigation() {
 }
 
 function MainPage() {
+  const navigate = useNavigate();
   const [movies, setMovies] = useState([]);
+  const [showtimes, setShowtimes] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -117,6 +120,41 @@ function MainPage() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    fetch('http://localhost:5083/api/Showtime/GetAllShowtimes')
+      .then((res) => res.json())
+      .then((data) => {
+        const list = Array.isArray(data) ? data : (data.data || []);
+        setShowtimes(list);
+      })
+      .catch((err) => {
+        console.error("Hiba a vetítések betöltésekor:", err);
+      });
+  }, []);
+
+  const getShowtimeIdForMovie = (movie) => {
+    const movieIds = [movie.movieId, movie.MovieId, movie.movie_id]
+      .filter((value) => value !== undefined && value !== null && String(value).trim() !== '')
+      .map((value) => String(value));
+    const movieTitle = (movie.title || movie.Title || '').toLowerCase().trim();
+
+    const byTitle = showtimes.find((st) => {
+      const stTitle = (st.movieTitle || st.MovieTitle || st.movie?.title || st.movie?.Title || '').toLowerCase().trim();
+      return stTitle && movieTitle && stTitle === movieTitle;
+    });
+
+    if (byTitle) return byTitle.showtimeId || byTitle.ShowtimeId;
+
+    const byMovieId = showtimes.find((st) => {
+      const stMovieId = st.movieId || st.MovieId || st.movie?.movieId || st.movie?.MovieId || st.movie?.id;
+      return stMovieId && movieIds.includes(String(stMovieId));
+    });
+
+    if (byMovieId) return byMovieId.showtimeId || byMovieId.ShowtimeId;
+
+    return null;
+  };
 
   useEffect(() => {
     if (movies.length === 0) return;
@@ -150,7 +188,7 @@ function MainPage() {
 
             return (
               <div 
-                key={movie.id || movie.movieId}
+                key={movie.movieId || movie.MovieId || movie.movie_id || movie.id}
                 className={`hero-slide ${index === currentSlide ? 'active' : ''}`}
                 style={{ backgroundImage: `url(${imageUrl})` }}
               >
@@ -160,8 +198,20 @@ function MainPage() {
                   <h2 className="movie-title">{movie.title || movie.Title}</h2>
                   <p className="movie-description">{movie.description || movie.Description}</p>
                   <div className="hero-buttons">
-                    <button className="btn-primary">Jegyfoglalás</button>
-                    <Link to={`/movie/${movie.id || movie.movieId}`}>
+                    <button
+                      className="btn-primary"
+                      onClick={() => {
+                        const showtimeId = getShowtimeIdForMovie(movie);
+                        if (!showtimeId) {
+                          alert('Ehhez a filmhez jelenleg nincs elérhető vetítés.');
+                          return;
+                        }
+                        navigate(`/booking/${showtimeId}`);
+                      }}
+                    >
+                      Jegyfoglalás
+                    </button>
+                    <Link to={`/movie/${movie.movieId || movie.MovieId || movie.movie_id || movie.id}`}>
                         <button className="btn-secondary">Részletek</button>
                     </Link>
                   </div>
@@ -212,6 +262,7 @@ function App() {
           <Route path="/Catalog" element={<SimpleLayout><Catalog /></SimpleLayout>} />
           <Route path="/Buffet" element={<SimpleLayout><Buffet /></SimpleLayout>} />
           <Route path="/Profile" element={<SimpleLayout><Profile /></SimpleLayout>} />
+          <Route path="/booking/:showtimeId" element={<SeatBooking />} />
 
           <Route path="/movie/:id" element={<ViewMovie />} />
 

@@ -67,7 +67,7 @@ const Catalog = () => {
         ) : (
           <div className="movie-grid">
             {filteredMovies.map((movie) => {
-              const id = movie.id || movie.movieId || movie.MovieId || movie.movie_id;
+              const id = movie.movieId || movie.MovieId || movie.movie_id || movie.id;
               const title = movie.title || movie.Title || 'Névtelen';
               const genre = movie.genre || movie.Genre || 'Ismeretlen';
               const rating = movie.rating || movie.Rating || '-';
