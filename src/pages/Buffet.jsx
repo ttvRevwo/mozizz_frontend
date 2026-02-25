@@ -1,195 +1,116 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import '../styles/newmoviestyle.css';
+import React, { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../styles/BuffetStyle.css';
+import logoImg from '../imgs/logo.webp';
 
-const NewMovie = () => {
+const Buffet = () => {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
     
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
+    const menusRef = useRef(null);
+    const snacksRef = useRef(null);
 
-    const [formData, setFormData] = useState({
-        Title: '',
-        Description: '',
-        Genre: '',
-        ReleaseDate: '',
-        Director: '',
-        Rating: '',
-        Duration: ''
-    });
+    const menus = [
+        { id: 1, name: "Családi Mix", price: 4500, image: "family_mix.png", desc: "2 nagy popcorn + 2 nagy üdítő + Nachos" },
+        { id: 2, name: "Páros Ajánlat", price: 3200, image: "couple_mix.png", desc: "1 nagy popcorn + 2 közepes üdítő" },
+        { id: 3, name: "Gyerek Menü", price: 2100, image: "kids_mix.png", desc: "Kis popcorn + Üdítő + Ajándék figura" },
+        { id: 4, name: "Heti Ajánlat", price: 2800, image: "weekly_offer.png", desc: "Különleges fűszerezésű popcorn menü" },
+        { id: 5, name: "Mozimaraton", price: 5500, image: "marathon.png", desc: "Korlátlan üdítő + XXL Popcorn" },
+    ];
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+    const snacks = [
+        { id: 101, name: "Vajas Popcorn", price: 1200, image: "popcorn.png", desc: "Friss, ropogós vajas popcorn." },
+        { id: 102, name: "Sajtos Nachos", price: 1400, image: "nachos.png", desc: "Nachos tál meleg sajtszósszal." },
+        { id: 103, name: "Coca Cola 0.5L", price: 650, image: "cola.png", desc: "Jéghideg frissítő." },
+        { id: 104, name: "KitKat", price: 450, image: "kitkat.png", desc: "Roppanós ostya csokoládéval." },
+        { id: 105, name: "Gumicukor", price: 890, image: "gummy.png", desc: "Savanyú és édes gumicukor mix." },
+        { id: 106, name: "Ásványvíz", price: 450, image: "water.png", desc: "Szénsavmentes ásványvíz." },
+        { id: 107, name: "Mogyoró", price: 550, image: "peanut.png", desc: "Sós pörkölt mogyoró." },
+    ];
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
+    const scroll = (ref, direction) => {
+        if (ref.current) {
+            const { current } = ref;
+            const scrollAmount = 300; 
+            current.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
         }
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setLoading(true);
-
-        const data = new FormData();
-        
-        data.append('Title', formData.Title);
-        data.append('Description', formData.Description);
-        data.append('Genre', formData.Genre);
-        data.append('Director', formData.Director);
-        data.append('Rating', formData.Rating);
-        data.append('Duration', formData.Duration);
-
-        if (formData.ReleaseDate) {
-            data.append('ReleaseDate', `${formData.ReleaseDate}T00:00:00`);
-        }
-
-        if (selectedFile) {
-            data.append('imageFile', selectedFile);
-        }
-
-        fetch('http://localhost:5083/api/Movie/NewMovie', { 
-            method: 'POST',
-            body: data
-        })
-        .then(response => {
-            if (response.ok) {
-                alert('Film sikeresen létrehozva!');
-                navigate('/admin');
-            } else {
-                return response.text().then(text => { throw new Error(text) });
-            }
-        })
-        .catch(error => {
-            console.error('Hiba:', error);
-            alert('Hiba történt a mentés során: ' + error.message);
-        })
-        .finally(() => setLoading(false));
+    const handleCardClick = (id) => {
+        navigate(`/buffet/product/${id}`);
     };
 
     return (
-        <div className="new-movie-page">
-            <div className="new-movie-container">
-                
-                <h2 className="new-movie-title">Új film felvétele</h2>
+        <div className="buffet-container">
+            <header className="buffet-header">
+                <div className="header-left-group">
+                    <button className="back-arrow-btn" onClick={() => navigate('/')} title="Vissza a főoldalra">
+                        &#10094;
+                    </button>
+                    <img src={logoImg} alt="Mozi Logo" className="buffet-logo" />                    {/* Ha van képed: <img src="/images/logo.png" className="buffet-logo" alt="Logo" /> */}
+                </div>
 
-                <form onSubmit={handleSubmit} className="new-movie-form">
+                <div className="header-center">
+                    <h1>AJÁNLATAINK</h1>
+                </div>
+
+                <div className="header-right">
+                    <div className="payment-info">
+                        <span>Szép kártyát elfogadunk!</span>
+                        <div className="payment-icons">💳 📱</div>
+                    </div>
+                </div>
+            </header>
+
+            <section className="buffet-section">
+                <h2 className="section-title">Kombók & Menük</h2>
+                <div className="carousel-wrapper">
+                    <button className="nav-arrow left" onClick={() => scroll(menusRef, 'left')}>&#10094;</button>
                     
-                    <div className="form-group" style={{textAlign: 'center', marginBottom: '20px'}}>
-                        <label style={{display:'block', marginBottom:'10px'}}>Borítókép</label>
-                        
-                        {previewUrl && (
-                            <div style={{marginBottom: '15px'}}>
-                                <img 
-                                    src={previewUrl} 
-                                    alt="Előnézet" 
-                                    style={{maxWidth: '150px', maxHeight: '200px', borderRadius: '8px', border: '1px solid #E0AA3E'}} 
-                                />
+                    <div className="product-scroll-container" ref={menusRef}>
+                        {menus.map(item => (
+                            <div key={item.id} className="product-card" onClick={() => handleCardClick(item.id)}>
+                                <div className="card-image-placeholder">
+                                    <span>{item.name} Kép</span>
+                                </div>
+                                <div className="card-info">
+                                    <h3>{item.name}</h3>
+                                    <p className="price">{item.price} Ft</p>
+                                </div>
                             </div>
-                        )}
-                        
-                        <input 
-                            type="file" 
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            required
-                            style={{color: '#fff'}}
-                        />
+                        ))}
                     </div>
 
-                    <div className="form-group">
-                        <label>Cím</label>
-                        <input 
-                            type="text" 
-                            name="Title" 
-                            value={formData.Title} 
-                            onChange={handleChange} 
-                            required 
-                            placeholder="Pl. A Keresztapa"
-                        />
+                    <button className="nav-arrow right" onClick={() => scroll(menusRef, 'right')}>&#10095;</button>
+                </div>
+            </section>
+
+            <section className="buffet-section">
+                <h2 className="section-title">Snackek & Üdítők</h2>
+                <div className="carousel-wrapper">
+                    <button className="nav-arrow left" onClick={() => scroll(snacksRef, 'left')}>&#10094;</button>
+                    
+                    <div className="product-scroll-container" ref={snacksRef}>
+                        {snacks.map(item => (
+                            <div key={item.id} className="product-card" onClick={() => handleCardClick(item.id)}>
+                                <div className="card-image-placeholder small">
+                                    <span>{item.name}</span>
+                                </div>
+                                <div className="card-info">
+                                    <h3>{item.name}</h3>
+                                    <p className="price">{item.price} Ft</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
-                    <div className="form-group">
-                        <label>Műfaj</label>
-                        <input 
-                            type="text" 
-                            name="Genre" 
-                            value={formData.Genre} 
-                            onChange={handleChange} 
-                            required 
-                            placeholder="Pl. Dráma, Akció"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Hossz (perc)</label>
-                        <input 
-                            type="number" 
-                            name="Duration" 
-                            value={formData.Duration} 
-                            onChange={handleChange} 
-                            required 
-                            placeholder="Pl. 120"
-                            min="1"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Korhatár besorolás (Rating)</label>
-                        <input 
-                            type="text" 
-                            name="Rating" 
-                            value={formData.Rating} 
-                            onChange={handleChange} 
-                            required 
-                            placeholder="Pl. R, PG-13, 16+"
-                        />
-                    </div>
-
-                    <div className="form-group full-width-mobile">
-                        <label>Megjelenés dátuma</label>
-                        <input 
-                            type="date" 
-                            name="ReleaseDate" 
-                            value={formData.ReleaseDate} 
-                            onChange={handleChange} 
-                            required 
-                        />
-                    </div>
-
-                    <div className="form-group full-width">
-                        <label>Leírás</label>
-                        <textarea 
-                            name="Description" 
-                            value={formData.Description} 
-                            onChange={handleChange} 
-                            rows="5"
-                            required
-                            placeholder="A film rövid leírása..."
-                        />
-                    </div>
-
-                    <div className="button-group">
-                        <Link to="/admin" className="cancel-btn">
-                            Mégse
-                        </Link>
-                        
-                        <button type="submit" className="save-btn" disabled={loading}>
-                            {loading ? 'Feltöltés...' : 'Mentés'}
-                        </button>
-                    </div>
-                </form>
-            </div>
+                    <button className="nav-arrow right" onClick={() => scroll(snacksRef, 'right')}>&#10095;</button>
+                </div>
+            </section>
         </div>
     );
 };
 
-export default NewMovie;
+export default Buffet;

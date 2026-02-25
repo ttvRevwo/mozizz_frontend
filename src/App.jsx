@@ -15,6 +15,8 @@ import Showtimes from './pages/Showtimes';
 import ShowtimeDetails from './pages/ShowtimeDetails';
 import NewShowtime from './pages/NewShowtime';
 import SeatBooking from './pages/SeatBooking';
+import ProductDetail from './pages/ProductDetails';
+import logoImg from './imgs/logo.webp';
 
 import './App.css'
 
@@ -47,7 +49,7 @@ function Navigation() {
     <nav className="top-nav">
       <div className="nav-left">
         <Link to="/" className="logo-link">
-             <img src="/vite.svg" alt="Logo" className="nav-logo"/>
+             <img src={logoImg} alt="Logo" className="nav-logo"/>
         </Link>
         <input type="text" placeholder="Keresés..." className="search-bar" />
       </div>
@@ -272,6 +274,7 @@ function App() {
           <Route path="/Buffet" element={<SimpleLayout><Buffet /></SimpleLayout>} />
           <Route path="/Profile" element={<SimpleLayout><Profile /></SimpleLayout>} />
           <Route path="/booking/:showtimeId" element={<SeatBooking />} />
+          <Route path="/buffet/product/:id" element={<ProductDetail />} />
 
           <Route path="/movie/:id" element={<ViewMovie />} />
 
