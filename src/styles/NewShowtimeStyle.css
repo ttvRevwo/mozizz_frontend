@@ -1,22 +1,22 @@
 .ns-page {
-    background-color: #121212;
+    background-color: #0f0f0f;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding-top: 50px;
+    padding: 30px 12px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #e0e0e0;
 }
 
 .ns-container {
-    background-color: #1e1e1e;
+    background-color: #1a0606;
     padding: 30px;
-    border-radius: 12px;
+    border-radius: 16px;
     width: 100%;
     max-width: 600px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    border: 2px solid #E0AA3E;
 }
 
 .ns-header {
@@ -30,7 +30,7 @@
 
 .ns-header h2 {
     margin: 0;
-    color: #e50914;
+    color: #E0AA3E;
     font-size: 1.5rem;
 }
 
@@ -44,8 +44,8 @@
 }
 
 .ns-back-btn:hover {
-    color: #fff;
-    background-color: #333;
+    color: #111;
+    background-color: #E0AA3E;
 }
 
 .ns-form {
@@ -69,7 +69,7 @@
 .ns-form-group input,
 .ns-form-group select {
     padding: 12px;
-    background-color: #2c2c2c;
+    background-color: #2a2a2a;
     border: 1px solid #444;
     border-radius: 6px;
     color: #fff;
@@ -80,7 +80,7 @@
 
 .ns-form-group input:focus,
 .ns-form-group select:focus {
-    border-color: #e50914;
+    border-color: #E0AA3E;
 }
 
 .ns-row {
@@ -99,8 +99,8 @@
 }
 
 .ns-save-btn {
-    background-color: #e50914;
-    color: white;
+    background-color: #E0AA3E;
+    color: #000;
     padding: 12px 24px;
     border: none;
     border-radius: 6px;
@@ -112,7 +112,7 @@
 }
 
 .ns-save-btn:hover:not(:disabled) {
-    background-color: #b20710;
+    background-color: #c79c0f;
 }
 
 .ns-save-btn:disabled {
@@ -129,9 +129,9 @@
 }
 
 .ns-error-msg {
-    background-color: rgba(229, 9, 20, 0.2);
-    border: 1px solid #e50914;
-    color: #ffcccc;
+    background-color: rgba(224, 170, 62, 0.12);
+    border: 1px solid #E0AA3E;
+    color: #ffe6b3;
     padding: 10px;
     border-radius: 6px;
     margin-bottom: 20px;

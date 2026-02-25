@@ -19,6 +19,7 @@ import ProductDetail from './pages/ProductDetails';
 import logoImg from './imgs/logo.webp';
 
 import './App.css'
+import './styles/ResponsiveStyle.css'
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
 
@@ -244,7 +245,7 @@ function MainPage() {
 const AuthLayout = ({ children }) => <div className="auth-full-page">{children}</div>;
 
 const SimpleLayout = ({ children }) => (
-  <div style={{ width: '100%', minHeight: '100vh', padding: '20px' }}>
+  <div style={{ width: '100%', boxSizing: 'border-box' }}>
     {children}
   </div>
 );

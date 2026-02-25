@@ -30,8 +30,9 @@ const UserProfile = () => {
     }, [currentUserId]);
 
     const handleLogout = () => {
-        alert("Sikeresen kijelentkeztél!");
+        localStorage.clear();
         navigate('/');
+        window.location.reload();
     };
 
     return (
@@ -73,7 +74,7 @@ const UserProfile = () => {
                             return (
                                 <div key={res.reservationId} className="reservation-card">
                                     <div className="res-header">
-                                        <h3 className="movie-title">{res.movieTitle}</h3>
+                                        <h3 className="res-movie-title">{res.movieTitle}</h3>
                                         <span className={`res-status ${res.status === 'confirmed' ? 'status-ok' : ''}`}>
                                             {res.status === 'confirmed' ? 'Véglegesítve' : res.status}
                                         </span>

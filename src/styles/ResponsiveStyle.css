@@ -1,0 +1,214 @@
+html,
+body,
+#root,
+.app-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img,
+video,
+svg,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.auth-full-page {
+  min-height: 100vh;
+  height: auto;
+  align-items: flex-start;
+  padding: 24px 16px;
+  overflow-y: auto;
+}
+
+.register-container,
+.login-container,
+.new-movie-container,
+.ns-container,
+.sd-container,
+.st-container,
+.details-container {
+  width: 100%;
+  max-width: 100%;
+}
+
+.new-movie-page,
+.ns-page,
+.sd-page,
+.st-page,
+.profile-page,
+.view-page,
+.product-detail-container {
+  min-height: 100vh;
+  align-items: flex-start;
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.app-container.admin-view {
+  align-items: flex-start;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.admin-panel {
+  height: auto;
+  max-height: none;
+  min-height: 0;
+}
+
+.admin-panel > div:not(.admin-tabs),
+.user-list-container {
+  overflow: visible;
+}
+
+.catalog-page {
+  min-height: 100vh;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .top-nav {
+    height: auto;
+    min-height: 72px;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .nav-left,
+  .nav-center,
+  .nav-right {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .nav-slogan {
+    font-size: 0.95rem;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .main-page-container {
+    padding-top: 130px;
+  }
+
+  .hero-content-slider {
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+    max-width: none;
+  }
+
+  .movie-title {
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+  }
+
+  .admin-tabs {
+    flex-wrap: wrap;
+  }
+
+  .user-card {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 640px) {
+  .top-bar,
+  .ns-header,
+  .sd-header,
+  .st-header,
+  .button-group,
+  .ns-actions,
+  .sd-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+    height: auto;
+  }
+
+  .search-container {
+    width: 100%;
+    padding: 0;
+    order: 3;
+  }
+
+  .filter-btn,
+  .details-button,
+  .ns-save-btn,
+  .sd-save-btn,
+  .sd-delete-btn,
+  .save-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+
+  .new-movie-form {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .full-width,
+  .button-group {
+    grid-column: span 1;
+  }
+
+  .ns-row,
+  .sd-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-group.half,
+  .sd-form-group.half,
+  .ns-form-group.half {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .st-form .form-group.half:nth-of-type(3),
+  .st-form .form-group.half:nth-of-type(4) {
+    float: none;
+  }
+
+  .content-area,
+  .new-movie-container,
+  .ns-container,
+  .sd-container,
+  .st-container,
+  .admin-panel {
+    padding: 16px;
+  }
+
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+
+  .movie-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .main-page-container {
+    padding-top: 150px;
+  }
+}

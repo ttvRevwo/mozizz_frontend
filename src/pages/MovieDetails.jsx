@@ -175,16 +175,16 @@ function MovieDetails() {
     }
 
     return (
-        <div className="app-container" style={{ flexDirection: 'column', justifyContent: 'center', padding: '40px 0' }}>
-            <Link to="/admin" className="back-to-home" style={{ position: 'absolute', top: '20px', left: '20px' }}>
+        <div className="movie-details-page">
+            <Link to="/admin" className="back-to-home movie-details-back">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} width={20} height={20}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                 </svg>
                 Vissza az admin felületre
             </Link>
 
-            <div className="register-container" style={{ maxWidth: '800px', width: '90%', borderColor: '#c79c0f', padding: '30px' }}>
-                <h2 className="register-title" style={{ fontSize: '2rem', marginBottom: '30px', borderBottom: '1px solid #444', paddingBottom: '10px' }}>
+            <div className="movie-details-container">
+                <h2 className="register-title movie-details-title">
                     Film szerkesztése
                 </h2>
 
@@ -194,7 +194,7 @@ function MovieDetails() {
                     </div>
                 )}
 
-                <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', alignItems: 'flex-start' }}>
+                <div className="movie-details-row movie-details-top-row">
                     <div style={{ 
                         width: '120px', 
                         height: '180px', 
@@ -220,7 +220,7 @@ function MovieDetails() {
                         )}
                     </div>
 
-                    <div className="form-group" style={{ flex: 1 }}>
+                    <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
                         <label style={{ color: '#c79c0f', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>
                             Borítókép cseréje
                         </label>
@@ -239,7 +239,7 @@ function MovieDetails() {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
+                <div className="movie-details-row">
                     <div className="form-group" style={{ flex: 1 }}>
                         <label style={{ color: '#c79c0f', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Movie ID</label>
                         <input
@@ -264,7 +264,7 @@ function MovieDetails() {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
+                <div className="movie-details-row">
                     <div className="form-group" style={{ flex: 2 }}>
                         <label style={{ color: '#c79c0f', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Film Címe</label>
                         <input
@@ -288,7 +288,7 @@ function MovieDetails() {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
+                <div className="movie-details-row">
                     <div className="form-group" style={{ flex: 1 }}>
                         <label style={{ color: '#c79c0f', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Hossz (perc)</label>
                         <input
@@ -312,18 +312,18 @@ function MovieDetails() {
                     </div>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: '20px' }}>
+                <div className="form-group movie-details-description-group">
                     <label style={{ color: '#c79c0f', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Leírás</label>
                     <textarea
                         name="description"
                         value={movieData.description}
                         onChange={handleInputChange}
                         className="form-input"
-                        style={{ minHeight: '120px', resize: 'vertical', fontFamily: 'inherit', lineHeight: '1.5' }}
+                        style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: '1.5' }}
                     />
                 </div>
 
-                <div className="form-group" style={{ marginBottom: '30px' }}>
+                <div className="form-group movie-details-created-group">
                     <label style={{ color: '#888', fontSize: '0.9rem', display: 'block', marginBottom: '5px' }}>
                         Rendszeradat: Létrehozva (Nem módosítható)
                     </label>
@@ -336,19 +336,17 @@ function MovieDetails() {
                     />
                 </div>
 
-                <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
+                <div className="movie-details-actions">
                     <button 
                         onClick={handleSave}
-                        className="reg-button" 
-                        style={{ flex: 1, margin: 0, fontSize: '1.1rem' }}
+                        className="reg-button movie-details-save"
                     >
                         Mentés
                     </button>
 
                     <button 
                         onClick={handleDelete}
-                        className="delete-button"
-                        style={{ flex: 1, margin: 0 }}
+                        className="delete-button movie-details-delete"
                     >
                         Film törlése
                     </button>

@@ -1,47 +1,53 @@
 .new-movie-page {
-    min-height: 100vh;
+    height: 100dvh;
+    min-height: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     background-color: #0f0f0f;
-    padding: 40px 20px;
+    padding: 8px;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .new-movie-container {
     width: 100%;
-    max-width: 700px;
+    max-width: min(100%, 980px);
     background-color: #1a0606;
     border: 2px solid #E0AA3E;
     border-radius: 16px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
-    padding: 40px;
+    padding: 14px;
     color: #ffffff;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .new-movie-title {
     text-align: center;
     color: #E0AA3E;
-    font-size: 2rem;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
     margin-top: 0;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
     border-bottom: 1px solid #444;
-    padding-bottom: 15px;
+    padding-bottom: 8px;
 }
 
 .new-movie-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 10px;
+    flex: 1;
+    min-height: 0;
 }
-
 
 .full-width {
     grid-column: span 2;
 }
-
 
 .form-group {
     display: flex;
@@ -49,20 +55,22 @@
 }
 
 .form-group label {
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     color: #c79c0f;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
 }
 
 .form-group input,
 .form-group textarea {
+    width: 100%;
+    max-width: 100%;
     background-color: #2a2a2a;
     border: 1px solid #444;
     border-radius: 6px;
-    padding: 12px;
+    padding: 10px;
     color: #fff;
-    font-size: 1rem;
+    font-size: 0.96rem;
     font-family: inherit;
     transition: all 0.3s ease;
 }
@@ -80,18 +88,25 @@
     cursor: pointer;
 }
 
+.new-movie-container textarea {
+    min-height: 88px;
+    resize: vertical;
+}
+
 .button-group {
     grid-column: span 2;
     display: flex;
     justify-content: flex-end;
-    gap: 15px;
-    margin-top: 20px;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
     border-top: 1px solid #444;
-    padding-top: 20px;
+    padding-top: 8px;
+    flex-wrap: wrap;
 }
 
 .save-btn, .cancel-btn {
-    padding: 12px 25px;
+    padding: 10px 22px;
     border-radius: 8px;
     font-weight: bold;
     font-size: 1rem;
@@ -104,11 +119,17 @@
     justify-content: center;
 }
 
+.button-group .save-btn,
+.button-group .cancel-btn {
+    flex: 0 0 auto;
+}
+
 .save-btn {
     background-color: #28a745;
     color: white;
     border: none;
-    min-width: 120px;
+    width: auto !important;
+    min-width: 170px;
 }
 
 .save-btn:hover {
@@ -128,6 +149,8 @@
     background-color: transparent;
     color: #aaa;
     border: 1px solid #666;
+    width: auto !important;
+    min-width: 110px;
 }
 
 .cancel-btn:hover {
@@ -136,25 +159,42 @@
     border-color: #fff;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
     .new-movie-form {
         grid-template-columns: 1fr;
     }
-    
-    .full-width {
+
+    .full-width,
+    .button-group {
         grid-column: span 1;
     }
-    
+
+    .save-btn,
+    .cancel-btn {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 600px) {
     .button-group {
         flex-direction: column-reverse;
     }
-    
-    .save-btn, .cancel-btn {
+
+    .save-btn,
+    .cancel-btn {
         width: 100%;
         text-align: center;
     }
-    
+
+    .new-movie-page {
+        height: auto;
+        min-height: 100dvh;
+        overflow: visible;
+    }
+
     .new-movie-container {
-        padding: 20px;
+        padding: 14px;
+        height: auto;
     }
 }
