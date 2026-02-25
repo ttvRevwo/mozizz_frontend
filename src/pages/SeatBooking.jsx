@@ -163,7 +163,8 @@ const SeatBooking = () => {
     if (error) return <div className="booking-error">Hiba: {error}</div>;
 
     return (
-        <div className="seat-booking-container">
+        <div className="seat-booking-page">
+            <div className="seat-booking-container">
             <h2>Válaszd ki a helyedet!</h2>
             <p className="hall-info">
                 Terem: <span className="highlight-gold">{hallName || 'Ismeretlen'}</span>
@@ -215,6 +216,7 @@ const SeatBooking = () => {
                 >
                     {loading ? "Feldolgozás..." : "Jegyek Lefoglalása"}
                 </button>
+            </div>
             </div>
         </div>
     );

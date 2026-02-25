@@ -203,15 +203,11 @@ function MainPage() {
                   <div className="hero-buttons">
                     <button
                       className="btn-primary"
-                      onClick={async () => {
+                      onClick={() => {
                         if (index !== currentSlide) return;
                         const currentMovie = movies[currentSlide];
-                        const showtimeId = await getShowtimeIdForMovie(currentMovie);
-                        if (!showtimeId) {
-                          alert('Ehhez a filmhez jelenleg nincs elérhető vetítés.');
-                          return;
-                        }
-                        navigate(`/booking/${showtimeId}`);
+                        const targetId = currentMovie.movieId || currentMovie.MovieId || currentMovie.movie_id || currentMovie.id;
+                        navigate(`/movie/${targetId}`);
                       }}
                     >
                       Jegyfoglalás

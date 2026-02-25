@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../Styles/ViewMovieStyle.css';
+import ShowtimeSelector from '../Pages/ShowtimeSelector';
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
 
@@ -9,7 +10,6 @@ const ViewMovie = () => {
   const navigate = useNavigate();
   
   const [movie, setMovie] = useState(null);
-  const [showtimeId, setShowtimeId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -36,40 +36,6 @@ const ViewMovie = () => {
         setLoading(false);
       });
   }, [id]);
-
-  useEffect(() => {
-    if (!movie) return;
-
-    const movieId = movie.movieId || movie.MovieId || movie.movie_id || movie.id;
-    const movieTitle = (movie.title || movie.Title || '').toLowerCase().trim();
-
-    fetch('http://localhost:5083/api/Showtime/GetAllShowtimes')
-      .then((res) => res.json())
-      .then((data) => {
-        const list = Array.isArray(data) ? data : (data.data || []);
-
-        const byMovieId = list.find((st) => {
-          const stMovieId = st.movieId || st.MovieId || st.movie?.movieId || st.movie?.MovieId || st.movie?.id;
-          return stMovieId && movieId && String(stMovieId) === String(movieId);
-        });
-
-        if (byMovieId) {
-          setShowtimeId(byMovieId.showtimeId || byMovieId.ShowtimeId);
-          return;
-        }
-
-        const byTitle = list.find((st) => {
-          const stTitle = (st.movieTitle || st.MovieTitle || '').toLowerCase().trim();
-          return stTitle && movieTitle && stTitle === movieTitle;
-        });
-
-        setShowtimeId(byTitle ? (byTitle.showtimeId || byTitle.ShowtimeId) : null);
-      })
-      .catch((err) => {
-        console.error('Hiba a vetítések betöltésekor:', err);
-        setShowtimeId(null);
-      });
-  }, [movie]);
 
   const getImageUrl = (imgName) => {
     if (!imgName) return null;
@@ -98,14 +64,6 @@ const ViewMovie = () => {
 
   const handleBack = () => {
     navigate('/Catalog'); 
-  };
-
-  const handleBooking = () => {
-    if (!showtimeId) {
-      alert('Ehhez a filmhez jelenleg nincs elérhető vetítés.');
-      return;
-    }
-    navigate(`/booking/${showtimeId}`);
   };
 
   if (loading) return <div className="view-page"><div className="loading-text">Betöltés...</div></div>;
@@ -163,11 +121,13 @@ const ViewMovie = () => {
             {description || "Ehhez a filmhez még nincs leírás megadva."}
           </p>
 
-          <div className="action-buttons">
-            <button className="play-btn" onClick={handleBooking}>🎫 Jegyfoglalás</button>
+          <div className="action-section" style={{ marginTop: '30px' }}>
+            <h3 style={{ color: '#e0aa3e', marginBottom: '15px' }}>Válassz időpontot a foglaláshoz:</h3>
+            
+            <ShowtimeSelector movieId={id} movieTitle={title} />
           </div>
 
-          <div className="secondary-info">
+          <div className="secondary-info" style={{ marginTop: '40px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
             <p><strong>Megjelenés:</strong> {formatDate(releaseDate)}</p>
           </div>
         </div>

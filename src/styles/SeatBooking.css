@@ -1,16 +1,46 @@
+.seat-booking-page {
+    height: 100dvh;
+    overflow: hidden;
+    overflow-y: auto;
+    background-color: #0f0f0f;
+}
+
+.seat-booking-page::-webkit-scrollbar {
+    width: 10px;
+}
+
+.seat-booking-page::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.seat-booking-page::-webkit-scrollbar-thumb {
+    background: #E0AA3E;
+    border-radius: 5px;
+}
+
+.seat-booking-page::-webkit-scrollbar-thumb:hover {
+    background: #f2bd4d;
+}
+
+.seat-booking-page {
+    scrollbar-width: thin;
+    scrollbar-color: #E0AA3E #1a1a1a;
+}
+
 .seat-booking-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     background-color: #121212;
     color: #e0e0e0;
-    padding: 40px 30px;
-    border-radius: 12px;
-    max-width: 850px;
-    margin: 40px auto;
+    padding: 30px 40px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
-    border: 1px solid #2a2a2a;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
 }
 
 .seat-booking-container h2 {
