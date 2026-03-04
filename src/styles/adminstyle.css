@@ -132,11 +132,22 @@
     position: absolute;
     top: 20px;
     left: 20px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 5px;
-    color: #c79c0f;
+    gap: 6px;
     text-decoration: none;
-    font-weight: bold;
+    border: 1px solid #c79c0f;
+    background: transparent;
+    color: #c79c0f;
+    border-radius: 22px;
+    padding: 8px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
     z-index: 10;
+}
+
+.back-to-home:hover {
+    background: #c79c0f;
+    color: #1a0606;
 }

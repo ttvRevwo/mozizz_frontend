@@ -37,6 +37,10 @@ const UserProfile = () => {
 
     return (
         <div className="profile-page">
+            <button className="profile-back-btn" onClick={() => navigate('/')}>
+                ← Vissza a főoldalra
+            </button>
+
             <div className="profile-container">
                 <aside className="profile-sidebar">
                     <div className="profile-avatar">

@@ -38,27 +38,22 @@ const Catalog = () => {
 
   return (
     <div className="catalog-page">
-      
       <div className="top-bar">
-        
         <div className="nav-left">
           <button className="nav-back-btn" onClick={() => navigate('/')}>
-            ← Vissza
+            ← Vissza a főoldalra
           </button>
-          
-          
+          <h2 className="catalog-title">Filmkatalógus</h2>
         </div>
         
         <div className="search-container">
           <input 
             type="text" 
-            placeholder="Keresés..." 
+            placeholder="Film keresése..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-
-        <button className="filter-btn">Szűrés</button>
       </div>
 
       <div className="content-area">

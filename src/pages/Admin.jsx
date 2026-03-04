@@ -10,7 +10,7 @@ const UserReservationsList = ({ userId, userName }) => {
     useEffect(() => {
         if (!userId) return;
         setLoading(true);
-        authFetch(`http://localhost:5083/api/Reservation/GetUserReservations/${userId}`)
+        authFetch(`http://localhost:5083/api/Booking/GetUserReservations/${userId}`)
             .then(res => res.json())
             .then(data => {
                 setReservations(Array.isArray(data) ? data : []);
@@ -29,7 +29,7 @@ const UserReservationsList = ({ userId, userName }) => {
             ) : (
                 <div className="user-list-container">
                     {reservations.map((res) => (
-                        <div key={res.reservationId} className="user-card" style={{ borderColor: '#28a745' }}>
+                        <div key={res.reservationId} className="user-card" style={{ borderColor: '#d11922' }}>
                             <div className="user-info">
                                 <div className="user-name">{res.movieTitle}</div>
                                 <div className="user-email">
@@ -78,7 +78,7 @@ const UsersList = () => {
                             <div className="user-email">{user.email}</div>
                         </div>
                         <div className="action-buttons" style={{ display: 'flex', gap: '10px' }}>
-                            <Link to={`/user-bookings/${user.userId}`}>
+                            <Link to={`/user-bookings/${user.userId}`} state={{ userName: user.name || user.username }}>
                                 <button className="details-button">Foglalások</button>
                             </Link>
                             <Link to={`/user/${user.userId}`} className="details-link">
@@ -141,7 +141,7 @@ const MoviesList = () => {
             ) : (
                 <div className="user-list-container">
                     {movies.map((movie) => (
-                        <div key={movie.id || movie.movieId} className="user-card" style={{ borderColor: '#ffd700' }}>
+                        <div key={movie.id || movie.movieId} className="user-card" style={{ borderColor: '#ff6a00' }}>
                             <div className="user-info">
                                 <div className="user-name">{movie.title}</div>
                                 <div className="user-email">{movie.genre || 'Nincs műfaj'}</div>

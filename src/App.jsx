@@ -16,14 +16,14 @@ import ShowtimeDetails from './pages/ShowtimeDetails';
 import NewShowtime from './pages/NewShowtime';
 import SeatBooking from './pages/SeatBooking';
 import ProductDetail from './pages/ProductDetails';
-import logoImg from './imgs/logo.webp';
 import UserBookings from './pages/UserBookings';
 import { getStoredRoleId, isUserLoggedIn } from './utils/auth';
+import { CLOUDINARY_BASE, getManualLogoUrl } from './utils/cloudinary';
 
 import './App.css'
 import './styles/ResponsiveStyle.css'
 
-const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
+const LOGO_URL = getManualLogoUrl();
 
 function Navigation() {
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ function Navigation() {
     <nav className="top-nav">
       <div className="nav-left">
         <Link to="/" className="logo-link">
-             <img src={logoImg} alt="Logo" className="nav-logo"/>
+             <img src={LOGO_URL} alt="Logo" className="nav-logo"/>
         </Link>
         <input type="text" placeholder="Keresés..." className="search-bar" />
       </div>

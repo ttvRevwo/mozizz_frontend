@@ -63,7 +63,12 @@ const ViewMovie = () => {
   };
 
   const handleBack = () => {
-    navigate('/Catalog'); 
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+
+    navigate('/Catalog');
   };
 
   if (loading) return <div className="view-page"><div className="loading-text">Betöltés...</div></div>;
@@ -71,7 +76,7 @@ const ViewMovie = () => {
   if (error || !movie) {
     return (
         <div className="view-page">
-            <button className="back-btn" onClick={handleBack}>← Vissza a Katalógusba</button>
+          <button className="back-btn" onClick={handleBack}>← Vissza</button>
             <div className="error-text">{error || "A film nem található."}</div>
         </div>
     );
@@ -95,7 +100,7 @@ const ViewMovie = () => {
       ></div>
 
       <button className="back-btn" onClick={handleBack}>
-        ← Vissza a Katalógusba
+        ← Vissza
       </button>
 
       <div className="movie-content">

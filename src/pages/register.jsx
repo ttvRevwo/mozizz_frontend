@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import '../styles/RegisterStyle.css';
 import backgroundImage from '../../src/imgs/4.png';
-import logoImg from '../imgs/logo.webp';
+import { getManualLogoUrl } from '../utils/cloudinary';
+
+const LOGO_URL = getManualLogoUrl();
 
 const WaveInput = ({ type, placeholder, value, onChange, validate, required = true, maxLength }) => {
   let statusClass = '';
@@ -189,7 +191,7 @@ export default function Register() {
           <>
             <div className="register-welcome">
               <div className="register-logo">
-                <img src={logoImg} alt="Mozi Logo" className="logo-icon" />
+                <img src={LOGO_URL} alt="Mozi Logo" className="logo-icon" />
               </div>
               <div className="register-welcome-text">
                 Üdvözlünk a mozizz.hu-n! Regisztrálj a legjobb filmélményekért és exkluzív ajánlatokért.

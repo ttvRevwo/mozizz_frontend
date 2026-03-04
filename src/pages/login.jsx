@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/LoginStyle.css';
 import backgroundImage from '../../src/imgs/4.png';
-import logoImg from '../imgs/logo.webp';
 import { decodeJwtPayload, getRoleIdFromClaims } from '../utils/auth';
+import { getManualLogoUrl } from '../utils/cloudinary';
+
+const LOGO_URL = getManualLogoUrl();
 
 const getFirstValue = (obj, keys) => {
   if (!obj || typeof obj !== 'object') return null;
@@ -163,7 +165,7 @@ export default function Login() {
       
       <div className="register-welcome">
         <div className="register-logo">
-          <img src={logoImg} alt="Mozi Logo" className="logo-icon" />
+          <img src={LOGO_URL} alt="Mozi Logo" className="logo-icon" />
         </div>
         <div className="register-welcome-text">
           Üdvözlünk a mozizz.hu-n! Jelentkezz be a legjobb filmélményekért és exkluzív ajánlatokért.

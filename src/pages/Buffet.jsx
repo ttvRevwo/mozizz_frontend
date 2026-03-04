@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/BuffetStyle.css';
-import logoImg from '../imgs/logo.webp';
+import { getManualLogoUrl } from '../utils/cloudinary';
+
+const LOGO_URL = getManualLogoUrl();
 
 const Buffet = () => {
     const navigate = useNavigate();
@@ -49,7 +51,7 @@ const Buffet = () => {
                     <button className="back-arrow-btn" onClick={() => navigate('/')} title="Vissza a főoldalra">
                         &#10094;
                     </button>
-                    <img src={logoImg} alt="Mozi Logo" className="buffet-logo" />                    {/* Ha van képed: <img src="/images/logo.png" className="buffet-logo" alt="Logo" /> */}
+                    <img src={LOGO_URL} alt="Mozi Logo" className="buffet-logo" />
                 </div>
 
                 <div className="header-center">

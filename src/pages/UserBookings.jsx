@@ -1,34 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import '../styles/UserBookingsStyle.css';
 import { authFetch } from '../utils/auth';
 
 const UserBookings = () => {
     const { userId } = useParams();
+    const location = useLocation();
     const [bookings, setBookings] = useState([]);
-    const [userName, setUserName] = useState('');
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const userRes = await authFetch(`http://localhost:5083/api/User/GetUser/${userId}`);
-                if (userRes.ok) {
-                    const userData = await userRes.json();
-                    setUserName(userData.name || userData.username);
-                }
+    const userName = location.state?.userName || `Felhasználó #${userId}`;
 
-                const res = await authFetch(`http://localhost:5083/api/Reservation/GetUserReservations/${userId}`);
-                const data = await res.json();
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                const res = await authFetch(`http://localhost:5083/api/Booking/GetUserReservations/${userId}`);
+                if (!res.ok) {
+                    setBookings([]);
+                    return;
+                }
+                const text = await res.text();
+                if (!text) { setBookings([]); return; }
+                const data = JSON.parse(text);
                 setBookings(Array.isArray(data) ? data : []);
             } catch (err) {
-                console.error("Hiba az adatok betöltésekor:", err);
+                console.error("Hiba a foglalások betöltésekor:", err);
+                setBookings([]);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchUserData();
+        fetchBookings();
     }, [userId]);
 
     if (loading) return <div className="loading-container"><div className="loader"></div></div>;

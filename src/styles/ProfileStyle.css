@@ -12,6 +12,26 @@
     box-sizing: border-box;
 }
 
+.profile-page .profile-back-btn {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 30;
+    border: 1px solid #c79c0f;
+    background: rgba(26, 6, 6, 0.9);
+    color: #c79c0f;
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.profile-page .profile-back-btn:hover {
+    background: #c79c0f;
+    color: #1a0606;
+}
+
 .profile-page .profile-container {
     width: min(100%, 1100px);
     height: 100%;
@@ -221,5 +241,12 @@
 
     .profile-page .res-movie-title {
         font-size: 1.1rem;
+    }
+
+    .profile-page .profile-back-btn {
+        top: 10px;
+        left: 10px;
+        padding: 7px 12px;
+        font-size: 0.85rem;
     }
 }
