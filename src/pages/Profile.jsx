@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/ProfileStyle.css'; 
+import '../styles/ProfileStyle.css';
+import { authFetch } from '../utils/auth';
 
 const UserProfile = () => {
     const navigate = useNavigate();
@@ -9,12 +10,12 @@ const UserProfile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const currentUserId = 1; 
+    const currentUserId = localStorage.getItem('userId');
 
     useEffect(() => {
         const fetchReservations = async () => {
             try {
-                const response = await fetch(`http://localhost:5083/api/Booking/GetUserReservations/${currentUserId}`);
+                const response = await authFetch(`http://localhost:5083/api/Booking/GetUserReservations/${currentUserId}`);
                 if (!response.ok) throw new Error("Nem sikerült betölteni a foglalásokat.");
                 
                 const data = await response.json();

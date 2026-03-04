@@ -61,7 +61,7 @@ const UserBookings = () => {
                                 <h3>{b.movieTitle}</h3>
                                 <div className="info-row">
                                     <span className="label">Időpont:</span>
-                                    <span className="value">{b.date} | {b.time}</span>
+                                    <span className="value">{String(b.date).split('T')[0]} | {b.time}</span>
                                 </div>
                                 <div className="info-row">
                                     <span className="label">Székek:</span>

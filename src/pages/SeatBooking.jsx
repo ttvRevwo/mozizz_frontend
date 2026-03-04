@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/SeatBooking.css';
+import PaymentModal from './PaymentModal';
 
 const SeatBooking = () => {
     const { showtimeId } = useParams(); 
@@ -14,15 +15,14 @@ const SeatBooking = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [bookingMessage, setBookingMessage] = useState(null);
+    const [showPayment, setShowPayment] = useState(false); 
 
     const currentUserId = localStorage.getItem('userId'); 
 
     const deriveSeatPrefix = (name, capacity) => {
         const normalizedName = (name || '').toLowerCase();
-
         if (normalizedName.includes('kis') || normalizedName.includes('small')) return 'B';
         if (normalizedName.includes('fő') || normalizedName.includes('fo') || normalizedName.includes('nagy') || normalizedName.includes('main')) return 'A';
-
         if (capacity && Number(capacity) <= 50) return 'B';
         return 'A';
     };
@@ -49,21 +49,12 @@ const SeatBooking = () => {
                     ? [...seatsData].sort((seatA, seatB) => {
                         const seatNumberA = String(seatA?.seatNumber || '').trim();
                         const seatNumberB = String(seatB?.seatNumber || '').trim();
-
                         const lettersA = (seatNumberA.match(/[A-Za-z]+/g) || []).join('').toUpperCase();
                         const lettersB = (seatNumberB.match(/[A-Za-z]+/g) || []).join('').toUpperCase();
-
-                        if (lettersA !== lettersB) {
-                            return lettersA.localeCompare(lettersB);
-                        }
-
+                        if (lettersA !== lettersB) return lettersA.localeCompare(lettersB);
                         const numberPartA = parseInt((seatNumberA.match(/\d+/) || ['0'])[0], 10);
                         const numberPartB = parseInt((seatNumberB.match(/\d+/) || ['0'])[0], 10);
-
-                        if (numberPartA !== numberPartB) {
-                            return numberPartA - numberPartB;
-                        }
-
+                        if (numberPartA !== numberPartB) return numberPartA - numberPartB;
                         return seatNumberA.localeCompare(seatNumberB, undefined, { sensitivity: 'base' });
                     })
                     : [];
@@ -74,7 +65,6 @@ const SeatBooking = () => {
                     const showtime = showtimeData?.data || showtimeData;
                     const resolvedHallName = showtime?.hallName || showtime?.HallName || '';
                     const resolvedHallId = showtime?.hallId || showtime?.HallId;
-
                     setHallName(resolvedHallName);
 
                     if (resolvedHallId) {
@@ -105,7 +95,6 @@ const SeatBooking = () => {
 
     const toggleSeatSelection = (seat) => {
         if (seat.isReserved) return;
-
         setSelectedSeats(prevSelected => {
             if (prevSelected.includes(seat.seatId)) {
                 return prevSelected.filter(id => id !== seat.seatId);
@@ -118,12 +107,15 @@ const SeatBooking = () => {
         });
     };
 
-    const handleBookingSubmit = async () => {
+    const handleBookingSubmit = () => {
         if (selectedSeats.length === 0) {
             alert("Kérjük, válassz ki legalább egy széket!");
             return;
         }
+        setShowPayment(true);
+    };
 
+    const handlePaymentConfirm = async () => {
         const payload = {
             userId: currentUserId,
             showtimeId: parseInt(showtimeId),
@@ -144,16 +136,18 @@ const SeatBooking = () => {
                 throw new Error(result || "Hiba történt a foglalás során.");
             }
 
+            setShowPayment(false);
             setBookingMessage("Sikeres foglalás! Készítjük a jegyeidet...");
             setSelectedSeats([]);
-            
+
             setTimeout(() => {
                 navigate('/Profile');
             }, 2000);
 
         } catch (err) {
+            setShowPayment(false);
             alert(err.message);
-            window.location.reload(); 
+            window.location.reload();
         } finally {
             setLoading(false);
         }
@@ -165,59 +159,67 @@ const SeatBooking = () => {
     return (
         <div className="seat-booking-page">
             <div className="seat-booking-container">
-            <h2>Válaszd ki a helyedet!</h2>
-            <p className="hall-info">
-                Terem: <span className="highlight-gold">{hallName || 'Ismeretlen'}</span>
-                {hallCapacity ? ` | Férőhely: ${hallCapacity}` : ''}
-            </p>
-            
-            {bookingMessage && <div className="success-msg">{bookingMessage}</div>}
+                <h2>Válaszd ki a helyedet!</h2>
+                <p className="hall-info">
+                    Terem: <span className="highlight-gold">{hallName || 'Ismeretlen'}</span>
+                    {hallCapacity ? ` | Férőhely: ${hallCapacity}` : ''}
+                </p>
 
-            <div className="screen">VÁSZON</div>
+                {bookingMessage && <div className="success-msg">{bookingMessage}</div>}
 
-            <div className="seat-grid">
-                {seats.map((seat, index) => {
-                    const isSelected = selectedSeats.includes(seat.seatId);
-                    const displayLabel = getSeatDisplayLabel(seat, index);
-                    
-                    let seatClass = "seat";
-                    if (seat.isReserved) seatClass += " reserved";
-                    else if (isSelected) seatClass += " selected";
-                    else seatClass += " available";
+                <div className="screen">VÁSZON</div>
 
-                    if (seat.isVip) seatClass += " vip";
+                <div className="seat-grid">
+                    {seats.map((seat, index) => {
+                        const isSelected = selectedSeats.includes(seat.seatId);
+                        const displayLabel = getSeatDisplayLabel(seat, index);
 
-                    return (
-                        <div 
-                            key={seat.seatId} 
-                            className={seatClass}
-                            onClick={() => toggleSeatSelection(seat)}
-                            title={`Szék: ${displayLabel} ${seat.isVip ? '(VIP)' : ''}`}
-                        >
-                            {displayLabel}
-                        </div>
-                    );
-                })}
+                        let seatClass = "seat";
+                        if (seat.isReserved) seatClass += " reserved";
+                        else if (isSelected) seatClass += " selected";
+                        else seatClass += " available";
+                        if (seat.isVip) seatClass += " vip";
+
+                        return (
+                            <div
+                                key={seat.seatId}
+                                className={seatClass}
+                                onClick={() => toggleSeatSelection(seat)}
+                                title={`Szék: ${displayLabel} ${seat.isVip ? '(VIP)' : ''}`}
+                            >
+                                {displayLabel}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div className="booking-legend">
+                    <div className="legend-item"><div className="seat available"></div> Szabad</div>
+                    <div className="legend-item"><div className="seat selected"></div> Kiválasztott</div>
+                    <div className="legend-item"><div className="seat reserved"></div> Foglalt</div>
+                    <div className="legend-item"><div className="seat available vip"></div> VIP</div>
+                </div>
+
+                <div className="booking-footer">
+                    <p>Kiválasztott jegyek száma: <strong className="highlight-gold">{selectedSeats.length} db</strong></p>
+                    <button
+                        className="submit-btn"
+                        onClick={handleBookingSubmit}
+                        disabled={selectedSeats.length === 0 || loading}
+                    >
+                        {loading ? "Feldolgozás..." : "Tovább a fizetéshez"}
+                    </button>
+                </div>
             </div>
 
-            <div className="booking-legend">
-                <div className="legend-item"><div className="seat available"></div> Szabad</div>
-                <div className="legend-item"><div className="seat selected"></div> Kiválasztott</div>
-                <div className="legend-item"><div className="seat reserved"></div> Foglalt</div>
-                <div className="legend-item"><div className="seat available vip"></div> VIP</div>
-            </div>
-
-            <div className="booking-footer">
-                <p>Kiválasztott jegyek száma: <strong className="highlight-gold">{selectedSeats.length} db</strong></p>
-                <button 
-                    className="submit-btn" 
-                    onClick={handleBookingSubmit}
-                    disabled={selectedSeats.length === 0 || loading}
-                >
-                    {loading ? "Feldolgozás..." : "Jegyek Lefoglalása"}
-                </button>
-            </div>
-            </div>
+            {showPayment && (
+                <PaymentModal
+                    selectedSeats={selectedSeats}
+                    seats={seats}
+                    onClose={() => setShowPayment(false)}
+                    onConfirm={handlePaymentConfirm}
+                />
+            )}
         </div>
     );
 };

@@ -6,7 +6,6 @@
     font-family: 'Poppins', sans-serif;
 }
 
-/*  Header  */
 .bookings-header {
     margin-bottom: 40px;
     border-bottom: 1px solid rgba(199, 156, 15, 0.3);
@@ -15,7 +14,7 @@
 
 .bookings-header h1 {
     font-size: 2rem;
-    margin-top: 18px;
+    margin-top: 32px;
     color: #fff;
     font-weight: 700;
 }
@@ -24,7 +23,6 @@
     color: #c79c0f;
 }
 
-/*  Back button  */
 .back-btn {
     display: inline-flex;
     align-items: center;
@@ -46,7 +44,6 @@
     color: #1a0606;
 }
 
-/*  Empty state  */
 .no-bookings {
     text-align: center;
     padding: 100px 0;
@@ -55,14 +52,12 @@
     font-size: 1.1rem;
 }
 
-/*  Grid  */
 .bookings-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 25px;
 }
 
-/*  Card  */
 .booking-card {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(199, 156, 15, 0.2);
@@ -88,7 +83,6 @@
     background: linear-gradient(to bottom, #c79c0f, rgba(199, 156, 15, 0.2));
 }
 
-/*  Card content  */
 .booking-details h3 {
     margin: 0 0 18px 0;
     color: #c79c0f;
@@ -122,7 +116,6 @@
     font-size: 1rem;
 }
 
-/*  Status badge  */
 .status-badge {
     padding: 3px 10px;
     border-radius: 20px;
@@ -145,7 +138,6 @@
     background: rgba(229, 115, 115, 0.12);
 }
 
-/*  Booking ID footer  */
 .booking-id {
     margin-top: 16px;
     font-size: 0.72rem;
@@ -154,7 +146,6 @@
     font-family: monospace;
 }
 
-/*  Loading  */
 .loading-container {
     display: flex;
     justify-content: center;
