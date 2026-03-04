@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import '../styles/ShowtimeDetailsStyle.css';
+import { authFetch } from '../utils/auth';
 
 const ShowtimeDetails = () => {
     const { id } = useParams();
@@ -27,9 +28,9 @@ const ShowtimeDetails = () => {
         const fetchData = async () => {
             try {
                 const [resShow, resMovies, resHalls] = await Promise.all([
-                    fetch(`http://localhost:5083/api/Showtime/GetById/${id}`),
-                    fetch('http://localhost:5083/api/Movie/GetMovies'),
-                    fetch('http://localhost:5083/api/Hall/GetAllHall')
+                    authFetch(`http://localhost:5083/api/Showtime/GetById/${id}`),
+                    authFetch('http://localhost:5083/api/Movie/GetMovies'),
+                    authFetch('http://localhost:5083/api/Hall/GetAllHall')
                 ]);
 
                 if (!resShow.ok) throw new Error("A vetítés nem található (vagy adatbázis hiba).");
@@ -138,21 +139,32 @@ const ShowtimeDetails = () => {
         console.log("Mentés payload:", payload);
 
         try {
-            const res = await fetch(`http://localhost:5083/api/Showtime/ModifyShowtime`, {
+            const res = await authFetch(`http://localhost:5083/api/Showtime/ModifyShowtime`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
             if (!res.ok) {
-                const errorData = await res.json().catch(() => null);
+                const responseText = await res.text();
+                if (res.status === 401) {
+                    throw new Error("Nincs jogosultság a módosításhoz. Jelentkezz be újra admin fiókkal.");
+                }
+
+                let errorData = null;
+                try {
+                    errorData = responseText ? JSON.parse(responseText) : null;
+                } catch {
+                    errorData = null;
+                }
+
                 if (errorData && errorData.errors) {
                     const messages = Object.values(errorData.errors).flat().join(", ");
                     throw new Error(messages || "Validációs hiba történt.");
                 }
-                const txt = await res.text();
-                if (txt.includes("<!DOCTYPE html>")) throw new Error("Szerver hiba (500).");
-                throw new Error(txt || "Sikertelen mentés.");
+
+                if (responseText.includes("<!DOCTYPE html>")) throw new Error("Szerver hiba (500).");
+                throw new Error(responseText || "Sikertelen mentés.");
             }
 
             alert("Vetítés sikeresen módosítva!");
@@ -169,13 +181,15 @@ const ShowtimeDetails = () => {
     const handleDelete = async () => {
         if(window.confirm("Biztosan törölni szeretnéd ezt a vetítést?")) {
              try {
-                const res = await fetch(`http://localhost:5083/api/Showtime/DeleteShowtime/${id}`, {
+                const res = await authFetch(`http://localhost:5083/api/Showtime/DeleteShowtime/${id}`, {
                     method: 'DELETE'
                 });
                 
                 if(res.ok) {
                     alert("Törölve.");
                     navigate('/admin');
+                } else if (res.status === 401) {
+                    alert("Nincs jogosultság a törléshez. Jelentkezz be újra admin fiókkal.");
                 } else {
                     alert("Hiba a törlésnél.");
                 }

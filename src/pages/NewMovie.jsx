@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/newmoviestyle.css';
+import { authFetch } from '../utils/auth';
 
 const NewMovie = () => {
     const navigate = useNavigate();
@@ -56,7 +57,7 @@ const NewMovie = () => {
             data.append('imageFile', selectedFile);
         }
 
-        fetch('http://localhost:5083/api/Movie/NewMovie', { 
+        authFetch('http://localhost:5083/api/Movie/NewMovie', { 
             method: 'POST',
             body: data
         })
@@ -64,6 +65,8 @@ const NewMovie = () => {
             if (response.ok) {
                 alert('Film sikeresen létrehozva!');
                 navigate('/admin');
+            } else if (response.status === 401) {
+                throw new Error('Nincs jogosultság a létrehozáshoz. Jelentkezz be újra admin fiókkal.');
             } else {
                 return response.text().then(text => { throw new Error(text) });
             }

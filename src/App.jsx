@@ -17,6 +17,8 @@ import NewShowtime from './pages/NewShowtime';
 import SeatBooking from './pages/SeatBooking';
 import ProductDetail from './pages/ProductDetails';
 import logoImg from './imgs/logo.webp';
+import UserBookings from './pages/UserBookings';
+import { getStoredRoleId, isUserLoggedIn } from './utils/auth';
 
 import './App.css'
 import './styles/ResponsiveStyle.css'
@@ -29,11 +31,10 @@ function Navigation() {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const userId = localStorage.getItem('userId');
-  const roleIdFromStorage = localStorage.getItem('roleId');
   const userName = localStorage.getItem('userName');
   
-  const isLoggedIn = !!userId;
-  const isAdmin = parseInt(roleIdFromStorage) === 1;
+  const isLoggedIn = isUserLoggedIn() || !!userId;
+  const isAdmin = getStoredRoleId() === 1;
 
   if (location.pathname !== '/') {
     return null;
@@ -247,9 +248,9 @@ const SimpleLayout = ({ children }) => (
 );
 
 const AdminRoute = ({ children }) => {
-  const roleId = localStorage.getItem('roleId');
+  const roleId = getStoredRoleId();
   
-  if (parseInt(roleId) !== 1) {
+  if (roleId !== 1) {
     return <Navigate to="/" replace />;
   }
 
@@ -286,6 +287,12 @@ function App() {
           <Route path="/user/:userId" element={
             <AdminRoute>
               <SimpleLayout><UserDetails /></SimpleLayout>
+            </AdminRoute>
+          } />
+
+          <Route path="/user-bookings/:userId" element={
+            <AdminRoute>
+              <SimpleLayout><UserBookings /></SimpleLayout>
             </AdminRoute>
           } />
 

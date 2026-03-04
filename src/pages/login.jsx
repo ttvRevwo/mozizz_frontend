@@ -3,6 +3,35 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/LoginStyle.css';
 import backgroundImage from '../../src/imgs/4.png';
 import logoImg from '../imgs/logo.webp';
+import { decodeJwtPayload, getRoleIdFromClaims } from '../utils/auth';
+
+const getFirstValue = (obj, keys) => {
+  if (!obj || typeof obj !== 'object') return null;
+
+  for (const key of keys) {
+    const value = obj[key];
+    if (value !== undefined && value !== null && value !== '') {
+      return value;
+    }
+  }
+
+  return null;
+};
+
+const normalizeRoleId = (value) => {
+  if (value === null || value === undefined) return null;
+
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isNaN(parsed)) return parsed;
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'admin') return 1;
+    if (normalized === 'user') return 2;
+  }
+
+  return null;
+};
 
 const WaveInput = ({ type, placeholder, value, onChange, required = true }) => {
   return (
@@ -52,13 +81,46 @@ export default function Login() {
 
         if (response.ok) {
             const data = await response.json();
+            const content = data?.data ?? data;
+
+            const token = getFirstValue(content, ['token', 'jwtToken', 'accessToken', 'access_token']);
+            if (token) {
+              localStorage.setItem('token', token);
+            }
+
+            const claims = token ? decodeJwtPayload(token) : null;
+
+            const resolvedUserId = getFirstValue(content, ['userId', 'id'])
+              ?? getFirstValue(claims, ['nameid', 'sub', 'userId', 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']);
+
+            const resolvedName = getFirstValue(content, ['name', 'userName', 'username'])
+              ?? getFirstValue(claims, ['name', 'unique_name', 'given_name']);
+
+            const resolvedEmail = getFirstValue(content, ['email'])
+              ?? getFirstValue(claims, ['email']);
+
+            const resolvedRoleId = getFirstValue(content, ['roleId', 'role'])
+              ?? getRoleIdFromClaims(claims);
+
+            const normalizedRoleId = normalizeRoleId(resolvedRoleId);
             
-            setMessage(`Sikeres bejelentkezés! Üdv, ${data.name}!`);
+            setMessage(`Sikeres bejelentkezés! Üdv, ${resolvedName || 'felhasználó'}!`);
             
-            localStorage.setItem('userId', data.userId);
-            localStorage.setItem('userName', data.name);
-            localStorage.setItem('userEmail', data.email);
-            localStorage.setItem('roleId', data.roleId);
+            if (resolvedUserId !== null && resolvedUserId !== undefined) {
+              localStorage.setItem('userId', String(resolvedUserId));
+            }
+
+            if (resolvedName) {
+              localStorage.setItem('userName', String(resolvedName));
+            }
+
+            if (resolvedEmail) {
+              localStorage.setItem('userEmail', String(resolvedEmail));
+            }
+
+            if (!Number.isNaN(normalizedRoleId) && normalizedRoleId !== null && normalizedRoleId !== undefined) {
+              localStorage.setItem('roleId', String(normalizedRoleId));
+            }
 
             setTimeout(() => {
                 navigate('/'); 

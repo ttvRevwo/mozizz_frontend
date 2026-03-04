@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import '../styles/MovieDetailsStyle.css';
+import { authFetch, getTokenFromStorage } from '../utils/auth';
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
 
@@ -29,7 +30,7 @@ function MovieDetails() {
     useEffect(() => {
         const url = `http://localhost:5083/api/Movie/MovieById/${id}`;
         
-        fetch(url)
+        authFetch(url)
             .then(res => {
                 if (!res.ok) throw new Error(`Szerver hiba: ${res.status}`);
                 return res.json();
@@ -81,6 +82,9 @@ function MovieDetails() {
     };
 
     const handleSave = () => {
+        const token = getTokenFromStorage();
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
         const formData = new FormData();
 
         formData.append('MovieId', movieData.movie_id);
@@ -107,7 +111,7 @@ function MovieDetails() {
 
         fetch('http://localhost:5083/api/Movie/ModifyMovie', {
             method: 'PUT',
-
+            headers,
             body: formData
         })
         .then(async response => {
@@ -122,6 +126,8 @@ function MovieDetails() {
                 }
 
                 setTimeout(() => setMessage(null), 3000);
+            } else if (response.status === 401) {
+                setMessage({ type: 'error', text: 'Nincs jogosultság a mentéshez. Jelentkezz be újra admin fiókkal.' });
             } else {
                 const errorText = await response.text();
                 console.error("Backend hiba:", errorText);
@@ -136,13 +142,19 @@ function MovieDetails() {
 
     const handleDelete = () => {
         if (window.confirm("Biztosan törölni szeretnéd ezt a filmet?")) {
+            const token = getTokenFromStorage();
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
             fetch(`http://localhost:5083/api/Movie/DeleteMovie/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers
             })
             .then(response => {
                 if (response.ok) {
                     alert("Film sikeresen törölve!");
                     navigate('/admin');
+                } else if (response.status === 401) {
+                    alert("Nincs jogosultság a törléshez. Jelentkezz be újra admin fiókkal.");
                 } else {
                     alert("Hiba történt a törlés során.");
                 }

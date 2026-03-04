@@ -15,7 +15,7 @@ const SeatBooking = () => {
     const [error, setError] = useState(null);
     const [bookingMessage, setBookingMessage] = useState(null);
 
-    const currentUserId = 1; 
+    const currentUserId = localStorage.getItem('userId'); 
 
     const deriveSeatPrefix = (name, capacity) => {
         const normalizedName = (name || '').toLowerCase();

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/NewShowtimeStyle.css';
+import { authFetch } from '../utils/auth';
 
 const NewShowtime = () => {
     const navigate = useNavigate();
@@ -23,8 +24,8 @@ const NewShowtime = () => {
         const fetchOptions = async () => {
             try {
                 const [resMovies, resHalls] = await Promise.all([
-                    fetch('http://localhost:5083/api/Movie/GetMovies'),
-                    fetch('http://localhost:5083/api/Hall/GetAllHall')
+                    authFetch('http://localhost:5083/api/Movie/GetMovies'),
+                    authFetch('http://localhost:5083/api/Hall/GetAllHall')
                 ]);
 
                 const moviesData = await resMovies.json();
@@ -99,13 +100,16 @@ const NewShowtime = () => {
         console.log("Küldött adat:", payload);
 
         try {
-            const res = await fetch('http://localhost:5083/api/Showtime/NewShowtime', {
+            const res = await authFetch('http://localhost:5083/api/Showtime/NewShowtime', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
             if (!res.ok) {
+                if (res.status === 401) {
+                    throw new Error("Nincs jogosultság a létrehozáshoz. Jelentkezz be újra admin fiókkal.");
+                }
                 const responseText = await res.text();
                 try {
                     const errorData = JSON.parse(responseText);

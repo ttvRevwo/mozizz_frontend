@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import '../styles/UserDetailsStyle.css';
+import { authFetch } from '../utils/auth';
 
 function UserDetails() {
     const { userId } = useParams();
@@ -19,7 +20,7 @@ function UserDetails() {
     useEffect(() => {
         const url = `http://localhost:5083/api/User/UserById/${userId}`;
         
-        fetch(url)
+        authFetch(url)
             .then(res => {
                 if (!res.ok) throw new Error(`Szerver hiba: ${res.status}`);
                 return res.json();
@@ -71,7 +72,7 @@ function UserDetails() {
             }
         };
 
-        fetch('http://localhost:5083/api/User/ModifyUser', {
+        authFetch('http://localhost:5083/api/User/ModifyUser', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -82,6 +83,8 @@ function UserDetails() {
             if (response.ok) {
                 setMessage({ type: 'success', text: 'Adatok sikeresen frissítve!' });
                 setTimeout(() => setMessage(null), 3000);
+            } else if (response.status === 401) {
+                setMessage({ type: 'error', text: 'Nincs jogosultság a mentéshez. Jelentkezz be újra admin fiókkal.' });
             } else {
                 const errorData = await response.json();
                 console.error("Server error:", errorData);
@@ -100,7 +103,7 @@ function UserDetails() {
 
     const handleDelete = () => {
         if (window.confirm("Biztosan törölni szeretnéd ezt a felhasználót?")) {
-            fetch(`http://localhost:5083/api/User/DeleteUser/${userId}`, {
+            authFetch(`http://localhost:5083/api/User/DeleteUser/${userId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
@@ -110,6 +113,8 @@ function UserDetails() {
                 if (response.ok) {
                     alert("Felhasználó sikeresen törölve!");
                     navigate('/admin');
+                } else if (response.status === 401) {
+                    alert("Nincs jogosultság a törléshez. Jelentkezz be újra admin fiókkal.");
                 } else {
                     alert("Hiba történt a törlés során.");
                 }
