@@ -4,80 +4,77 @@ import '../styles/ProfileStyle.css';
 import { authFetch } from '../utils/auth';
 
 const TicketCard = ({ ticket }) => {
-    const [flipped, setFlipped] = useState(false);
-
+    const [showQr, setShowQr] = useState(false);
     const isUsed = ticket.isUsed || ticket.status === 'used';
 
     return (
-        <div
-            className={`ticket-flip-wrapper ${flipped ? 'flipped' : ''}`}
-            onClick={() => setFlipped(f => !f)}
-        >
-            <div className="ticket-inner">
+        <div className={`ticket-card ${isUsed ? 'ticket-used' : ''}`}>
+            {isUsed && <div className="ticket-used-stamp">FELHASZNÁLVA</div>}
 
-                <div className="ticket-face ticket-front">
-                    {isUsed && <div className="ticket-used-stamp">FELHASZNÁLVA</div>}
-                    <div className="ticket-punch ticket-punch-left"></div>
-                    <div className="ticket-punch ticket-punch-right"></div>
-                    <div className="ticket-perforated-line"></div>
+            <div className="ticket-punch ticket-punch-left"></div>
+            <div className="ticket-punch ticket-punch-right"></div>
 
-                    <div className="ticket-stub">
-                        <span className="ticket-stub-icon">🎬</span>
-                        <span className="ticket-stub-code">{ticket.ticketCode?.slice(-4) ?? '----'}</span>
+            <div className="ticket-stub">
+                <span className="ticket-stub-icon">🎬</span>
+                <span className="ticket-stub-code">{ticket.ticketCode?.slice(-4) ?? '----'}</span>
+            </div>
+
+            <div className="ticket-perforated-line"></div>
+
+            <div className="ticket-main">
+                <div className="ticket-top-row">
+                    <span className="ticket-cinema-name">MOZIZZ</span>
+                    <span className={`ticket-status-badge ${isUsed ? 'used' : 'valid'}`}>
+                        {isUsed ? 'Lejárt' : 'Érvényes'}
+                    </span>
+                </div>
+
+                <h3 className="ticket-movie-title">{ticket.movieTitle || 'Ismeretlen film'}</h3>
+
+                <div className="ticket-meta-grid">
+                    <div className="ticket-meta-item">
+                        <span className="meta-label">Kiállítva</span>
+                        <span className="meta-value">
+                            {ticket.issuedDate
+                                ? new Date(ticket.issuedDate).toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' })
+                                : '—'}
+                        </span>
                     </div>
-
-                    <div className="ticket-main">
-                        <div className="ticket-top-row">
-                            <span className="ticket-cinema-name">MOZIZZ</span>
-                            <span className={`ticket-status-badge ${isUsed ? 'used' : 'valid'}`}>
-                                {isUsed ? 'Lejárt' : 'Érvényes'}
-                            </span>
-                        </div>
-                        <h3 className="ticket-movie-title">{ticket.movieTitle || 'Ismeretlen film'}</h3>
-                        <div className="ticket-meta-grid">
-                            <div className="ticket-meta-item">
-                                <span className="meta-label">Kiállítva</span>
-                                <span className="meta-value">
-                                    {ticket.issuedDate
-                                        ? new Date(ticket.issuedDate).toLocaleDateString('hu-HU', {
-                                            year: 'numeric', month: 'short', day: 'numeric'
-                                          })
-                                        : '—'}
-                                </span>
-                            </div>
-                            <div className="ticket-meta-item">
-                                <span className="meta-label">Kód</span>
-                                <span className="meta-value mono">{ticket.ticketCode?.slice(0, 8) ?? '—'}…</span>
-                            </div>
-                        </div>
-                        <p className="ticket-flip-hint">Kattints a QR kódért →</p>
+                    <div className="ticket-meta-item">
+                        <span className="meta-label">Vetítés</span>
+                        <span className="meta-value">
+                            {ticket.showDate
+                                ? new Date(ticket.showDate).toLocaleDateString('hu-HU', { month: 'short', day: 'numeric' })
+                                : '—'}
+                            {ticket.showTime ? ` ${ticket.showTime.slice(0, 5)}` : ''}
+                        </span>
                     </div>
                 </div>
 
-                <div className="ticket-face ticket-back">
-                    <div className="ticket-punch ticket-punch-left"></div>
-                    <div className="ticket-punch ticket-punch-right"></div>
-                    <div className="ticket-perforated-line"></div>
-
-                    <div className="ticket-stub ticket-stub-back">
-                        <span className="ticket-stub-icon">🎬</span>
-                        <span className="ticket-stub-code">{ticket.ticketCode?.slice(-4) ?? '----'}</span>
+                {ticket.seats?.length > 0 && (
+                    <div className="ticket-seats">
+                        {ticket.seats.map(s => (
+                            <span key={s} className="ticket-seat-badge">{s}</span>
+                        ))}
                     </div>
+                )}
 
-                    <div className="ticket-main ticket-main-back">
-                        <p className="ticket-qr-label">Szkenneld be a bejáratnál</p>
+                <button className="ticket-qr-toggle" onClick={() => setShowQr(v => !v)}>
+                    {showQr ? '▲ QR elrejtése' : '▼ QR kód megjelenítése'}
+                </button>
+
+                {showQr && (
+                    <div className="ticket-qr-section">
                         <div className="ticket-qr-wrapper">
                             <img
-                                src={`https://quickchart.io/qr?text=${encodeURIComponent(ticket.ticketCode)}&size=110`}
+                                src={`https://quickchart.io/qr?text=${encodeURIComponent(ticket.ticketCode)}&size=140`}
                                 alt="QR kód"
                                 className="ticket-qr-img"
                             />
                         </div>
                         <p className="ticket-code-full mono">{ticket.ticketCode}</p>
-                        <p className="ticket-flip-hint">← Vissza</p>
                     </div>
-                </div>
-
+                )}
             </div>
         </div>
     );
@@ -94,12 +91,36 @@ const UserProfile = () => {
     useEffect(() => {
         const fetchTickets = async () => {
             try {
-                const response = await authFetch(
+                const reservationsRes = await authFetch(
+                    `http://localhost:5083/api/Booking/GetUserReservations/${currentUserId}`
+                );
+                if (!reservationsRes.ok) throw new Error("Nem sikerült betölteni a jegyeket.");
+                const resData = await reservationsRes.json();
+                const reservations = Array.isArray(resData) ? resData : [];
+
+                const ticketsRes = await authFetch(
                     `http://localhost:5083/api/Ticket/MyTickets/${currentUserId}`
                 );
-                if (!response.ok) throw new Error("Nem sikerült betölteni a jegyeket.");
-                const data = await response.json();
-                setTickets(Array.isArray(data) ? data : []);
+                const ticketsData = ticketsRes.ok ? await ticketsRes.json() : [];
+                const tickets = Array.isArray(ticketsData) ? ticketsData : [];
+
+                const sortedRes = [...reservations].sort((a, b) => a.reservationId - b.reservationId);
+                const sortedTickets = [...tickets].sort((a, b) =>
+                    new Date(a.issuedDate) - new Date(b.issuedDate)
+                );
+
+                const merged = sortedRes.map((res, i) => ({
+                    ticketCode: sortedTickets[i]?.ticketCode ?? `RES-${res.reservationId}`,
+                    issuedDate: sortedTickets[i]?.issuedDate ?? null,
+                    status: sortedTickets[i]?.status ?? res.status,
+                    movieTitle: res.movieTitle,
+                    seats: res.seats ?? [],
+                    showDate: res.date,
+                    showTime: res.time,
+                    reservationId: res.reservationId,
+                }));
+
+                setTickets(merged);
             } catch (err) {
                 setError(err.message);
             } finally {
