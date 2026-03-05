@@ -250,3 +250,308 @@
         font-size: 0.85rem;
     }
 }
+
+.profile-page .profile-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.profile-page .stat-item {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.profile-page .stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #E0AA3E;
+    line-height: 1;
+}
+.profile-page .stat-label {
+    font-size: 0.7rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.profile-page .profile-loader-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 60px 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+.profile-page .profile-loader {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(224, 170, 62, 0.2);
+    border-top-color: #E0AA3E;
+    border-radius: 50%;
+    animation: profile-spin 0.9s linear infinite;
+}
+@keyframes profile-spin { to { transform: rotate(360deg); } }
+
+.profile-page .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+.profile-page .empty-reservations {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    color: #555;
+}
+
+.profile-page .tickets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+    padding-bottom: 20px;
+}
+
+.profile-page .ticket-flip-wrapper {
+    perspective: 1000px;
+    height: 180px;
+    cursor: pointer;
+}
+.profile-page .ticket-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+.profile-page .ticket-flip-wrapper.flipped .ticket-inner {
+    transform: rotateY(180deg);
+}
+
+.profile-page .ticket-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    background: linear-gradient(135deg, #1c1a12 0%, #201d10 60%, #1a1808 100%);
+    border: 1px solid rgba(224, 170, 62, 0.3);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(224,170,62,0.08);
+}
+.profile-page .ticket-back {
+    transform: rotateY(180deg);
+}
+
+.profile-page .ticket-punch {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #0f0f0f;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    box-shadow: inset 0 0 0 1px rgba(224,170,62,0.15);
+}
+.profile-page .ticket-punch-left  { left: -9px; }
+.profile-page .ticket-punch-right { right: -9px; }
+
+.profile-page .ticket-perforated-line {
+    position: absolute;
+    left: 90px;
+    top: 10px;
+    bottom: 10px;
+    width: 1px;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(224,170,62,0.4) 0px,
+        rgba(224,170,62,0.4) 5px,
+        transparent 5px,
+        transparent 10px
+    );
+    z-index: 1;
+}
+
+.profile-page .ticket-stub {
+    width: 90px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 6px;
+    background: rgba(224,170,62,0.05);
+}
+.profile-page .ticket-stub-icon { font-size: 1.4rem; }
+.profile-page .ticket-stub-code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: #E0AA3E;
+    font-weight: 700;
+    letter-spacing: 2px;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+.profile-page .ticket-stub-back { background: rgba(224,170,62,0.03); }
+
+.profile-page .ticket-main {
+    flex: 1;
+    padding: 14px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    position: relative;
+}
+
+.profile-page .ticket-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.profile-page .ticket-cinema-name {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: rgba(224,170,62,0.5);
+    text-transform: uppercase;
+}
+.profile-page .ticket-status-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.profile-page .ticket-status-badge.valid {
+    background: rgba(76,175,80,0.15);
+    border: 1px solid rgba(76,175,80,0.4);
+    color: #81c784;
+}
+.profile-page .ticket-status-badge.used {
+    background: rgba(150,150,150,0.1);
+    border: 1px solid rgba(150,150,150,0.3);
+    color: #777;
+}
+
+.profile-page .ticket-movie-title {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-page .ticket-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+.profile-page .ticket-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.profile-page .meta-label {
+    font-size: 0.62rem;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.profile-page .meta-value {
+    font-size: 0.8rem;
+    color: #ccc;
+    font-weight: 600;
+}
+.profile-page .mono {
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    color: #E0AA3E;
+}
+
+.profile-page .ticket-flip-hint {
+    margin: 6px 0 0;
+    font-size: 0.65rem;
+    color: #444;
+    letter-spacing: 0.3px;
+    text-align: right;
+}
+
+.profile-page .ticket-used-stamp {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-18deg);
+    border: 3px solid rgba(200,60,60,0.5);
+    color: rgba(200,60,60,0.55);
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 5;
+    white-space: nowrap;
+}
+
+.profile-page .ticket-main-back {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+}
+.profile-page .ticket-qr-label {
+    margin: 0;
+    font-size: 0.68rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.profile-page .ticket-qr-wrapper {
+    background: #F5E6C8;
+    border-radius: 8px;
+    padding: 6px;
+    display: inline-flex;
+    box-shadow: 0 0 16px rgba(224,170,62,0.25);
+}
+.profile-page .ticket-qr-img {
+    display: block;
+    border-radius: 4px;
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+}
+.profile-page .ticket-code-full {
+    margin: 0;
+    font-size: 0.6rem;
+    color: #444;
+    word-break: break-all;
+    max-width: 180px;
+}
+
+@media (max-width: 600px) {
+    .profile-page .tickets-grid {
+        grid-template-columns: 1fr;
+    }
+    .profile-page .ticket-flip-wrapper {
+        height: 170px;
+    }
+    .profile-page .ticket-movie-title {
+        font-size: 0.9rem;
+    }
+}
