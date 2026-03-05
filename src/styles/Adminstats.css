@@ -1,0 +1,296 @@
+.astat-root {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding-bottom: 12px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #E0AA3E #1a0606;
+}
+.astat-root::-webkit-scrollbar { width: 6px; }
+.astat-root::-webkit-scrollbar-track { background: #1a0606; }
+.astat-root::-webkit-scrollbar-thumb { background: #E0AA3E; border-radius: 3px; }
+
+.astat-section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.astat-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #555;
+    margin: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.astat-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.astat-card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+    overflow: hidden;
+    animation: stat-in 0.4s ease both;
+    transition: border-color 0.2s;
+}
+.astat-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent, #E0AA3E);
+    opacity: 0.6;
+}
+.astat-card:hover { border-color: var(--accent, #E0AA3E); }
+
+@keyframes stat-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.astat-label {
+    font-size: 0.68rem;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.astat-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--accent, #E0AA3E);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+}
+.astat-sub {
+    font-size: 0.7rem;
+    color: #444;
+}
+
+.astat-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+.astat-chart-box {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 10px;
+    padding: 14px 12px 10px;
+}
+.astat-chart-label {
+    margin: 0 0 10px;
+    font-size: 0.68rem;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.astat-tooltip {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: #ccc;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+.tt-label {
+    margin: 0 0 6px;
+    color: #E0AA3E;
+    font-weight: 700;
+    font-size: 0.78rem;
+}
+.astat-tooltip p { margin: 2px 0; }
+
+.astat-revenue-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+}
+.astat-rev-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #1e1e1e;
+}
+.astat-rev-row:last-child { border-bottom: none; }
+.astat-rev-rank {
+    font-size: 0.85rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    flex-shrink: 0;
+    width: 24px;
+}
+.astat-rev-title {
+    flex: 1;
+    font-size: 0.8rem;
+    color: #ccc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.astat-rev-amt {
+    font-size: 0.8rem;
+    color: #E0AA3E;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    flex-shrink: 0;
+}
+
+.astat-occ-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #2a2a2a;
+}
+.astat-occ-tabs {
+    display: flex;
+    gap: 6px;
+}
+.astat-occ-tab {
+    background: transparent;
+    border: 1px solid #2a2a2a;
+    color: #555;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    text-transform: uppercase;
+}
+.astat-occ-tab:hover { border-color: #E0AA3E; color: #E0AA3E; }
+.astat-occ-tab.active {
+    background: rgba(224,170,62,0.1);
+    border-color: #E0AA3E;
+    color: #E0AA3E;
+}
+
+.astat-occ-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.astat-occ-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 8px;
+    padding: 10px 14px;
+    animation: stat-in 0.35s ease both;
+    transition: border-color 0.2s;
+}
+.astat-occ-row:hover { border-color: #2a2a2a; }
+
+.astat-occ-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 160px;
+    flex-shrink: 0;
+}
+.astat-occ-film {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ddd;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 155px;
+}
+.astat-occ-time {
+    font-size: 0.68rem;
+    color: #555;
+    font-family: 'Courier New', monospace;
+}
+
+.astat-occ-bar-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.astat-occ-bar-track {
+    flex: 1;
+    height: 6px;
+    background: #222;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.astat-occ-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.astat-occ-pct {
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    min-width: 46px;
+    text-align: right;
+}
+.astat-occ-tickets {
+    font-size: 0.72rem;
+    color: #444;
+    min-width: 52px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.astat-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 60px 0;
+    color: #555;
+    font-size: 0.85rem;
+    flex: 1;
+}
+.astat-spinner {
+    width: 32px; height: 32px;
+    border: 2px solid #222;
+    border-top-color: #E0AA3E;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.astat-empty {
+    color: #444;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 20px 0;
+    margin: 0;
+}
+
+@media (max-width: 700px) {
+    .astat-cards        { grid-template-columns: 1fr 1fr; }
+    .astat-charts-row   { grid-template-columns: 1fr; }
+    .astat-occ-info     { min-width: 110px; }
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import '../Styles/AdminStyle.css';
 import { authFetch } from '../utils/auth';
+import AdminStats from './AdminStats';
 
 const UserReservationsList = ({ userId, userName }) => {
     const [reservations, setReservations] = useState([]);
@@ -12,9 +13,7 @@ const UserReservationsList = ({ userId, userName }) => {
         setLoading(true);
         authFetch(`http://localhost:5083/api/Booking/GetUserReservations/${userId}`)
             .then(res => res.json())
-            .then(data => {
-                setReservations(Array.isArray(data) ? data : []);
-            })
+            .then(data => setReservations(Array.isArray(data) ? data : []))
             .catch(err => console.error("Hiba a foglalások lekérésekor:", err))
             .finally(() => setLoading(false));
     }, [userId]);
@@ -88,7 +87,6 @@ const UsersList = () => {
                     </div>
                 ))}
             </div>
-
             {selectedUser && (
                 <UserReservationsList userId={selectedUser.id} userName={selectedUser.name} />
             )}
@@ -120,7 +118,7 @@ const MoviesList = () => {
             authFetch(`http://localhost:5083/api/Movie/DeleteMovie/${id}`, { method: 'DELETE' })
                 .then(res => {
                     if (res.ok) { alert("Sikeres törlés!"); fetchMovies(); }
-                    else if (res.status === 401) alert("Nincs jogosultság a törléshez. Jelentkezz be újra admin fiókkal.");
+                    else if (res.status === 401) alert("Nincs jogosultság. Jelentkezz be újra admin fiókkal.");
                     else alert("Hiba a törlés során.");
                 });
         }
@@ -186,7 +184,7 @@ const ShowtimesList = () => {
             authFetch(`http://localhost:5083/api/Showtime/DeleteShowtime/${id}`, { method: 'DELETE' })
                 .then(res => {
                     if (res.ok) { alert("Sikeres törlés!"); fetchShowtimes(); }
-                    else if (res.status === 401) alert("Nincs jogosultság a törléshez. Jelentkezz be újra admin fiókkal.");
+                    else if (res.status === 401) alert("Nincs jogosultság. Jelentkezz be újra admin fiókkal.");
                     else alert("Hiba történt.");
                 })
                 .catch(err => alert("Szerver hiba: " + err));
@@ -231,6 +229,13 @@ const ShowtimesList = () => {
     );
 };
 
+const TABS = [
+    { key: 'users',      label: 'Felhasználók & Foglalások' },
+    { key: 'movies',     label: 'Filmek' },
+    { key: 'showtimes',  label: 'Vetítések' },
+    { key: 'stats',      label: '📊 Statisztikák' },
+];
+
 function Admin() {
     const [activeTab, setActiveTab] = useState('users');
 
@@ -244,35 +249,26 @@ function Admin() {
             </Link>
 
             <div className="admin-panel">
-                <div className="admin-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #444', paddingBottom: '10px' }}>
-                    <button 
-                        className={`details-button ${activeTab === 'users' ? 'active' : ''}`}
-                        style={{ backgroundColor: activeTab === 'users' ? '#b8860b' : 'transparent', border: '1px solid #b8860b' }}
-                        onClick={() => setActiveTab('users')}
-                    >
-                        Felhasználók & Foglalások
-                    </button>
-
-                    <button 
-                        className={`details-button ${activeTab === 'movies' ? 'active' : ''}`}
-                        style={{ backgroundColor: activeTab === 'movies' ? '#b8860b' : 'transparent', border: '1px solid #b8860b' }}
-                        onClick={() => setActiveTab('movies')}
-                    >
-                        Filmek
-                    </button>
-
-                    <button 
-                        className={`details-button ${activeTab === 'showtimes' ? 'active' : ''}`}
-                        style={{ backgroundColor: activeTab === 'showtimes' ? '#b8860b' : 'transparent', border: '1px solid #b8860b' }}
-                        onClick={() => setActiveTab('showtimes')}
-                    >
-                        Vetítések
-                    </button>
+                <div className="admin-tabs">
+                    {TABS.map(tab => (
+                        <button
+                            key={tab.key}
+                            className={`details-button ${activeTab === tab.key ? 'active' : ''}`}
+                            style={{
+                                backgroundColor: activeTab === tab.key ? '#b8860b' : 'transparent',
+                                border: '1px solid #b8860b'
+                            }}
+                            onClick={() => setActiveTab(tab.key)}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
 
-                {activeTab === 'users' && <UsersList />}
-                {activeTab === 'movies' && <MoviesList />}
+                {activeTab === 'users'     && <UsersList />}
+                {activeTab === 'movies'    && <MoviesList />}
                 {activeTab === 'showtimes' && <ShowtimesList />}
+                {activeTab === 'stats'     && <AdminStats />}
             </div>
         </div>
     );
