@@ -3,9 +3,43 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/ProfileStyle.css';
 import { authFetch } from '../utils/auth';
 
-const TicketCard = ({ ticket }) => {
+const TicketCard = ({ ticket, onCancel }) => {
     const [showQr, setShowQr] = useState(false);
-    const isUsed = ticket.isUsed || ticket.status === 'used';
+    const [cancelling, setCancelling] = useState(false);
+    const isUsed = ticket.isUsed || ticket.status === 'used' || ticket.status === 'Used';
+
+    const showDateTime = (() => {
+        if (!ticket.showDate) return null;
+        const datePart = ticket.showDate.split('T')[0];
+        const timePart = ticket.showTime ? ticket.showTime.slice(0, 5) : '00:00';
+        const dt = new Date(`${datePart}T${timePart}:00`);
+        return isNaN(dt.getTime()) ? null : dt;
+    })();
+
+    const isExpired = showDateTime ? showDateTime < new Date() : false;
+    const twoHoursBefore = showDateTime ? new Date(showDateTime.getTime() - 2 * 60 * 60 * 1000) : null;
+    const canCancel = !isUsed && !isExpired && twoHoursBefore && new Date() < twoHoursBefore;
+
+    const handleCancel = async () => {
+        if (!window.confirm('Biztosan lemondod ezt a foglalást?')) return;
+        setCancelling(true);
+        try {
+            const res = await authFetch(
+                `http://localhost:5083/api/Reservation/Cancel/${ticket.reservationId}`,
+                { method: 'DELETE' }
+            );
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.uzenet ?? 'Hiba történt a lemondás során.');
+                return;
+            }
+            onCancel(ticket.reservationId);
+        } catch {
+            alert('Hiba történt a lemondás során.');
+        } finally {
+            setCancelling(false);
+        }
+    };
 
     return (
         <div className={`ticket-card ${isUsed ? 'ticket-used' : ''}`}>
@@ -24,8 +58,8 @@ const TicketCard = ({ ticket }) => {
             <div className="ticket-main">
                 <div className="ticket-top-row">
                     <span className="ticket-cinema-name">MOZIZZ</span>
-                    <span className={`ticket-status-badge ${isUsed ? 'used' : 'valid'}`}>
-                        {isUsed ? 'Lejárt' : 'Érvényes'}
+                    <span className={`ticket-status-badge ${isUsed ? 'used' : isExpired ? 'expired' : 'valid'}`}>
+                        {isUsed ? 'Felhasznált' : isExpired ? 'Lejárt' : 'Érvényes'}
                     </span>
                 </div>
 
@@ -59,9 +93,20 @@ const TicketCard = ({ ticket }) => {
                     </div>
                 )}
 
-                <button className="ticket-qr-toggle" onClick={() => setShowQr(v => !v)}>
-                    {showQr ? '▲ QR elrejtése' : '▼ QR kód megjelenítése'}
-                </button>
+                <div className="ticket-actions-row">
+                    {canCancel && (
+                        <button
+                            className="ticket-cancel-btn"
+                            onClick={handleCancel}
+                            disabled={cancelling}
+                        >
+                            {cancelling ? 'Lemondás...' : '✕ Lemondás'}
+                        </button>
+                    )}
+                    <button className="ticket-qr-toggle" onClick={() => setShowQr(v => !v)}>
+                        {showQr ? '▲ QR elrejtése' : '▼ QR kód'}
+                    </button>
+                </div>
 
                 {showQr && (
                     <div className="ticket-qr-section">
@@ -70,6 +115,7 @@ const TicketCard = ({ ticket }) => {
                                 src={`https://quickchart.io/qr?text=${encodeURIComponent(ticket.ticketCode)}&size=140`}
                                 alt="QR kód"
                                 className="ticket-qr-img"
+                                loading="lazy"
                             />
                         </div>
                         <p className="ticket-code-full mono">{ticket.ticketCode}</p>
@@ -112,6 +158,7 @@ const UserProfile = () => {
                 const merged = sortedRes.map((res, i) => ({
                     ticketCode: sortedTickets[i]?.ticketCode ?? `RES-${res.reservationId}`,
                     issuedDate: sortedTickets[i]?.issuedDate ?? null,
+                    isUsed: sortedTickets[i]?.isUsed ?? false,
                     status: sortedTickets[i]?.status ?? res.status,
                     movieTitle: res.movieTitle,
                     seats: res.seats ?? [],
@@ -130,13 +177,44 @@ const UserProfile = () => {
         fetchTickets();
     }, [currentUserId]);
 
+    const [activeTab, setActiveTab] = useState('valid');
+
+    const handleCancel = (reservationId) => {
+        setTickets(prev => prev.filter(t => t.reservationId !== reservationId));
+    };
+
     const handleLogout = () => {
         localStorage.clear();
         navigate('/');
         window.location.reload();
     };
 
-    const validCount = tickets.filter(t => !t.isUsed && t.status !== 'used').length;
+    const getTicketState = (t) => {
+        const isUsed = t.isUsed || t.status === 'used' || t.status === 'Used';
+        if (isUsed) return 'used';
+        const isCancelled = t.status === 'cancelled' || t.status === 'Cancelled';
+        if (isCancelled) return 'cancelled';
+        const showDateTime = (() => {
+            if (!t.showDate) return null;
+            const datePart = t.showDate.split('T')[0];
+            const timePart = t.showTime ? t.showTime.slice(0, 5) : '00:00';
+            const dt = new Date(`${datePart}T${timePart}:00`);
+            return isNaN(dt.getTime()) ? null : dt;
+        })();
+        if (showDateTime && showDateTime < new Date()) return 'expired';
+        return 'valid';
+    };
+
+    const validCount = tickets.filter(t => getTicketState(t) === 'valid').length;
+
+    const TABS = [
+        { key: 'valid',     label: 'Érvényes' },
+        { key: 'expired',   label: 'Lejárt' },
+        { key: 'used',      label: 'Felhasznált' },
+        { key: 'cancelled', label: 'Lemondott' },
+    ];
+
+    const filteredTickets = tickets.filter(t => getTicketState(t) === activeTab);
 
     return (
         <div className="profile-page">
@@ -169,6 +247,21 @@ const UserProfile = () => {
                 <main className="profile-content">
                     <h2>Lefoglalt jegyeim</h2>
 
+                    <div className="tickets-tabs">
+                        {TABS.map(tab => (
+                            <button
+                                key={tab.key}
+                                className={`tickets-tab ${activeTab === tab.key ? 'active' : ''}`}
+                                onClick={() => setActiveTab(tab.key)}
+                            >
+                                {tab.label}
+                                <span className="tab-count">
+                                    {tickets.filter(t => getTicketState(t) === tab.key).length}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
                     {loading && (
                         <div className="profile-loader-wrap">
                             <div className="profile-loader"></div>
@@ -177,19 +270,21 @@ const UserProfile = () => {
                     )}
                     {error && <p className="error-text">Hiba: {error}</p>}
 
-                    {!loading && !error && tickets.length === 0 && (
+                    {!loading && !error && filteredTickets.length === 0 && (
                         <div className="empty-reservations">
                             <div className="empty-icon">🎟️</div>
-                            <p>Még nincsenek jegyeid.</p>
-                            <button className="go-to-movies-btn" onClick={() => navigate('/')}>
-                                Nézzük a filmeket!
-                            </button>
+                            <p>Nincs ilyen jegyed.</p>
+                            {activeTab === 'valid' && (
+                                <button className="go-to-movies-btn" onClick={() => navigate('/')}>
+                                    Nézzük a filmeket!
+                                </button>
+                            )}
                         </div>
                     )}
 
                     <div className="tickets-grid">
-                        {tickets.map(ticket => (
-                            <TicketCard key={ticket.ticketCode} ticket={ticket} />
+                        {filteredTickets.map(ticket => (
+                            <TicketCard key={ticket.ticketCode} ticket={ticket} onCancel={handleCancel} />
                         ))}
                     </div>
                 </main>
