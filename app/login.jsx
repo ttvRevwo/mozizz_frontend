@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import styles from '../../styles/authStyles';
 
 const API_BASE = 'http://192.168.137.1:5083/api';
 
@@ -130,44 +131,3 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#141414' },
-  inner: { flexGrow: 1, padding: 24, paddingTop: 60 },
-
-  backBtn: { marginBottom: 20 },
-  backText: { color: '#888', fontSize: 15 },
-
-  logo: { color: '#E50914', fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
-  title: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
-  subtitle: { color: '#888', fontSize: 14, marginBottom: 32, lineHeight: 20 },
-
-  form: { gap: 12 },
-  label: { color: '#ccc', fontSize: 13, marginBottom: 4 },
-  input: {
-    backgroundColor: '#1a1a1a',
-    color: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    borderWidth: 1,
-    borderColor: '#333',
-    marginBottom: 8,
-  },
-
-  message: { fontSize: 13, padding: 10, borderRadius: 8, textAlign: 'center' },
-  error: { backgroundColor: '#3d0000', color: '#ff6b6b' },
-  success: { backgroundColor: '#003d1a', color: '#6bff9e' },
-
-  btn: {
-    backgroundColor: '#E50914',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-
-  link: { color: '#888', fontSize: 14, textAlign: 'center', marginTop: 16 },
-  linkBold: { color: '#E50914', fontWeight: 'bold' },
-});

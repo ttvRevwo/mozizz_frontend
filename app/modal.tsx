@@ -12,6 +12,7 @@ export default function ModalScreen() {
         <ThemedText type="link">Go to home screen</ThemedText>
       </Link>
     </ThemedView>
+    
   );
 }
 
