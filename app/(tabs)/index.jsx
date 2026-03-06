@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../../styles/homeStyles';
 

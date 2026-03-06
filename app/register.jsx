@@ -5,7 +5,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import styles from '../../styles/authStyles';
+import styles from '../styles/authStyles';
 
 const API_BASE = 'http://192.168.137.1:5083/api';
 

@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export default StyleSheet.create({
   container: { flex: 1, backgroundColor: '#141414' },
