@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, Image, TouchableOpacity,
   ActivityIndicator, ScrollView
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../../styles/homeStyles';
@@ -19,15 +19,18 @@ export default function HomeScreen() {
   const [userName, setUserName] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  useEffect(() => {
-    const checkLogin = async () => {
-      const token = await AsyncStorage.getItem('token');
-      const name = await AsyncStorage.getItem('userName');
-      setIsLoggedIn(!!token);
-      setUserName(name || '');
-    };
-    checkLogin();
-  }, []);
+  // Login állapot frissítése minden tab váltásnál
+  useFocusEffect(
+    useCallback(() => {
+      const checkLogin = async () => {
+        const token = await AsyncStorage.getItem('token');
+        const name = await AsyncStorage.getItem('userName');
+        setIsLoggedIn(!!token);
+        setUserName(name || '');
+      };
+      checkLogin();
+    }, [])
+  );
 
   useEffect(() => {
     fetch(`${API_BASE}/Movie/GetMovies`)
@@ -74,6 +77,8 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+
+      {/* NAVBAR */}
       <View style={styles.navbar}>
         <Text style={styles.logo}>🎬 Mozizz</Text>
         {isLoggedIn ? (
@@ -95,6 +100,7 @@ export default function HomeScreen() {
         )}
       </View>
 
+      {/* HERO SLIDER */}
       {currentMovie && (
         <View style={styles.hero}>
           {heroImageUrl && (
@@ -129,6 +135,8 @@ export default function HomeScreen() {
           </View>
         </View>
       )}
+
+      {/* AKTUÁLIS FILMEK */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Aktuális filmek</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -158,4 +166,3 @@ export default function HomeScreen() {
     </ScrollView>
   );
 }
-
