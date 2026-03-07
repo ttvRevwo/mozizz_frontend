@@ -37,7 +37,6 @@ export default function CatalogScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Fejléc */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🎬 Filmkatalógus</Text>
         <TextInput

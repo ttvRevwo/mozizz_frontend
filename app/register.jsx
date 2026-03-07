@@ -105,7 +105,6 @@ export default function RegisterScreen() {
         <Text style={styles.logo}>🎬 Mozizz</Text>
         <Text style={styles.title}>Regisztráció</Text>
 
-        {/* REGISTER STEP */}
         {step === 'register' && (
           <View style={styles.form}>
             <Text style={styles.subtitle}>Hozd létre a fiókodat a legjobb filmélményekért!</Text>
@@ -177,7 +176,6 @@ export default function RegisterScreen() {
           </View>
         )}
 
-        {/* VERIFY STEP */}
         {step === 'verify' && (
           <View style={styles.form}>
             <Text style={styles.subtitle}>
@@ -203,8 +201,6 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
         )}
-
-        {/* SUCCESS STEP */}
         {step === 'success' && (
           <View style={styles.successBox}>
             <Text style={styles.successIcon}>✅</Text>

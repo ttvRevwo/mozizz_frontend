@@ -31,7 +31,6 @@ export default function BuffetScreen() {
         <Text style={styles.headerSub}>💳 Szép kártyát elfogadunk!</Text>
       </View>
 
-      {/* MENÜK */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Kombók & Menük</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -46,7 +45,6 @@ export default function BuffetScreen() {
         </ScrollView>
       </View>
 
-      {/* SNACKEK */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Snackek & Üdítők</Text>
         <View style={styles.snackGrid}>

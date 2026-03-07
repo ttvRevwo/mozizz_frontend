@@ -74,8 +74,6 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-
-      {/* NAVBAR */}
       <View style={styles.navbar}>
         <Text style={styles.logo}>🎬 Mozizz</Text>
         {isLoggedIn ? (
@@ -97,7 +95,6 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {/* HERO SLIDER */}
       {currentMovie && (
         <View style={styles.hero}>
           {heroImageUrl && (
@@ -132,8 +129,6 @@ export default function HomeScreen() {
           </View>
         </View>
       )}
-
-      {/* AKTUÁLIS FILMEK */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Aktuális filmek</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
