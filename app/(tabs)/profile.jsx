@@ -1,108 +1,181 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "../../styles/profileStyles";
 
 const API_BASE = "http://192.168.137.1:5083/api";
 
-function TicketCard({ ticket }) {
+const getTicketState = (ticket) => {
+  if (ticket.isUsed === true) return "used";
+  if (!ticket.showDate) return "valid";
+  const dt = new Date(
+    `${ticket.showDate.split("T")[0]}T${ticket.showTime?.slice(0, 5) ?? "00:00"}:00`,
+  );
+  if (!isNaN(dt) && dt < new Date()) return "expired";
+  return "valid";
+};
+
+const formatDate = (d) =>
+  d
+    ? new Date(d).toLocaleDateString("hu-HU", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "—";
+
+const formatShow = (d, t) => {
+  if (!d) return "—";
+  const date = new Date(d).toLocaleDateString("hu-HU", {
+    month: "short",
+    day: "numeric",
+  });
+  return `${date} ${t?.slice(0, 5) ?? ""}`.trim();
+};
+
+const TABS = [
+  { key: "valid", label: "Érvényes" },
+  { key: "expired", label: "Lejárt" },
+  { key: "used", label: "Felhasznált" },
+];
+
+const STATE_LABELS = {
+  valid: "Érvényes",
+  expired: "Lejárt",
+  used: "Felhasznált",
+};
+
+function TicketCard({ ticket, onCancel }) {
   const [showQr, setShowQr] = useState(false);
-  const isUsed = ticket.isUsed || ticket.status === "used";
+  const [cancelling, setCancelling] = useState(false);
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "—";
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "—";
-    return d.toLocaleDateString("hu-HU", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const state = getTicketState(ticket);
+  const isUsed = state === "used";
+  const isExpired = state === "expired";
 
-  const formatShowDate = (dateStr) => {
-    if (!dateStr) return "—";
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString("hu-HU", { month: "short", day: "numeric" });
+  const showDt = ticket.showDate
+    ? new Date(
+        `${ticket.showDate.split("T")[0]}T${ticket.showTime?.slice(0, 5) ?? "00:00"}:00`,
+      )
+    : null;
+  const canCancel =
+    !isUsed &&
+    !isExpired &&
+    showDt &&
+    new Date() < new Date(showDt - 2 * 3600000);
+
+  const handleCancel = () => {
+    Alert.alert("Lemondás", "Biztosan lemondod ezt a foglalást?", [
+      { text: "Mégsem", style: "cancel" },
+      {
+        text: "Igen",
+        style: "destructive",
+        onPress: async () => {
+          setCancelling(true);
+          try {
+            const token = await AsyncStorage.getItem("token");
+            const res = await fetch(
+              `${API_BASE}/Reservation/Cancel/${ticket.reservationId}`,
+              {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+              },
+            );
+            if (!res.ok) {
+              const data = await res.json();
+              Alert.alert("Hiba", data.uzenet ?? "Hiba történt.");
+              return;
+            }
+            onCancel(ticket.reservationId);
+          } catch {
+            Alert.alert("Hiba", "Nem sikerült a lemondás.");
+          } finally {
+            setCancelling(false);
+          }
+        },
+      },
+    ]);
   };
 
   return (
-    <View style={[styles.ticketCard, isUsed && styles.ticketUsed]}>
+    <View style={[styles.card, isUsed && styles.cardUsed]}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cinemaName}>🎬 MOZIZZ</Text>
+        <View style={[styles.badge, styles[`badge_${state}`]]}>
+          <Text style={styles.badgeText}>{STATE_LABELS[state]}</Text>
+        </View>
+      </View>
+
       {isUsed && (
-        <View style={styles.ticketUsedStamp}>
-          <Text style={styles.ticketUsedStampText}>FELHASZNÁLVA</Text>
+        <View style={styles.stamp}>
+          <Text style={styles.stampText}>FELHASZNÁLVA</Text>
         </View>
       )}
 
-      <View style={styles.ticketHeader}>
-        <Text style={styles.ticketCinema}>🎬 MOZIZZ</Text>
-        <View style={isUsed ? styles.ticketBadgeUsed : styles.ticketBadgeValid}>
-          <Text
-            style={[
-              styles.ticketBadgeText,
-              isUsed ? styles.ticketBadgeTextUsed : styles.ticketBadgeTextValid,
-            ]}
-          >
-            {isUsed ? "Lejárt" : "Érvényes"}
+      <Text style={styles.movieTitle}>
+        {ticket.movieTitle || "Ismeretlen film"}
+      </Text>
+
+      <View style={styles.metaRow}>
+        <View>
+          <Text style={styles.metaLabel}>Kiállítva</Text>
+          <Text style={styles.metaValue}>{formatDate(ticket.issuedDate)}</Text>
+        </View>
+        <View>
+          <Text style={styles.metaLabel}>Vetítés</Text>
+          <Text style={styles.metaValue}>
+            {formatShow(ticket.showDate, ticket.showTime)}
           </Text>
         </View>
       </View>
 
-      <View style={styles.ticketBody}>
-        <Text style={styles.ticketTitle}>
-          {ticket.movieTitle || "Ismeretlen film"}
-        </Text>
-
-        <View style={styles.ticketMetaRow}>
-          <View style={styles.ticketMetaItem}>
-            <Text style={styles.metaLabel}>Kiállítva</Text>
-            <Text style={styles.metaValue}>
-              {formatDate(ticket.issuedDate)}
-            </Text>
-          </View>
-          <View style={styles.ticketMetaItem}>
-            <Text style={styles.metaLabel}>Vetítés</Text>
-            <Text style={styles.metaValue}>
-              {formatShowDate(ticket.showDate)}
-              {ticket.showTime ? ` ${ticket.showTime.slice(0, 5)}` : ""}
-            </Text>
-          </View>
+      {ticket.seats?.length > 0 && (
+        <View style={styles.seatsRow}>
+          {ticket.seats.map((s) => (
+            <View key={s} style={styles.seatBadge}>
+              <Text style={styles.seatBadgeText}>{s}</Text>
+            </View>
+          ))}
         </View>
+      )}
 
-        {ticket.seats?.length > 0 && (
-          <View style={styles.seatsRow}>
-            {ticket.seats.map((s) => (
-              <View key={s} style={styles.seatBadge}>
-                <Text style={styles.seatBadgeText}>{s}</Text>
-              </View>
-            ))}
-          </View>
+      <View style={styles.actions}>
+        {canCancel && (
+          <TouchableOpacity
+            style={styles.cancelBtn}
+            onPress={handleCancel}
+            disabled={cancelling}
+          >
+            <Text style={styles.cancelBtnText}>
+              {cancelling ? "Lemondás..." : "✕ Lemondás"}
+            </Text>
+          </TouchableOpacity>
         )}
+        <TouchableOpacity
+          style={styles.qrBtn}
+          onPress={() => setShowQr((v) => !v)}
+        >
+          <Text style={styles.qrBtnText}>
+            {showQr ? "▲ QR elrejtése" : "▼ QR kód"}
+          </Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity
-        style={styles.qrToggleBtn}
-        onPress={() => setShowQr((v) => !v)}
-      >
-        <Text style={styles.qrToggleText}>
-          {showQr ? "▲ QR elrejtése" : "▼ QR kód megjelenítése"}
-        </Text>
-      </TouchableOpacity>
 
       {showQr && (
         <View style={styles.qrSection}>
           <Image
             source={{
-              uri: `https://quickchart.io/qr?text=${encodeURIComponent(ticket.ticketCode)}&size=150`,
+              uri: `https://quickchart.io/qr?text=${encodeURIComponent(ticket.ticketCode)}&size=180`,
             }}
             style={styles.qrImage}
           />
@@ -114,204 +187,184 @@ function TicketCard({ ticket }) {
 }
 
 export default function ProfileScreen() {
-  const router = useRouter();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("valid");
   const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [userId, setUserId] = useState(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      const load = async () => {
-        const id = await AsyncStorage.getItem("userId");
-        const name = await AsyncStorage.getItem("userName");
-        const email = await AsyncStorage.getItem("userEmail");
-        const token = await AsyncStorage.getItem("token");
+  const fetchTickets = useCallback(async () => {
+    try {
+      setError(null);
+      const userId = await AsyncStorage.getItem("userId");
+      const token = await AsyncStorage.getItem("token");
+      const name = await AsyncStorage.getItem("userName");
+      if (name) setUserName(name);
 
-        setUserName(name || "Felhasználó");
-        setUserEmail(email || "");
-        setUserId(id);
+      const headers = { Authorization: `Bearer ${token}` };
 
-        if (!id || !token) {
-          setLoading(false);
-          return;
-        }
+      const [resRes, ticketRes] = await Promise.all([
+        fetch(`${API_BASE}/Booking/GetUserReservations/${userId}`, { headers }),
+        fetch(`${API_BASE}/Ticket/MyTickets/${userId}`, { headers }),
+      ]);
 
-        try {
-          const headers = { Authorization: `Bearer ${token}` };
+      const reservations = resRes.ok ? await resRes.json() : [];
+      const ticketsData = ticketRes.ok ? await ticketRes.json() : [];
 
-          const [resRes, ticketRes] = await Promise.all([
-            fetch(`${API_BASE}/Booking/GetUserReservations/${id}`, { headers }),
-            fetch(`${API_BASE}/Ticket/MyTickets/${id}`, { headers }),
-          ]);
+      const confirmedRes = reservations.filter((r) => r.status === "confirmed");
 
-          const reservations = resRes.ok ? await resRes.json() : [];
-          const ticketData = ticketRes.ok ? await ticketRes.json() : [];
+      const sortedRes = [...confirmedRes].sort(
+        (a, b) => a.reservationId - b.reservationId,
+      );
+      const sortedTickets = [...ticketsData].sort(
+        (a, b) => new Date(a.issuedDate) - new Date(b.issuedDate),
+      );
 
-          const sortedRes = [
-            ...(Array.isArray(reservations) ? reservations : []),
-          ].sort((a, b) => a.reservationId - b.reservationId);
-          const sortedTickets = [
-            ...(Array.isArray(ticketData) ? ticketData : []),
-          ].sort((a, b) => new Date(a.issuedDate) - new Date(b.issuedDate));
+      const merged = sortedRes.map((res, i) => ({
+        ticketCode: sortedTickets[i]?.ticketCode ?? `RES-${res.reservationId}`,
+        issuedDate: sortedTickets[i]?.issuedDate ?? null,
+        isUsed: sortedTickets[i]?.isUsed === true,
+        status: res.status,
+        movieTitle: res.movieTitle,
+        seats: res.seats ?? [],
+        showDate: res.date,
+        showTime: res.time,
+        reservationId: res.reservationId,
+      }));
 
-          const merged = sortedRes.map((res, i) => ({
-            ticketCode:
-              sortedTickets[i]?.ticketCode ?? `RES-${res.reservationId}`,
-            issuedDate: sortedTickets[i]?.issuedDate ?? null,
-            status: sortedTickets[i]?.status ?? res.status,
-            isUsed: sortedTickets[i]?.isUsed ?? false,
-            movieTitle: res.movieTitle,
-            seats: res.seats ?? [],
-            showDate: res.date,
-            showTime: res.time,
-            reservationId: res.reservationId,
-          }));
+      setTickets(merged);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
-          setTickets(merged);
-        } catch (err) {
-          setError("Nem sikerült betölteni a jegyeket.");
-        } finally {
-          setLoading(false);
-        }
-      };
+  useEffect(() => {
+    fetchTickets();
+  }, [fetchTickets]);
 
-      load();
-    }, []),
-  );
+  const handleCancel = (id) =>
+    setTickets((prev) => prev.filter((t) => t.reservationId !== id));
 
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem("token");
-    await AsyncStorage.removeItem("userId");
-    await AsyncStorage.removeItem("userName");
-    await AsyncStorage.removeItem("userEmail");
-    await AsyncStorage.removeItem("role");
-    router.replace("/");
+  const handleLogout = () => {
+    Alert.alert("Kijelentkezés", "Biztosan ki szeretnél jelentkezni?", [
+      { text: "Mégsem", style: "cancel" },
+      {
+        text: "Igen",
+        style: "destructive",
+        onPress: async () => {
+          await AsyncStorage.clear();
+        },
+      },
+    ]);
   };
 
-  const [activeTab, setActiveTab] = useState("valid");
-
-  const validTickets = tickets.filter((t) => !t.isUsed && t.status !== "used");
-  const usedTickets = tickets.filter((t) => t.isUsed || t.status === "used");
+  const validCount = tickets.filter(
+    (t) => getTicketState(t) === "valid",
+  ).length;
+  const filtered = tickets.filter((t) => getTicketState(t) === activeTab);
 
   return (
-    <View style={styles.container}>
-      <ScrollView>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              setRefreshing(true);
+              fetchTickets();
+            }}
+            tintColor="#E50914"
+          />
+        }
+      >
         <View style={styles.header}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>👤</Text>
           </View>
-          <Text style={styles.headerName}>{userName}</Text>
-          {userEmail ? (
-            <Text style={styles.headerEmail}>{userEmail}</Text>
-          ) : null}
-
+          <Text style={styles.profileTitle}>{userName || "Profil"}</Text>
           <View style={styles.statsRow}>
-            <View style={styles.statItem}>
+            <View style={styles.statBox}>
               <Text style={styles.statNumber}>{tickets.length}</Text>
               <Text style={styles.statLabel}>Összes jegy</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{validTickets.length}</Text>
+            <View style={styles.statBox}>
+              <Text style={styles.statNumber}>{validCount}</Text>
               <Text style={styles.statLabel}>Érvényes</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{usedTickets.length}</Text>
-              <Text style={styles.statLabel}>Lejárt</Text>
-            </View>
           </View>
-
           <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-            <Text style={styles.logoutText}>Kijelentkezés</Text>
+            <Text style={styles.logoutBtnText}>Kijelentkezés</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Lefoglalt jegyeim</Text>
 
-          <View style={styles.tabRow}>
-            <TouchableOpacity
-              style={[
-                styles.tabBtn,
-                activeTab === "valid" && styles.tabBtnActive,
-              ]}
-              onPress={() => setActiveTab("valid")}
-            >
-              <Text
-                style={[
-                  styles.tabBtnText,
-                  activeTab === "valid" && styles.tabBtnTextActive,
-                ]}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.tabsRow}
+          >
+            {TABS.map((tab) => (
+              <TouchableOpacity
+                key={tab.key}
+                style={[styles.tab, activeTab === tab.key && styles.tabActive]}
+                onPress={() => setActiveTab(tab.key)}
               >
-                Érvényes ({validTickets.length})
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.tabBtn,
-                activeTab === "used" && styles.tabBtnActive,
-              ]}
-              onPress={() => setActiveTab("used")}
-            >
-              <Text
-                style={[
-                  styles.tabBtnText,
-                  activeTab === "used" && styles.tabBtnTextActive,
-                ]}
-              >
-                Lejárt ({usedTickets.length})
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === tab.key && styles.tabTextActive,
+                  ]}
+                >
+                  {tab.label}
+                </Text>
+                <View
+                  style={[
+                    styles.tabCount,
+                    activeTab === tab.key && styles.tabCountActive,
+                  ]}
+                >
+                  <Text style={styles.tabCountText}>
+                    {
+                      tickets.filter((t) => getTicketState(t) === tab.key)
+                        .length
+                    }
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
 
           {loading && (
-            <View style={styles.centered}>
-              <ActivityIndicator size="large" color="#E50914" />
-              <Text style={styles.loadingText}>Jegyek betöltése...</Text>
-            </View>
+            <ActivityIndicator
+              size="large"
+              color="#E50914"
+              style={{ marginTop: 40 }}
+            />
           )}
+          {error && <Text style={styles.errorText}>⚠️ {error}</Text>}
 
-          {error && <Text style={styles.errorText}>{error}</Text>}
-
-          {!loading && !error && tickets.length === 0 && (
-            <View style={styles.emptyBox}>
+          {!loading && !error && filtered.length === 0 && (
+            <View style={styles.empty}>
               <Text style={styles.emptyIcon}>🎟️</Text>
-              <Text style={styles.emptyText}>Még nincsenek jegyeid.</Text>
-              <TouchableOpacity
-                style={styles.emptyBtn}
-                onPress={() => router.push("/")}
-              >
-                <Text style={styles.emptyBtnText}>Nézzük a filmeket!</Text>
-              </TouchableOpacity>
+              <Text style={styles.emptyText}>Nincs ilyen jegyed.</Text>
             </View>
           )}
 
-          {!loading &&
-            !error &&
-            tickets.length > 0 &&
-            (activeTab === "valid" ? validTickets : usedTickets).length ===
-              0 && (
-              <View style={styles.emptyBox}>
-                <Text style={styles.emptyIcon}>
-                  {activeTab === "valid" ? "✅" : "🎟️"}
-                </Text>
-                <Text style={styles.emptyText}>
-                  {activeTab === "valid"
-                    ? "Nincs érvényes jegyed."
-                    : "Nincs lejárt jegyed."}
-                </Text>
-              </View>
-            )}
-
-          {(activeTab === "valid" ? validTickets : usedTickets).map(
-            (ticket) => (
-              <TicketCard key={ticket.ticketCode} ticket={ticket} />
-            ),
-          )}
+          {filtered.map((ticket) => (
+            <TicketCard
+              key={ticket.ticketCode}
+              ticket={ticket}
+              onCancel={handleCancel}
+            />
+          ))}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
