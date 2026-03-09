@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -63,7 +64,7 @@ function TicketCard({ ticket, onCancel }) {
   const isUsed = state === "used";
   const isExpired = state === "expired";
 
-  // A backend elvégzi a 2 órás ellenőrzést, itt csak az alapfeltételeket nézzük
+  // A backend elvégzi a 2 órás ellenőrzést
   const canCancel = !isUsed && !isExpired;
 
   const handleCancel = () => {
@@ -183,6 +184,8 @@ function TicketCard({ ticket, onCancel }) {
 }
 
 export default function ProfileScreen() {
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -195,6 +198,14 @@ export default function ProfileScreen() {
       setError(null);
       const userId = await AsyncStorage.getItem("userId");
       const token = await AsyncStorage.getItem("token");
+
+      if (!token || !userId) {
+        setIsLoggedIn(false);
+        setLoading(false);
+        return;
+      }
+      setIsLoggedIn(true);
+
       const name = await AsyncStorage.getItem("userName");
       if (name) setUserName(name);
 
@@ -253,6 +264,9 @@ export default function ProfileScreen() {
         style: "destructive",
         onPress: async () => {
           await AsyncStorage.clear();
+          setIsLoggedIn(false);
+          setTickets([]);
+          setUserName("");
         },
       },
     ]);
@@ -262,6 +276,78 @@ export default function ProfileScreen() {
     (t) => getTicketState(t) === "valid",
   ).length;
   const filtered = tickets.filter((t) => getTicketState(t) === activeTab);
+
+  if (isLoggedIn === null) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ActivityIndicator
+          size="large"
+          color="#E50914"
+          style={{ marginTop: 60 }}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  if (isLoggedIn === false) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 32,
+            gap: 20,
+          }}
+        >
+          <Text style={{ fontSize: 60 }}>🎬</Text>
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 22,
+              fontWeight: "bold",
+              textAlign: "center",
+            }}
+          >
+            Jelentkezz be a profilodhoz!
+          </Text>
+          <Text
+            style={{
+              color: "#888",
+              fontSize: 15,
+              textAlign: "center",
+              lineHeight: 22,
+            }}
+          >
+            A jegyeid és foglalásaid megtekintéséhez bejelentkezés szükséges.
+          </Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#E50914",
+              paddingHorizontal: 36,
+              paddingVertical: 14,
+              borderRadius: 10,
+              marginTop: 8,
+            }}
+            onPress={() => router.push("/login")}
+          >
+            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
+              Bejelentkezés
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/register")}>
+            <Text style={{ color: "#888", fontSize: 14 }}>
+              Még nincs fiókod?{" "}
+              <Text style={{ color: "#E50914", fontWeight: "bold" }}>
+                Regisztrálj!
+              </Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
