@@ -1,7 +1,9 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   ScrollView,
   Text,
@@ -67,7 +69,16 @@ export default function MovieDetailScreen() {
       .then((res) => res.json())
       .then((data) => {
         const all = Array.isArray(data) ? data : data.data || [];
-        const sorted = all.sort((a, b) => {
+        const now = new Date();
+        const future = all.filter((st) => {
+          const d = st.showDate || st.date || "";
+          const t = st.showTime1 || st.time || "00:00";
+          const dt = new Date(
+            `${String(d).split("T")[0]}T${String(t).slice(0, 5)}:00`,
+          );
+          return dt > now;
+        });
+        const sorted = future.sort((a, b) => {
           const da =
             (a.showDate || a.date || "") + (a.showTime1 || a.time || "");
           const db =
@@ -209,7 +220,24 @@ export default function MovieDetailScreen() {
                   <TouchableOpacity
                     key={String(stId)}
                     style={styles.showtimeCard}
-                    onPress={() => router.push(`/booking/${stId}`)}
+                    onPress={async () => {
+                      const token = await AsyncStorage.getItem("token");
+                      if (!token) {
+                        Alert.alert(
+                          "Bejelentkezés szükséges",
+                          "A jegyfoglaláshoz be kell jelentkezned!",
+                          [
+                            { text: "Mégsem", style: "cancel" },
+                            {
+                              text: "Bejelentkezés",
+                              onPress: () => router.push("/login"),
+                            },
+                          ],
+                        );
+                        return;
+                      }
+                      router.push(`/booking/${stId}`);
+                    }}
                   >
                     <Text style={styles.showtimeTime}>{formattedTime}</Text>
                     <Text style={styles.showtimeDate}>

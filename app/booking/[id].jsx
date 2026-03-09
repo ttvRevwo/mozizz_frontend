@@ -11,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 import styles from "../../styles/bookingStyles";
 
 const API_BASE = "http://192.168.137.1:5083/api";
@@ -373,6 +372,24 @@ export default function BookingScreen() {
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
+
+  // Bejelentkezés ellenőrzés
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert(
+          "Bejelentkezés szükséges",
+          "A jegyfoglaláshoz be kell jelentkezned!",
+          [
+            { text: "Mégsem", style: "cancel", onPress: () => router.back() },
+            { text: "Bejelentkezés", onPress: () => router.replace("/login") },
+          ],
+        );
+      }
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     if (!showtimeId) return;
