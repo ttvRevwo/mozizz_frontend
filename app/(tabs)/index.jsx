@@ -1,41 +1,47 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
-  View, Text, Image, TouchableOpacity,
-  ActivityIndicator, ScrollView
-} from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
+  ActivityIndicator,
+  Alert,
+  Image,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import styles from '../../styles/homeStyles';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import styles from "../../styles/homeStyles";
 
-const CLOUDINARY_BASE = 'https://res.cloudinary.com/dytjuv6qt/image/upload/';
-const API_BASE = 'http://192.168.137.1:5083/api';
+const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
+const API_BASE = "http://192.168.137.1:5083/api";
 
 export default function HomeScreen() {
   const router = useRouter();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Login állapot frissítése minden tab váltásnál
   useFocusEffect(
     useCallback(() => {
       const checkLogin = async () => {
-        const token = await AsyncStorage.getItem('token');
-        const name = await AsyncStorage.getItem('userName');
+        const token = await AsyncStorage.getItem("token");
+        const name = await AsyncStorage.getItem("userName");
         setIsLoggedIn(!!token);
-        setUserName(name || '');
+        setUserName(name || "");
       };
       checkLogin();
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
     fetch(`${API_BASE}/Movie/GetMovies`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         const list = data.data || data;
         setMovies(list.slice(0, 6));
         setLoading(false);
@@ -46,7 +52,7 @@ export default function HomeScreen() {
   useEffect(() => {
     if (movies.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % movies.length);
+      setCurrentSlide((prev) => (prev + 1) % movies.length);
     }, 4000);
     return () => clearInterval(interval);
   }, [movies.length]);
@@ -54,12 +60,12 @@ export default function HomeScreen() {
   const handleLogout = async () => {
     await AsyncStorage.clear();
     setIsLoggedIn(false);
-    setUserName('');
+    setUserName("");
   };
 
   const getImageUrl = (img) => {
     if (!img) return null;
-    if (img.startsWith('http')) return img;
+    if (img.startsWith("http")) return img;
     return `${CLOUDINARY_BASE}${img}`;
   };
 
@@ -77,7 +83,6 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-
       {/* NAVBAR */}
       <View style={styles.navbar}>
         <Text style={styles.logo}>🎬 Mozizz</Text>
@@ -90,11 +95,13 @@ export default function HomeScreen() {
           </View>
         ) : (
           <View style={styles.navRight}>
-            <TouchableOpacity onPress={() => router.push('/login')}>
+            <TouchableOpacity onPress={() => router.push("/login")}>
               <Text style={styles.navBtn}>Bejelentkezés</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/register')}>
-              <Text style={[styles.navBtn, styles.navBtnPrimary]}>Regisztráció</Text>
+            <TouchableOpacity onPress={() => router.push("/register")}>
+              <Text style={[styles.navBtn, styles.navBtnPrimary]}>
+                Regisztráció
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -104,17 +111,49 @@ export default function HomeScreen() {
       {currentMovie && (
         <View style={styles.hero}>
           {heroImageUrl && (
-            <Image source={{ uri: heroImageUrl }} style={styles.heroImage} resizeMode="cover" />
+            <Image
+              source={{ uri: heroImageUrl }}
+              style={styles.heroImage}
+              resizeMode="cover"
+            />
           )}
           <View style={styles.heroOverlay} />
           <View style={styles.heroContent}>
-            <Text style={styles.heroGenre}>{currentMovie.genre || 'Film'}</Text>
+            <Text style={styles.heroGenre}>{currentMovie.genre || "Film"}</Text>
             <Text style={styles.heroTitle}>{currentMovie.title}</Text>
-            <Text style={styles.heroDesc} numberOfLines={3}>{currentMovie.description}</Text>
+            <Text style={styles.heroDesc} numberOfLines={3}>
+              {currentMovie.description}
+            </Text>
             <View style={styles.heroButtons}>
               <TouchableOpacity
                 style={styles.btnPrimary}
-                onPress={() => router.push(`/movie/${currentMovie.movieId}`)}
+                onPress={async () => {
+                  if (!isLoggedIn) {
+                    if (Platform.OS === "web") {
+                      if (
+                        window.confirm(
+                          "A jegyfoglaláshoz be kell jelentkezned! Átirányítsunk a bejelentkezés oldalra?",
+                        )
+                      ) {
+                        router.push("/login");
+                      }
+                    } else {
+                      Alert.alert(
+                        "Bejelentkezés szükséges",
+                        "A jegyfoglaláshoz be kell jelentkezned!",
+                        [
+                          { text: "Mégsem", style: "cancel" },
+                          {
+                            text: "Bejelentkezés",
+                            onPress: () => router.push("/login"),
+                          },
+                        ],
+                      );
+                    }
+                    return;
+                  }
+                  router.push(`/movie/${currentMovie.movieId}`);
+                }}
               >
                 <Text style={styles.btnPrimaryText}>🎟 Jegyfoglalás</Text>
               </TouchableOpacity>
@@ -129,7 +168,9 @@ export default function HomeScreen() {
           <View style={styles.dots}>
             {movies.map((_, i) => (
               <TouchableOpacity key={i} onPress={() => setCurrentSlide(i)}>
-                <View style={[styles.dot, i === currentSlide && styles.dotActive]} />
+                <View
+                  style={[styles.dot, i === currentSlide && styles.dotActive]}
+                />
               </TouchableOpacity>
             ))}
           </View>
@@ -149,20 +190,25 @@ export default function HomeScreen() {
                 onPress={() => router.push(`/movie/${item.movieId}`)}
               >
                 {imgUrl ? (
-                  <Image source={{ uri: imgUrl }} style={styles.moviePoster} resizeMode="cover" />
+                  <Image
+                    source={{ uri: imgUrl }}
+                    style={styles.moviePoster}
+                    resizeMode="cover"
+                  />
                 ) : (
                   <View style={styles.noPoster}>
                     <Text style={styles.noPosterText}>Nincs kép</Text>
                   </View>
                 )}
-                <Text style={styles.movieCardTitle} numberOfLines={1}>{item.title}</Text>
+                <Text style={styles.movieCardTitle} numberOfLines={1}>
+                  {item.title}
+                </Text>
                 <Text style={styles.movieCardGenre}>{item.genre}</Text>
               </TouchableOpacity>
             );
           })}
         </ScrollView>
       </View>
-
     </ScrollView>
   );
 }
