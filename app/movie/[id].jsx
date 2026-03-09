@@ -230,7 +230,8 @@ export default function MovieDetailScreen() {
                             { text: "Mégsem", style: "cancel" },
                             {
                               text: "Bejelentkezés",
-                              onPress: () => router.push("/login"),
+                              onPress: () =>
+                                router.push(`/login?redirect=/movie/${id}`),
                             },
                           ],
                         );

@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import styles from '../styles/authStyles';
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import styles from "../styles/authStyles";
 
-const API_BASE = 'http://192.168.137.1:5083/api';
+const API_BASE = "http://192.168.137.1:5083/api";
 
 function decodeJwtPayload(token) {
   try {
-    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
     return JSON.parse(atob(base64));
   } catch {
     return null;
@@ -20,26 +26,27 @@ function decodeJwtPayload(token) {
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const { redirect } = useLocalSearchParams();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
       setIsError(true);
-      setMessage('Kérlek töltsd ki az összes mezőt!');
+      setMessage("Kérlek töltsd ki az összes mezőt!");
       return;
     }
 
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
     try {
       const response = await fetch(`${API_BASE}/Auth/Login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Email: email, Password: password }),
       });
 
@@ -50,22 +57,27 @@ export default function LoginScreen() {
         const token = content.token || content.jwtToken || content.accessToken;
         const claims = token ? decodeJwtPayload(token) : null;
 
-        if (token) await AsyncStorage.setItem('token', token);
-        if (content.userId) await AsyncStorage.setItem('userId', String(content.userId));
-        if (content.name) await AsyncStorage.setItem('userName', content.name);
-        if (content.role) await AsyncStorage.setItem('role', content.role);
+        if (token) await AsyncStorage.setItem("token", token);
+        if (content.userId)
+          await AsyncStorage.setItem("userId", String(content.userId));
+        if (content.name) await AsyncStorage.setItem("userName", content.name);
+        if (content.role) await AsyncStorage.setItem("role", content.role);
 
         setIsError(false);
-        setMessage(`Sikeres bejelentkezés! Üdv, ${content.name || 'felhasználó'}!`);
+        setMessage(
+          `Sikeres bejelentkezés! Üdv, ${content.name || "felhasználó"}!`,
+        );
 
-        setTimeout(() => router.replace('/'), 1000);
+        setTimeout(() => router.replace(redirect || "/"), 1000);
       } else {
         setIsError(true);
-        setMessage(typeof data === 'string' ? data : 'Hibás email cím vagy jelszó!');
+        setMessage(
+          typeof data === "string" ? data : "Hibás email cím vagy jelszó!",
+        );
       }
     } catch {
       setIsError(true);
-      setMessage('Nem sikerült csatlakozni a szerverhez.');
+      setMessage("Nem sikerült csatlakozni a szerverhez.");
     } finally {
       setLoading(false);
     }
@@ -74,17 +86,21 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView contentContainerStyle={styles.inner} keyboardShouldPersistTaps="handled">
-
+      <ScrollView
+        contentContainerStyle={styles.inner}
+        keyboardShouldPersistTaps="handled"
+      >
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Text style={styles.backText}>← Vissza</Text>
         </TouchableOpacity>
 
         <Text style={styles.logo}>🎬 Mozizz</Text>
         <Text style={styles.title}>Bejelentkezés</Text>
-        <Text style={styles.subtitle}>Üdvözlünk! Jelentkezz be a legjobb filmélményekért.</Text>
+        <Text style={styles.subtitle}>
+          Üdvözlünk! Jelentkezz be a legjobb filmélményekért.
+        </Text>
 
         <View style={styles.form}>
           <Text style={styles.label}>Email cím</Text>
@@ -109,25 +125,33 @@ export default function LoginScreen() {
           />
 
           {message ? (
-            <Text style={[styles.message, isError ? styles.error : styles.success]}>
+            <Text
+              style={[styles.message, isError ? styles.error : styles.success]}
+            >
               {message}
             </Text>
           ) : null}
 
-          <TouchableOpacity style={styles.btn} onPress={handleLogin} disabled={loading}>
-            {loading
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.btnText}>Bejelentkezés</Text>
-            }
+          <TouchableOpacity
+            style={styles.btn}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.btnText}>Bejelentkezés</Text>
+            )}
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.push('/register')}>
-            <Text style={styles.link}>Nincs még fiókod? <Text style={styles.linkBold}>Regisztrálj!</Text></Text>
+          <TouchableOpacity onPress={() => router.push("/register")}>
+            <Text style={styles.link}>
+              Nincs még fiókod?{" "}
+              <Text style={styles.linkBold}>Regisztrálj!</Text>
+            </Text>
           </TouchableOpacity>
         </View>
-
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-

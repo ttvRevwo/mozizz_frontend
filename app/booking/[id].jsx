@@ -373,7 +373,6 @@ export default function BookingScreen() {
   const [error, setError] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
 
-  // Bejelentkezés ellenőrzés
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem("token");
@@ -383,7 +382,11 @@ export default function BookingScreen() {
           "A jegyfoglaláshoz be kell jelentkezned!",
           [
             { text: "Mégsem", style: "cancel", onPress: () => router.back() },
-            { text: "Bejelentkezés", onPress: () => router.replace("/login") },
+            {
+              text: "Bejelentkezés",
+              onPress: () =>
+                router.replace(`/login?redirect=/booking/${showtimeId}`),
+            },
           ],
         );
       }

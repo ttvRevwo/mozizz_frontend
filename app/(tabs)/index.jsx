@@ -25,7 +25,6 @@ export default function HomeScreen() {
   const [userName, setUserName] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Login állapot frissítése minden tab váltásnál
   useFocusEffect(
     useCallback(() => {
       const checkLogin = async () => {
@@ -95,7 +94,9 @@ export default function HomeScreen() {
           </View>
         ) : (
           <View style={styles.navRight}>
-            <TouchableOpacity onPress={() => router.push("/login")}>
+            <TouchableOpacity
+              onPress={() => router.push("/login?redirect=/(tabs)/profile")}
+            >
               <Text style={styles.navBtn}>Bejelentkezés</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push("/register")}>
@@ -135,7 +136,9 @@ export default function HomeScreen() {
                           "A jegyfoglaláshoz be kell jelentkezned! Átirányítsunk a bejelentkezés oldalra?",
                         )
                       ) {
-                        router.push("/login");
+                        router.push(
+                          `/login?redirect=/movie/${currentMovie.movieId}`,
+                        );
                       }
                     } else {
                       Alert.alert(
@@ -145,7 +148,10 @@ export default function HomeScreen() {
                           { text: "Mégsem", style: "cancel" },
                           {
                             text: "Bejelentkezés",
-                            onPress: () => router.push("/login"),
+                            onPress: () =>
+                              router.push(
+                                `/login?redirect=/movie/${currentMovie.movieId}`,
+                              ),
                           },
                         ],
                       );

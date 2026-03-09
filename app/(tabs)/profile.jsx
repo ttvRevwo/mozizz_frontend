@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -64,7 +64,7 @@ function TicketCard({ ticket, onCancel }) {
   const isUsed = state === "used";
   const isExpired = state === "expired";
 
-  // A backend elvégzi a 2 órás ellenőrzést
+  // A backend elvégzi a 2 órás ellenőrzést, itt csak az alapfeltételeket nézzük
   const canCancel = !isUsed && !isExpired;
 
   const handleCancel = () => {
@@ -184,7 +184,6 @@ function TicketCard({ ticket, onCancel }) {
 }
 
 export default function ProfileScreen() {
-  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -288,7 +287,6 @@ export default function ProfileScreen() {
       </SafeAreaView>
     );
   }
-
   if (isLoggedIn === false) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -322,28 +320,31 @@ export default function ProfileScreen() {
           >
             A jegyeid és foglalásaid megtekintéséhez bejelentkezés szükséges.
           </Text>
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#E50914",
-              paddingHorizontal: 36,
-              paddingVertical: 14,
-              borderRadius: 10,
-              marginTop: 8,
-            }}
-            onPress={() => router.push("/login")}
-          >
-            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
-              Bejelentkezés
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/register")}>
-            <Text style={{ color: "#888", fontSize: 14 }}>
-              Még nincs fiókod?{" "}
-              <Text style={{ color: "#E50914", fontWeight: "bold" }}>
-                Regisztrálj!
+          <Link href="/login?redirect=/(tabs)/profile" asChild>
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#E50914",
+                paddingHorizontal: 36,
+                paddingVertical: 14,
+                borderRadius: 10,
+                marginTop: 8,
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
+                Bejelentkezés
               </Text>
-            </Text>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </Link>
+          <Link href="/register" asChild>
+            <TouchableOpacity>
+              <Text style={{ color: "#888", fontSize: 14 }}>
+                Még nincs fiókod?{" "}
+                <Text style={{ color: "#E50914", fontWeight: "bold" }}>
+                  Regisztrálj!
+                </Text>
+              </Text>
+            </TouchableOpacity>
+          </Link>
         </View>
       </SafeAreaView>
     );
