@@ -151,7 +151,7 @@ export default StyleSheet.create({
   bookBtnText: { color: "#121212", fontWeight: "bold", fontSize: 15 },
   bookBtnTextDisabled: { color: "#555" },
 
-  //Payment modal
+  // ===== PAYMENT MODAL =====
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.85)",

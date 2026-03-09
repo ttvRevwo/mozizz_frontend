@@ -63,16 +63,8 @@ function TicketCard({ ticket, onCancel }) {
   const isUsed = state === "used";
   const isExpired = state === "expired";
 
-  const showDt = ticket.showDate
-    ? new Date(
-        `${ticket.showDate.split("T")[0]}T${ticket.showTime?.slice(0, 5) ?? "00:00"}:00`,
-      )
-    : null;
-  const canCancel =
-    !isUsed &&
-    !isExpired &&
-    showDt &&
-    new Date() < new Date(showDt - 2 * 3600000);
+  // A backend elvégzi a 2 órás ellenőrzést, itt csak az alapfeltételeket nézzük
+  const canCancel = !isUsed && !isExpired;
 
   const handleCancel = () => {
     Alert.alert("Lemondás", "Biztosan lemondod ezt a foglalást?", [
@@ -91,14 +83,18 @@ function TicketCard({ ticket, onCancel }) {
                 headers: { Authorization: `Bearer ${token}` },
               },
             );
+            const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-              const data = await res.json();
-              Alert.alert("Hiba", data.uzenet ?? "Hiba történt.");
+              Alert.alert(
+                "Lemondás sikertelen",
+                data?.uzenet ?? data?.hiba ?? "Hiba történt.",
+              );
               return;
             }
             onCancel(ticket.reservationId);
-          } catch {
-            Alert.alert("Hiba", "Nem sikerült a lemondás.");
+            Alert.alert("Siker", "A foglalás sikeresen lemondva!");
+          } catch (err) {
+            Alert.alert("Hiba", "Nem sikerült csatlakozni a szerverhez.");
           } finally {
             setCancelling(false);
           }
