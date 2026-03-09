@@ -1,25 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View, Text, Image, TouchableOpacity,
-  ActivityIndicator, ScrollView
-} from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import styles from '../../styles/movieStyles';
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import styles from "../../styles/movieStyles";
 
-const CLOUDINARY_BASE = 'https://res.cloudinary.com/dytjuv6qt/image/upload/';
-const API_BASE = 'http://192.168.137.1:5083/api';
+const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
+const API_BASE = "http://192.168.137.1:5083/api";
 
 const getImageUrl = (img) => {
   if (!img) return null;
-  if (img.startsWith('http')) return img;
+  if (img.startsWith("http")) return img;
   return `${CLOUDINARY_BASE}${img}`;
 };
 
 const formatDate = (dateStr) => {
-  if (!dateStr) return 'Ismeretlen dátum';
+  if (!dateStr) return "Ismeretlen dátum";
   const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return 'Érvénytelen dátum';
-  return date.toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' });
+  if (isNaN(date.getTime())) return "Érvénytelen dátum";
+  return date.toLocaleDateString("hu-HU", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 };
 
 const getYear = (dateStr) => {
@@ -39,38 +47,38 @@ export default function MovieDetailScreen() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!id || id === 'undefined') {
-      setError('Érvénytelen film azonosító.');
+    if (!id || id === "undefined") {
+      setError("Érvénytelen film azonosító.");
       setLoading(false);
       return;
     }
 
     fetch(`${API_BASE}/Movie/MovieById/${id}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Film nem található.');
+      .then((res) => {
+        if (!res.ok) throw new Error("Film nem található.");
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         const movieData = data.data || data;
         setMovie(movieData);
 
-        return fetch(`${API_BASE}/Showtime/GetAllShowtimes`);
+        return fetch(`${API_BASE}/Showtime/GetByMovie/${id}`);
       })
-      .then(res => res.json())
-      .then(data => {
-        const all = Array.isArray(data) ? data : (data.data || []);
-        const filtered = all
-          .filter(st => String(st.movieId || st.MovieId) === String(id))
-          .sort((a, b) => {
-            const da = (a.date || '') + (a.time || '');
-            const db = (b.date || '') + (b.time || '');
-            return da.localeCompare(db);
-          });
-        setShowtimes(filtered);
+      .then((res) => res.json())
+      .then((data) => {
+        const all = Array.isArray(data) ? data : data.data || [];
+        const sorted = all.sort((a, b) => {
+          const da =
+            (a.showDate || a.date || "") + (a.showTime1 || a.time || "");
+          const db =
+            (b.showDate || b.date || "") + (b.showTime1 || b.time || "");
+          return da.localeCompare(db);
+        });
+        setShowtimes(sorted);
         setLoading(false);
       })
-      .catch(err => {
-        setError('Nem sikerült betölteni az adatokat.');
+      .catch((err) => {
+        setError("Nem sikerült betölteni az adatokat.");
         setLoading(false);
       });
   }, [id]);
@@ -90,7 +98,7 @@ export default function MovieDetailScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Text style={styles.backText}>← Vissza</Text>
         </TouchableOpacity>
-        <Text style={styles.errorText}>{error || 'A film nem található.'}</Text>
+        <Text style={styles.errorText}>{error || "A film nem található."}</Text>
       </View>
     );
   }
@@ -100,16 +108,20 @@ export default function MovieDetailScreen() {
   const genre = movie.genre || movie.Genre;
   const rating = movie.rating || movie.Rating;
   const duration = movie.duration || movie.Duration;
-  const releaseDate = movie.release_date || movie.releaseDate || movie.ReleaseDate;
+  const releaseDate =
+    movie.release_date || movie.releaseDate || movie.ReleaseDate;
   const imgUrl = getImageUrl(movie.img || movie.Img || movie.imageUrl);
   const releaseYear = getYear(releaseDate);
 
   return (
     <View style={styles.container}>
-
       {imgUrl && (
         <>
-          <Image source={{ uri: imgUrl }} style={styles.bgImage} resizeMode="cover" />
+          <Image
+            source={{ uri: imgUrl }}
+            style={styles.bgImage}
+            resizeMode="cover"
+          />
           <View style={styles.bgOverlay} />
         </>
       )}
@@ -118,14 +130,25 @@ export default function MovieDetailScreen() {
         <Text style={styles.backText}>← Vissza</Text>
       </TouchableOpacity>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.header}>
           {imgUrl ? (
-            <Image source={{ uri: imgUrl }} style={styles.poster} resizeMode="cover" />
+            <Image
+              source={{ uri: imgUrl }}
+              style={styles.poster}
+              resizeMode="cover"
+            />
           ) : (
-            <View style={[styles.poster, { justifyContent: 'center', alignItems: 'center' }]}>
-              <Text style={{ color: '#888' }}>Nincs kép</Text>
+            <View
+              style={[
+                styles.poster,
+                { justifyContent: "center", alignItems: "center" },
+              ]}
+            >
+              <Text style={{ color: "#888" }}>Nincs kép</Text>
             </View>
           )}
 
@@ -159,7 +182,7 @@ export default function MovieDetailScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Leírás</Text>
           <Text style={styles.description}>
-            {description || 'Ehhez a filmhez még nincs leírás megadva.'}
+            {description || "Ehhez a filmhez még nincs leírás megadva."}
           </Text>
         </View>
 
@@ -175,10 +198,12 @@ export default function MovieDetailScreen() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {showtimes.map((st) => {
                 const stId = st.showtimeId || st.ShowtimeId || st.id;
-                const timeRaw = st.time || st.Time;
-                const dateRaw = st.date || st.Date;
+                const timeRaw = st.showTime1 || st.time || st.Time;
+                const dateRaw = st.showDate || st.date || st.Date;
                 const hallName = st.hallName || st.HallName;
-                const formattedTime = timeRaw ? timeRaw.substring(0, 5) : '';
+                const formattedTime = timeRaw
+                  ? String(timeRaw).substring(0, 5)
+                  : "";
 
                 return (
                   <TouchableOpacity
@@ -187,8 +212,12 @@ export default function MovieDetailScreen() {
                     onPress={() => router.push(`/booking/${stId}`)}
                   >
                     <Text style={styles.showtimeTime}>{formattedTime}</Text>
-                    <Text style={styles.showtimeDate}>{dateRaw}</Text>
-                    {hallName && <Text style={styles.showtimeHall}>{hallName}</Text>}
+                    <Text style={styles.showtimeDate}>
+                      {String(dateRaw).split("T")[0]}
+                    </Text>
+                    {hallName && (
+                      <Text style={styles.showtimeHall}>{hallName}</Text>
+                    )}
                   </TouchableOpacity>
                 );
               })}
@@ -198,10 +227,10 @@ export default function MovieDetailScreen() {
 
         <View style={[styles.section, styles.releaseRow]}>
           <Text style={styles.releaseText}>
-            Megjelenés: <Text style={styles.releaseValue}>{formatDate(releaseDate)}</Text>
+            Megjelenés:{" "}
+            <Text style={styles.releaseValue}>{formatDate(releaseDate)}</Text>
           </Text>
         </View>
-
       </ScrollView>
     </View>
   );
