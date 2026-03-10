@@ -38,6 +38,7 @@ export default StyleSheet.create({
   tabActive: { backgroundColor: "#E0AA3E", borderColor: "#E0AA3E" },
   tabText: { color: "#888", fontSize: 12, fontWeight: "600" },
   tabTextActive: { color: "#111" },
+
   lockIcon: { fontSize: 48, marginBottom: 16 },
   notAuthTitle: {
     color: "#fff",
@@ -162,7 +163,8 @@ export default StyleSheet.create({
   topRank: { fontSize: 18, fontWeight: "bold", width: 30 },
   topTitle: { color: "#fff", fontSize: 14, flex: 1 },
   topCount: { color: "#E0AA3E", fontSize: 13, fontWeight: "bold" },
-  ccRow: {
+
+  occRow: {
     backgroundColor: "#1a1a1a",
     borderRadius: 8,
     padding: 12,
@@ -200,4 +202,71 @@ export default StyleSheet.create({
 
   loadingText: { color: "#888", marginTop: 12 },
   errorText: { color: "#ff6b6b", textAlign: "center", padding: 16 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    justifyContent: "flex-end",
+  },
+  modalBox: {
+    backgroundColor: "#1a1a1a",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: "85%",
+  },
+  modalTitle: {
+    color: "#E0AA3E",
+    fontSize: 17,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  modalLabel: { color: "#888", fontSize: 12, marginBottom: 4 },
+  modalInput: {
+    backgroundColor: "#0f0f0f",
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+    borderRadius: 8,
+    color: "#fff",
+    padding: 10,
+    fontSize: 14,
+  },
+  modalBtns: { flexDirection: "row", gap: 10, marginTop: 16 },
+  modalBtnCancel: {
+    flex: 1,
+    backgroundColor: "#2a2a2a",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  modalBtnCancelText: { color: "#888", fontWeight: "600" },
+  modalBtnSave: {
+    flex: 1,
+    backgroundColor: "#E0AA3E",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  modalBtnSaveText: { color: "#111", fontWeight: "bold" },
+
+  helperBox: {
+    backgroundColor: "#111",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+  },
+  helperTitle: {
+    color: "#E0AA3E",
+    fontSize: 11,
+    fontWeight: "bold",
+    marginBottom: 6,
+  },
+  helperSub: {
+    color: "#888",
+    fontSize: 11,
+    marginBottom: 4,
+    fontWeight: "600",
+  },
+  helperRow: { color: "#aaa", fontSize: 11, marginBottom: 2 },
 });
