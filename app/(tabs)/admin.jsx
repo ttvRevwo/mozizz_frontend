@@ -1,4 +1,17 @@
-import { Alert, Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    Platform,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import styles from "../../styles/adminStyles";
 
 const API_BASE = "http://192.168.137.1:5083/api";
 
@@ -71,7 +84,7 @@ function MoviesTab({ token }) {
   }, []);
 
   const handleDelete = (id, title) => {
-    confirmAction(`Biztosan törlöd ezt a filmet?\n"${title}"`, async () => {
+    confirmAction(`Biztosan törlöd ezt a filmet?`, async () => {
       try {
         const res = await fetch(`${API_BASE}/Movie/DeleteMovie/${id}`, {
           method: "DELETE",
@@ -80,9 +93,7 @@ function MoviesTab({ token }) {
         if (res.ok) {
           fetchMovies();
           Alert.alert("Siker", "Film törölve!");
-        } else {
-          Alert.alert("Hiba", "Nem sikerült törölni.");
-        }
+        } else Alert.alert("Hiba", "Nem sikerült törölni.");
       } catch {
         Alert.alert("Hiba", "Szerver hiba.");
       }
@@ -135,273 +146,274 @@ function MoviesTab({ token }) {
       ))}
     </ScrollView>
   );
+}
 
-  function ShowtimesTab({ token }) {
-    const [showtimes, setShowtimes] = useState([]);
-    const [loading, setLoading] = useState(true);
+function ShowtimesTab({ token }) {
+  const [showtimes, setShowtimes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const fetchShowtimes = useCallback(() => {
-      setLoading(true);
-      fetch(`${API_BASE}/Showtime/GetAllShowtimes`)
-        .then((r) => r.json())
-        .then((d) => setShowtimes(Array.isArray(d) ? d : d.data || []))
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    }, []);
+  const fetchShowtimes = useCallback(() => {
+    setLoading(true);
+    fetch(`${API_BASE}/Showtime/GetAllShowtimes`)
+      .then((r) => r.json())
+      .then((d) => setShowtimes(Array.isArray(d) ? d : d.data || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
-    useEffect(() => {
-      fetchShowtimes();
-    }, []);
+  useEffect(() => {
+    fetchShowtimes();
+  }, []);
 
-    const handleDelete = (id, title) => {
-      confirmAction(`Biztosan törlöd ezt a vetítést?\n"${title}"`, async () => {
-        try {
-          const res = await fetch(`${API_BASE}/Showtime/DeleteShowtime/${id}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            fetchShowtimes();
-            Alert.alert("Siker", "Vetítés törölve!");
-          } else {
-            Alert.alert(
-              "Hiba",
-              "Nem sikerült törölni. (Lehet, hogy van foglalás hozzá.)",
-            );
-          }
-        } catch {
-          Alert.alert("Hiba", "Szerver hiba.");
-        }
-      });
-    };
+  const handleDelete = (id, title) => {
+    confirmAction(`Biztosan törlöd ezt a vetítést?`, async () => {
+      try {
+        const res = await fetch(`${API_BASE}/Showtime/DeleteShowtime/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          fetchShowtimes();
+          Alert.alert("Siker", "Vetítés törölve!");
+        } else
+          Alert.alert(
+            "Hiba",
+            "Nem sikerült törölni. (Lehet, hogy van foglalás hozzá.)",
+          );
+      } catch {
+        Alert.alert("Hiba", "Szerver hiba.");
+      }
+    });
+  };
 
-    if (loading)
-      return <ActivityIndicator color="#E0AA3E" style={{ marginTop: 40 }} />;
+  if (loading)
+    return <ActivityIndicator color="#E0AA3E" style={{ marginTop: 40 }} />;
 
-    return (
-      <ScrollView style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Vetítések</Text>
-          <Text style={styles.sectionCount}>{showtimes.length} db</Text>
+  return (
+    <ScrollView style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Vetítések</Text>
+        <Text style={styles.sectionCount}>{showtimes.length} db</Text>
+      </View>
+      {showtimes.length === 0 && (
+        <View style={styles.empty}>
+          <Text style={styles.emptyIcon}>🎥</Text>
+          <Text style={styles.emptyText}>Nincs vetítés.</Text>
         </View>
-        {showtimes.length === 0 && (
-          <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>🎥</Text>
-            <Text style={styles.emptyText}>Nincs vetítés.</Text>
+      )}
+      {showtimes.map((st) => {
+        const id = st.showtimeId || st.ShowtimeId;
+        const title = st.movieTitle || st.MovieTitle;
+        const date = st.date || st.Date;
+        const time = st.time || st.Time;
+        const hall = st.hallName || st.HallName;
+        return (
+          <View key={id} style={[styles.card, { borderLeftColor: "#00d2ff" }]}>
+            <Text style={styles.cardTitle} numberOfLines={1}>
+              {title}
+            </Text>
+            <Text style={styles.cardSub}>
+              {date} • {String(time).slice(0, 5)} • {hall}
+            </Text>
+            <View style={styles.btnRow}>
+              <TouchableOpacity
+                style={styles.btnDelete}
+                onPress={() => handleDelete(id, title)}
+              >
+                <Text style={styles.btnDeleteText}>🗑 Törlés</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        )}
-        {showtimes.map((st) => {
-          const id = st.showtimeId || st.ShowtimeId;
-          const title = st.movieTitle || st.MovieTitle;
-          const date = st.date || st.Date;
-          const time = st.time || st.Time;
-          const hall = st.hallName || st.HallName;
-          return (
-            <View
-              key={id}
-              style={[styles.card, { borderLeftColor: "#00d2ff" }]}
+        );
+      })}
+    </ScrollView>
+  );
+}
+
+function StatsTab({ token }) {
+  const [daily, setDaily] = useState(null);
+  const [topMovies, setTopMovies] = useState([]);
+  const [occupancy, setOccupancy] = useState({
+    aktivVetitesek: [],
+    archivVetitesek: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [occTab, setOccTab] = useState("aktiv");
+
+  useEffect(() => {
+    const headers = { Authorization: `Bearer ${token}` };
+    Promise.all([
+      fetch(`${API_BASE}/Admin/DailyReport`, { headers }).then((r) =>
+        r.ok ? r.json() : null,
+      ),
+      fetch(`${API_BASE}/Admin/TopMovies`, { headers }).then((r) =>
+        r.ok ? r.json() : [],
+      ),
+      fetch(`${API_BASE}/Admin/ShowtimeOccupancy`, { headers }).then((r) =>
+        r.ok ? r.json() : null,
+      ),
+    ])
+      .then(([d, t, o]) => {
+        if (d) setDaily(d);
+        if (t) setTopMovies(t);
+        if (o) setOccupancy(o);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading)
+    return <ActivityIndicator color="#E0AA3E" style={{ marginTop: 40 }} />;
+
+  const statCards = [
+    {
+      label: "Mai bevétel",
+      value: daily?.maiBevetel ?? daily?.MaiBevetel ?? "0 Ft",
+      color: "#E0AA3E",
+    },
+    {
+      label: "Eladott jegyek",
+      value: daily?.eladottJegyek ?? daily?.EladottJegyek ?? "0 db",
+      color: "#00b4d8",
+    },
+    {
+      label: "Foglalások",
+      value: daily?.foglalasokSzama ?? daily?.FoglalasokSzama ?? 0,
+      color: "#52b788",
+    },
+    {
+      label: "Dátum",
+      value: daily?.datum ?? daily?.Datum ?? "—",
+      color: "#888",
+    },
+  ];
+
+  const rankColors = ["#E0AA3E", "#c0c0c0", "#cd7f32"];
+  const activeList = occupancy.aktivVetitesek || [];
+  const archiveList = occupancy.archivVetitesek || [];
+  const occList = occTab === "aktiv" ? activeList : archiveList;
+
+  return (
+    <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
+      <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>
+        Mai nap – {daily?.datum ?? daily?.Datum ?? "—"}
+      </Text>
+      <View style={styles.statGrid}>
+        {statCards.map((sc) => (
+          <View
+            key={sc.label}
+            style={[styles.statCard, { borderTopColor: sc.color }]}
+          >
+            <Text style={styles.statLabel}>{sc.label}</Text>
+            <Text style={[styles.statValue, { color: sc.color }]}>
+              {sc.value}
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>
+        🏆 Top 3 film
+      </Text>
+      {topMovies.length === 0 ? (
+        <View style={styles.empty}>
+          <Text style={styles.emptyText}>Nincs adat.</Text>
+        </View>
+      ) : (
+        topMovies.map((m, i) => (
+          <View key={i} style={styles.topRow}>
+            <Text style={[styles.topRank, { color: rankColors[i] || "#888" }]}>
+              #{i + 1}
+            </Text>
+            <Text style={styles.topTitle} numberOfLines={1}>
+              {m.filmCim || m.FilmCim}
+            </Text>
+            <Text style={styles.topCount}>
+              {m.jegyekSzama ?? m.JegyekSzama ?? 0} jegy
+            </Text>
+          </View>
+        ))
+      )}
+
+      <View style={[styles.sectionHeader, { marginTop: 20, marginBottom: 8 }]}>
+        <Text style={styles.sectionTitle}>Telítettség</Text>
+      </View>
+      <View style={styles.occTabs}>
+        {[
+          { key: "aktiv", label: `Aktív (${activeList.length})` },
+          { key: "archiv", label: `Archív (${archiveList.length})` },
+        ].map((t) => (
+          <TouchableOpacity
+            key={t.key}
+            style={[styles.occTab, occTab === t.key && styles.occTabActive]}
+            onPress={() => setOccTab(t.key)}
+          >
+            <Text
+              style={[
+                styles.occTabText,
+                occTab === t.key && styles.occTabTextActive,
+              ]}
             >
-              <Text style={styles.cardTitle} numberOfLines={1}>
-                {title}
-              </Text>
-              <Text style={styles.cardSub}>
-                {date} • {String(time).slice(0, 5)} • {hall}
-              </Text>
-              <View style={styles.btnRow}>
-                <TouchableOpacity
-                  style={styles.btnDelete}
-                  onPress={() => handleDelete(id, title)}
-                >
-                  <Text style={styles.btnDeleteText}>🗑 Törlés</Text>
-                </TouchableOpacity>
+              {t.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {occList.length === 0 ? (
+        <View style={styles.empty}>
+          <Text style={styles.emptyText}>Nincs adat.</Text>
+        </View>
+      ) : (
+        occList.map((item, i) => {
+          const pct = parseFloat(item.telitettseg) || 0;
+          const barColor =
+            pct >= 80 ? "#E50914" : pct >= 50 ? "#E0AA3E" : "#00b4d8";
+          return (
+            <View key={i} style={styles.occRow}>
+              <Text style={styles.occFilm}>{item.film}</Text>
+              <Text style={styles.occTime}>{item.idopont}</Text>
+              <View style={styles.occBarTrack}>
+                <View
+                  style={[
+                    styles.occBarFill,
+                    {
+                      width: `${Math.min(pct, 100)}%`,
+                      backgroundColor: barColor,
+                    },
+                  ]}
+                />
+              </View>
+              <View style={styles.occBottom}>
+                <Text style={[styles.occPct, { color: barColor }]}>
+                  {item.telitettseg}
+                </Text>
+                <Text style={styles.occTickets}>{item.eladottJegyek} jegy</Text>
               </View>
             </View>
           );
-        })}
-      </ScrollView>
-    );
-  }
-
-  function StatsTab({ token }) {
-    const [daily, setDaily] = useState(null);
-    const [topMovies, setTopMovies] = useState([]);
-    const [occupancy, setOccupancy] = useState({
-      aktivVetitesek: [],
-      archivVetitesek: [],
-    });
-    const [loading, setLoading] = useState(true);
-    const [occTab, setOccTab] = useState("aktiv");
-
-    useEffect(() => {
-      const headers = { Authorization: `Bearer ${token}` };
-      Promise.all([
-        fetch(`${API_BASE}/Admin/DailyReport`, { headers }).then((r) =>
-          r.ok ? r.json() : null,
-        ),
-        fetch(`${API_BASE}/Admin/TopMovies`, { headers }).then((r) =>
-          r.ok ? r.json() : [],
-        ),
-        fetch(`${API_BASE}/Admin/ShowtimeOccupancy`, { headers }).then((r) =>
-          r.ok ? r.json() : null,
-        ),
-      ])
-        .then(([d, t, o]) => {
-          if (d) setDaily(d);
-          if (t) setTopMovies(t);
-          if (o) setOccupancy(o);
         })
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    }, []);
-
-    if (loading)
-      return <ActivityIndicator color="#E0AA3E" style={{ marginTop: 40 }} />;
-
-    const statCards = [
-      {
-        label: "Mai bevétel",
-        value: daily?.maiBevetel ?? daily?.MaiBevetel ?? "0 Ft",
-        color: "#E0AA3E",
-      },
-      {
-        label: "Eladott jegyek",
-        value: daily?.eladottJegyek ?? daily?.EladottJegyek ?? "0 db",
-        color: "#00b4d8",
-      },
-      {
-        label: "Foglalások",
-        value: daily?.foglalasokSzama ?? daily?.FoglalasokSzama ?? 0,
-        color: "#52b788",
-      },
-      {
-        label: "Dátum",
-        value: daily?.datum ?? daily?.Datum ?? "—",
-        color: "#888",
-      },
-    ];
-
-    const rankColors = ["#E0AA3E", "#c0c0c0", "#cd7f32"];
-    const activeList = occupancy.aktivVetitesek || [];
-    const archiveList = occupancy.archivVetitesek || [];
-    const occList = occTab === "aktiv" ? activeList : archiveList;
-
-    return (
-      <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>
-          Mai nap – {daily?.datum ?? daily?.Datum ?? "—"}
-        </Text>
-        <View style={styles.statGrid}>
-          {statCards.map((sc) => (
-            <View
-              key={sc.label}
-              style={[styles.statCard, { borderTopColor: sc.color }]}
-            >
-              <Text style={styles.statLabel}>{sc.label}</Text>
-              <Text style={[styles.statValue, { color: sc.color }]}>
-                {sc.value}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>
-          🏆 Top 3 film
-        </Text>
-        {topMovies.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>Nincs adat.</Text>
-          </View>
-        ) : (
-          topMovies.map((m, i) => (
-            <View key={i} style={styles.topRow}>
-              <Text
-                style={[styles.topRank, { color: rankColors[i] || "#888" }]}
-              >
-                #{i + 1}
-              </Text>
-              <Text style={styles.topTitle} numberOfLines={1}>
-                {m.filmCim || m.FilmCim}
-              </Text>
-              <Text style={styles.topCount}>
-                {m.jegyekSzama ?? m.JegyekSzama ?? 0} jegy
-              </Text>
-            </View>
-          ))
-        )}
-        <View
-          style={[styles.sectionHeader, { marginTop: 20, marginBottom: 8 }]}
-        >
-          <Text style={styles.sectionTitle}>Telítettség</Text>
-        </View>
-        <View style={styles.occTabs}>
-          {[
-            { key: "aktiv", label: `Aktív (${activeList.length})` },
-            { key: "archiv", label: `Archív (${archiveList.length})` },
-          ].map((t) => (
-            <TouchableOpacity
-              key={t.key}
-              style={[styles.occTab, occTab === t.key && styles.occTabActive]}
-              onPress={() => setOccTab(t.key)}
-            >
-              <Text
-                style={[
-                  styles.occTabText,
-                  occTab === t.key && styles.occTabTextActive,
-                ]}
-              >
-                {t.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {occList.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>Nincs adat.</Text>
-          </View>
-        ) : (
-          occList.map((item, i) => {
-            const pct = parseFloat(item.telitettseg) || 0;
-            const barColor =
-              pct >= 80 ? "#E50914" : pct >= 50 ? "#E0AA3E" : "#00b4d8";
-            return (
-              <View key={i} style={styles.occRow}>
-                <Text style={styles.occFilm}>{item.film}</Text>
-                <Text style={styles.occTime}>{item.idopont}</Text>
-                <View style={styles.occBarTrack}>
-                  <View
-                    style={[
-                      styles.occBarFill,
-                      {
-                        width: `${Math.min(pct, 100)}%`,
-                        backgroundColor: barColor,
-                      },
-                    ]}
-                  />
-                </View>
-                <View style={styles.occBottom}>
-                  <Text style={[styles.occPct, { color: barColor }]}>
-                    {item.telitettseg}
-                  </Text>
-                  <Text style={styles.occTickets}>
-                    {item.eladottJegyek} jegy
-                  </Text>
-                </View>
-              </View>
-            );
-          })
-        )}
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    );
-  }
+      )}
+      <View style={{ height: 40 }} />
+    </ScrollView>
+  );
 }
+
+// [2025-03-09] Tab lista - AdminScreen-en kívül definiálva, hogy mindig elérhető legyen
+const TABS = [
+  { key: "users", label: "👥 Userek" },
+  { key: "movies", label: "🎬 Filmek" },
+  { key: "showtimes", label: "🎥 Vetítések" },
+  { key: "stats", label: "📊 Statisztika" },
+];
+
 export default function AdminScreen() {
   const [role, setRole] = useState(null);
   const [token, setToken] = useState(null);
   const [activeTab, setActiveTab] = useState("users");
   const [checking, setChecking] = useState(true);
 
+  // [2025-03-09] Admin jogosultság ellenőrzése minden fókuszálásnál
   useFocusEffect(
     useCallback(() => {
       const check = async () => {
