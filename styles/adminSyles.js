@@ -147,4 +147,17 @@ export default StyleSheet.create({
   },
   statValue: { color: "#fff", fontSize: 22, fontWeight: "bold" },
   statSub: { color: "#555", fontSize: 11, marginTop: 4 },
+
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "#1a1a1a",
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 10,
+  },
+  topRank: { fontSize: 18, fontWeight: "bold", width: 30 },
+  topTitle: { color: "#fff", fontSize: 14, flex: 1 },
+  topCount: { color: "#E0AA3E", fontSize: 13, fontWeight: "bold" },
 });
