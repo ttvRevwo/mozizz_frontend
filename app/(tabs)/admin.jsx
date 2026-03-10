@@ -396,3 +396,82 @@ function MoviesTab({ token }) {
     );
   }
 }
+export default function AdminScreen() {
+  const [role, setRole] = useState(null);
+  const [token, setToken] = useState(null);
+  const [activeTab, setActiveTab] = useState("users");
+  const [checking, setChecking] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      const check = async () => {
+        const r = await AsyncStorage.getItem("role");
+        const t = await AsyncStorage.getItem("token");
+        setRole(r);
+        setToken(t);
+        setChecking(false);
+      };
+      check();
+    }, []),
+  );
+
+  if (checking) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator color="#E0AA3E" style={{ marginTop: 60 }} />
+      </SafeAreaView>
+    );
+  }
+
+  if (role !== "Admin") {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centered}>
+          <Text style={styles.lockIcon}>🔒</Text>
+          <Text style={styles.notAuthTitle}>Nincs hozzáférésed</Text>
+          <Text style={styles.notAuthText}>
+            Ez az oldal csak adminisztrátorok számára érhető el.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>⚙️ Admin Panel</Text>
+        <Text style={styles.headerSub}>Mozizz rendszerkezelés</Text>
+      </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabs}
+        contentContainerStyle={{ gap: 8, paddingVertical: 10 }}
+      >
+        {TABS.map((t) => (
+          <TouchableOpacity
+            key={t.key}
+            style={[styles.tab, activeTab === t.key && styles.tabActive]}
+            onPress={() => setActiveTab(t.key)}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === t.key && styles.tabTextActive,
+              ]}
+            >
+              {t.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {activeTab === "users" && <UsersTab token={token} />}
+      {activeTab === "movies" && <MoviesTab token={token} />}
+      {activeTab === "showtimes" && <ShowtimesTab token={token} />}
+      {activeTab === "stats" && <StatsTab token={token} />}
+    </SafeAreaView>
+  );
+}

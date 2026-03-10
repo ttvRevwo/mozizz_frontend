@@ -160,4 +160,42 @@ export default StyleSheet.create({
   topRank: { fontSize: 18, fontWeight: "bold", width: 30 },
   topTitle: { color: "#fff", fontSize: 14, flex: 1 },
   topCount: { color: "#E0AA3E", fontSize: 13, fontWeight: "bold" },
+  ccRow: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  occFilm: { color: "#fff", fontSize: 13, fontWeight: "600", marginBottom: 2 },
+  occTime: { color: "#666", fontSize: 11, marginBottom: 8 },
+  occBarTrack: {
+    height: 6,
+    backgroundColor: "#2a2a2a",
+    borderRadius: 3,
+    marginBottom: 4,
+  },
+  occBarFill: { height: 6, borderRadius: 3 },
+  occBottom: { flexDirection: "row", justifyContent: "space-between" },
+  occPct: { fontSize: 12, fontWeight: "bold" },
+  occTickets: { color: "#888", fontSize: 11 },
+
+  occTabs: { flexDirection: "row", gap: 8, marginBottom: 12 },
+  occTab: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: "#1a1a1a",
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+  },
+  occTabActive: { backgroundColor: "#E0AA3E", borderColor: "#E0AA3E" },
+  occTabText: { color: "#888", fontSize: 12 },
+  occTabTextActive: { color: "#111", fontWeight: "bold" },
+
+  empty: { alignItems: "center", padding: 32 },
+  emptyIcon: { fontSize: 36, marginBottom: 12 },
+  emptyText: { color: "#555", fontSize: 14 },
+
+  loadingText: { color: "#888", marginTop: 12 },
+  errorText: { color: "#ff6b6b", textAlign: "center", padding: 16 },
 });
