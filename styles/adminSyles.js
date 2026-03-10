@@ -123,4 +123,28 @@ export default StyleSheet.create({
   userName: { color: "#fff", fontSize: 15, fontWeight: "600" },
   userEmail: { color: "#888", fontSize: 12, marginTop: 2 },
   userRole: { color: "#E0AA3E", fontSize: 11, marginTop: 4 },
+
+  statGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 20,
+  },
+  statCard: {
+    flex: 1,
+    minWidth: "45%",
+    backgroundColor: "#1a1a1a",
+    borderRadius: 10,
+    padding: 14,
+    borderTopWidth: 3,
+  },
+  statLabel: {
+    color: "#888",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  statValue: { color: "#fff", fontSize: 22, fontWeight: "bold" },
+  statSub: { color: "#555", fontSize: 11, marginTop: 4 },
 });
