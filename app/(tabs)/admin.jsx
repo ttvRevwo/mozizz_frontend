@@ -56,10 +56,9 @@ function UsersTab({ token }) {
         </View>
       )}
       {users.map((u) => (
-        <View key={u.userId} style={styles.userCard}>
-          <Text style={styles.userName}>{u.name}</Text>
-          <Text style={styles.userEmail}>{u.email}</Text>
-          <Text style={styles.userRole}>{u.phone || "—"}</Text>
+        <View key={u.userId || u.UserId} style={styles.userCard}>
+          <Text style={styles.userName}>{u.name || u.Name}</Text>
+          <Text style={styles.userEmail}>{u.email || u.Email}</Text>
         </View>
       ))}
     </ScrollView>
@@ -289,8 +288,9 @@ function StatsTab({ token }) {
   ];
 
   const rankColors = ["#E0AA3E", "#c0c0c0", "#cd7f32"];
-  const activeList = occupancy.aktivVetitesek || [];
-  const archiveList = occupancy.archivVetitesek || [];
+  const activeList = occupancy.AktivVetitesek || occupancy.aktivVetitesek || [];
+  const archiveList =
+    occupancy.ArchivVetitesek || occupancy.archivVetitesek || [];
   const occList = occTab === "aktiv" ? activeList : archiveList;
 
   return (
@@ -366,13 +366,13 @@ function StatsTab({ token }) {
         </View>
       ) : (
         occList.map((item, i) => {
-          const pct = parseFloat(item.telitettseg) || 0;
+          const pct = parseFloat(item.Telitettseg || item.telitettseg) || 0;
           const barColor =
             pct >= 80 ? "#E50914" : pct >= 50 ? "#E0AA3E" : "#00b4d8";
           return (
             <View key={i} style={styles.occRow}>
-              <Text style={styles.occFilm}>{item.film}</Text>
-              <Text style={styles.occTime}>{item.idopont}</Text>
+              <Text style={styles.occFilm}>{item.Film || item.film}</Text>
+              <Text style={styles.occTime}>{item.Idopont || item.idopont}</Text>
               <View style={styles.occBarTrack}>
                 <View
                   style={[
@@ -386,9 +386,11 @@ function StatsTab({ token }) {
               </View>
               <View style={styles.occBottom}>
                 <Text style={[styles.occPct, { color: barColor }]}>
-                  {item.telitettseg}
+                  {item.Telitettseg || item.telitettseg}
                 </Text>
-                <Text style={styles.occTickets}>{item.eladottJegyek} jegy</Text>
+                <Text style={styles.occTickets}>
+                  {item.EladottJegyek ?? item.eladottJegyek} jegy
+                </Text>
               </View>
             </View>
           );
@@ -399,7 +401,6 @@ function StatsTab({ token }) {
   );
 }
 
-// [2025-03-09] Tab lista - AdminScreen-en kívül definiálva, hogy mindig elérhető legyen
 const TABS = [
   { key: "users", label: "👥 Userek" },
   { key: "movies", label: "🎬 Filmek" },
@@ -413,7 +414,6 @@ export default function AdminScreen() {
   const [activeTab, setActiveTab] = useState("users");
   const [checking, setChecking] = useState(true);
 
-  // [2025-03-09] Admin jogosultság ellenőrzése minden fókuszálásnál
   useFocusEffect(
     useCallback(() => {
       const check = async () => {
