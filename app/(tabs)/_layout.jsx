@@ -1,5 +1,5 @@
-import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
 
 export default function TabLayout() {
   return (
@@ -7,17 +7,17 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#000',
-          borderTopColor: '#222',
+          backgroundColor: "#000",
+          borderTopColor: "#222",
         },
-        tabBarActiveTintColor: '#E50914',
-        tabBarInactiveTintColor: '#888',
+        tabBarActiveTintColor: "#E50914",
+        tabBarInactiveTintColor: "#888",
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: "Home",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
@@ -26,7 +26,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="catalog"
         options={{
-          title: 'Filmek',
+          title: "Filmek",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="film" size={size} color={color} />
           ),
@@ -35,7 +35,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="buffet"
         options={{
-          title: 'Büfé',
+          title: "Büfé",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="fast-food" size={size} color={color} />
           ),
@@ -44,9 +44,18 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profil',
+          title: "Profil",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="admin"
+        options={{
+          title: "Admin",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings" size={size} color={color} />
           ),
         }}
       />
