@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { addCacheBust, getImageVersions } from "../../lib/imageCache";
 import styles from "../../styles/homeStyles";
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
@@ -20,6 +21,7 @@ const API_BASE = "http://192.168.137.1:5083/api";
 export default function HomeScreen() {
   const router = useRouter();
   const [movies, setMovies] = useState([]);
+  const [imgVersions, setImgVersions] = useState({});
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
@@ -37,16 +39,20 @@ export default function HomeScreen() {
     }, []),
   );
 
-  useEffect(() => {
-    fetch(`${API_BASE}/Movie/GetMovies`)
-      .then((res) => res.json())
-      .then((data) => {
-        const list = data.data || data;
-        setMovies(list.slice(0, 6));
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetch(`${API_BASE}/Movie/GetMovies`)
+        .then((res) => res.json())
+        .then((data) => {
+          const list = data.data || data;
+          setMovies(list.slice(0, 6));
+          setLoading(false);
+          const ids = list.map((m) => m.movieId || m.MovieId).filter(Boolean);
+          getImageVersions(ids).then(setImgVersions);
+        })
+        .catch(() => setLoading(false));
+    }, []),
+  );
 
   useEffect(() => {
     if (movies.length === 0) return;
@@ -188,7 +194,10 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Aktuális filmek</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {movies.map((item) => {
-            const imgUrl = getImageUrl(item.img);
+            const imgUrl = addCacheBust(
+              getImageUrl(item.img || item.Img),
+              imgVersions[String(item.movieId || item.MovieId)],
+            );
             return (
               <TouchableOpacity
                 key={String(item.movieId)}

@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { addCacheBust, getImageVersions } from "../../lib/imageCache";
 import styles from "../../styles/catalogStyles";
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
@@ -17,18 +18,39 @@ const API_BASE = "http://192.168.137.1:5083/api";
 export default function CatalogScreen() {
   const router = useRouter();
   const [movies, setMovies] = useState([]);
+  const [imgVersions, setImgVersions] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    fetch(`${API_BASE}/Movie/GetMovies`)
-      .then((res) => res.json())
-      .then((data) => {
-        setMovies(data.data || data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      if (movies.length > 0) {
+        const ids = movies.map((m) => m.movieId || m.MovieId).filter(Boolean);
+      }
+    }, [movies]),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      fetch(`${API_BASE}/Movie/GetMovies`)
+        .then((res) => res.json())
+        .then((data) => {
+          setMovies(data.data || data);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (movies.length > 0) {
+        const ids = movies.map((m) => m.movieId || m.MovieId).filter(Boolean);
+        getImageVersions(ids).then(setImgVersions);
+      }
+    }, [movies]),
+  );
 
   const getImageUrl = (img) => {
     if (!img) return null;
@@ -60,7 +82,10 @@ export default function CatalogScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.grid}>
           {filtered.map((movie) => {
-            const imgUrl = getImageUrl(movie.img);
+            const imgUrl = addCacheBust(
+              getImageUrl(movie.img || movie.Img),
+              imgVersions[String(movie.movieId || movie.MovieId)],
+            );
             return (
               <TouchableOpacity
                 key={movie.movieId}

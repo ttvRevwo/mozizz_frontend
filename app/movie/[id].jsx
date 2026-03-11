@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { addCacheBust } from "../../lib/imageCache";
 import styles from "../../styles/movieStyles";
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
@@ -44,6 +45,7 @@ export default function MovieDetailScreen() {
   const router = useRouter();
 
   const [movie, setMovie] = useState(null);
+  const [imgVersion, setImgVersion] = useState(null);
   const [showtimes, setShowtimes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -121,7 +123,10 @@ export default function MovieDetailScreen() {
   const duration = movie.duration || movie.Duration;
   const releaseDate =
     movie.release_date || movie.releaseDate || movie.ReleaseDate;
-  const imgUrl = getImageUrl(movie.img || movie.Img || movie.imageUrl);
+  const imgUrl = addCacheBust(
+    getImageUrl(movie.img || movie.Img || movie.imageUrl),
+    imgVersion,
+  );
   const releaseYear = getYear(releaseDate);
 
   return (

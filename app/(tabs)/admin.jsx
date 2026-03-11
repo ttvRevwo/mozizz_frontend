@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { bustImageCache } from "../../lib/imageCache";
 import styles from "../../styles/adminStyles";
 
 const API_BASE = "http://192.168.137.1:5083/api";
@@ -378,6 +379,7 @@ function MoviesTab({ token }) {
     ).catch(() => null);
     setSaving(false);
     if (r?.ok) {
+      if (pickedImage && !isNew) await bustImageCache(form.MovieId);
       refetch();
       closeEdit();
       Alert.alert("Siker", isNew ? "Film hozzáadva!" : "Módosítva!");
@@ -955,10 +957,12 @@ export default function AdminScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header - fix */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>⚙️ Admin Panel</Text>
         <Text style={styles.headerSub}>Mozizz rendszerkezelés</Text>
       </View>
+      {/* Tab sor - fix, nem scrollozódik a tartalommal */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -986,6 +990,7 @@ export default function AdminScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+      {/* Tartalom - flex:1 hogy kitöltse a maradék helyet */}
       <View style={{ flex: 1 }}>
         {token && activeTab === "users" && <UsersTab token={token} />}
         {token && activeTab === "movies" && <MoviesTab token={token} />}
