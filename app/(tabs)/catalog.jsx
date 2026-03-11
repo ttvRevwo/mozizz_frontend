@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -30,18 +30,26 @@ export default function CatalogScreen() {
     }, [movies]),
   );
 
+  const [focusTick, setFocusTick] = useState(0);
   useFocusEffect(
     useCallback(() => {
-      setLoading(true);
-      fetch(`${API_BASE}/Movie/GetMovies`)
-        .then((res) => res.json())
-        .then((data) => {
-          setMovies(data.data || data);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
+      setFocusTick((t) => t + 1);
     }, []),
   );
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${API_BASE}/Movie/GetMovies`)
+      .then((res) => res.json())
+      .then((data) => {
+        const list = Array.isArray(data) ? data : data.data || [];
+        setMovies(list);
+        setLoading(false);
+        const ids = list.map((m) => m.movieId || m.MovieId).filter(Boolean);
+        getImageVersions(ids).then(setImgVersions);
+      })
+      .catch(() => setLoading(false));
+  }, [focusTick]);
 
   useFocusEffect(
     useCallback(() => {

@@ -39,20 +39,29 @@ export default function HomeScreen() {
     }, []),
   );
 
+  const [focusTick, setFocusTick] = useState(0);
   useFocusEffect(
     useCallback(() => {
-      fetch(`${API_BASE}/Movie/GetMovies`)
-        .then((res) => res.json())
-        .then((data) => {
-          const list = data.data || data;
-          setMovies(list.slice(0, 6));
-          setLoading(false);
-          const ids = list.map((m) => m.movieId || m.MovieId).filter(Boolean);
-          getImageVersions(ids).then(setImgVersions);
-        })
-        .catch(() => setLoading(false));
+      setFocusTick((t) => t + 1);
     }, []),
   );
+
+  useEffect(() => {
+    fetch(`${API_BASE}/Movie/GetMovies`)
+      .then((res) => res.json())
+      .then((data) => {
+        const list = Array.isArray(data) ? data : data.data || [];
+        const sorted = [...list].sort(
+          (a, b) =>
+            (b.movieId || b.MovieId || 0) - (a.movieId || a.MovieId || 0),
+        );
+        setMovies(sorted.slice(0, 6));
+        setLoading(false);
+        const ids = list.map((m) => m.movieId || m.MovieId).filter(Boolean);
+        getImageVersions(ids).then(setImgVersions);
+      })
+      .catch(() => setLoading(false));
+  }, [focusTick]);
 
   useEffect(() => {
     if (movies.length === 0) return;
