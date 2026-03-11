@@ -22,11 +22,12 @@ export default StyleSheet.create({
   headerSub: { color: "#666", fontSize: 12, marginTop: 2 },
 
   tabs: {
-    flexDirection: "row",
-    backgroundColor: "#000",
+    flexGrow: 0,
+    flexShrink: 0,
+    backgroundColor: "#111",
     paddingHorizontal: 12,
-    paddingBottom: 10,
-    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#222",
   },
   tab: {
     paddingHorizontal: 14,

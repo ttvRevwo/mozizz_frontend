@@ -959,7 +959,11 @@ export default function AdminScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.tabs}
-        contentContainerStyle={{ gap: 8, paddingVertical: 10 }}
+        contentContainerStyle={{
+          gap: 8,
+          paddingVertical: 10,
+          paddingHorizontal: 4,
+        }}
       >
         {TABS.map((t) => (
           <TouchableOpacity
@@ -978,10 +982,12 @@ export default function AdminScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
-      {token && activeTab === "users" && <UsersTab token={token} />}
-      {token && activeTab === "movies" && <MoviesTab token={token} />}
-      {token && activeTab === "showtimes" && <ShowtimesTab token={token} />}
-      {token && activeTab === "stats" && <StatsTab token={token} />}
+      <View style={{ flex: 1 }}>
+        {token && activeTab === "users" && <UsersTab token={token} />}
+        {token && activeTab === "movies" && <MoviesTab token={token} />}
+        {token && activeTab === "showtimes" && <ShowtimesTab token={token} />}
+        {token && activeTab === "stats" && <StatsTab token={token} />}
+      </View>
     </SafeAreaView>
   );
 }
