@@ -735,12 +735,30 @@ function ShowtimesTab({ token }) {
   );
 }
 
+const HONAP_NEV = [
+  "Jan",
+  "Feb",
+  "Már",
+  "Ápr",
+  "Máj",
+  "Jún",
+  "Júl",
+  "Aug",
+  "Sze",
+  "Okt",
+  "Nov",
+  "Dec",
+];
+
 function StatsTab({ token }) {
   const [daily, setDaily] = useState(null);
   const [topMovies, setTopMovies] = useState([]);
   const [occ, setOcc] = useState({ AktivVetitesek: [], ArchivVetitesek: [] });
+  const [monthly, setMonthly] = useState([]);
+  const [yearly, setYearly] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("aktiv");
+  const [revenueTab, setRevenueTab] = useState("honap");
 
   useEffect(() => {
     if (!token) return;
@@ -756,11 +774,19 @@ function StatsTab({ token }) {
       fetch(`${API_BASE}/Admin/ShowtimeOccupancy`, { headers: h }).then((r) =>
         r.ok ? r.json() : null,
       ),
+      fetch(`${API_BASE}/Admin/MonthlyRevenue`, { headers: h }).then((r) =>
+        r.ok ? r.json() : [],
+      ),
+      fetch(`${API_BASE}/Admin/YearlyRevenue`, { headers: h }).then((r) =>
+        r.ok ? r.json() : [],
+      ),
     ])
-      .then(([d, t, o]) => {
+      .then(([d, t, o, m, y]) => {
         if (d) setDaily(d);
         if (Array.isArray(t)) setTopMovies(t);
         if (o) setOcc(o);
+        if (Array.isArray(m)) setMonthly(m);
+        if (Array.isArray(y)) setYearly(y);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -793,7 +819,16 @@ function StatsTab({ token }) {
   ];
   const activeList = occ.AktivVetitesek || occ.aktivVetitesek || [];
   const archiveList = occ.ArchivVetitesek || occ.archivVetitesek || [];
-  const list = tab === "aktiv" ? activeList : archiveList;
+  const occList = tab === "aktiv" ? activeList : archiveList;
+
+  const maxMonthRev = Math.max(
+    ...monthly.map((m) => m.Bevetel || m.bevetel || 0),
+    1,
+  );
+  const maxYearRev = Math.max(
+    ...yearly.map((y) => y.Bevetel || y.bevetel || 0),
+    1,
+  );
 
   return (
     <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
@@ -813,7 +848,117 @@ function StatsTab({ token }) {
           </View>
         ))}
       </View>
-      <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>
+
+      <Text style={[styles.sectionTitle, { marginTop: 20, marginBottom: 8 }]}>
+        💰 Bevétel
+      </Text>
+      <View style={styles.occTabs}>
+        {[
+          { key: "honap", label: "Havi" },
+          { key: "ev", label: "Évi" },
+        ].map((t) => (
+          <TouchableOpacity
+            key={t.key}
+            style={[styles.occTab, revenueTab === t.key && styles.occTabActive]}
+            onPress={() => setRevenueTab(t.key)}
+          >
+            <Text
+              style={[
+                styles.occTabText,
+                revenueTab === t.key && styles.occTabTextActive,
+              ]}
+            >
+              {t.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {revenueTab === "honap" &&
+        (monthly.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>Nincs havi adat.</Text>
+          </View>
+        ) : (
+          monthly.map((m, i) => {
+            const rev = m.bevetel || 0;
+            const pct = (rev / maxMonthRev) * 100;
+            return (
+              <View key={i} style={styles.revCard}>
+                <View style={styles.revCardHeader}>
+                  <Text style={styles.revPeriod}>
+                    {HONAP_NEV[m.honap - 1]} {m.ev}
+                  </Text>
+                  <Text style={styles.revAmount}>
+                    {rev.toLocaleString()} Ft
+                  </Text>
+                </View>
+                <View style={styles.occBarTrack}>
+                  <View
+                    style={[
+                      styles.occBarFill,
+                      { width: `${pct}%`, backgroundColor: "#E0AA3E" },
+                    ]}
+                  />
+                </View>
+                <View style={styles.revCardStats}>
+                  <View style={styles.revStat}>
+                    <Text style={styles.revStatVal}>{m.eladottJegyek}</Text>
+                    <Text style={styles.revStatLabel}>jegy</Text>
+                  </View>
+                  <View style={styles.revDivider} />
+                  <View style={styles.revStat}>
+                    <Text style={styles.revStatVal}>{m.foglalasokSzama}</Text>
+                    <Text style={styles.revStatLabel}>foglalás</Text>
+                  </View>
+                </View>
+              </View>
+            );
+          })
+        ))}
+
+      {revenueTab === "ev" &&
+        (yearly.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>Nincs évi adat.</Text>
+          </View>
+        ) : (
+          yearly.map((y, i) => {
+            const rev = y.bevetel || 0;
+            const pct = (rev / maxYearRev) * 100;
+            return (
+              <View key={i} style={styles.revCard}>
+                <View style={styles.revCardHeader}>
+                  <Text style={styles.revPeriod}>{y.ev}. év</Text>
+                  <Text style={styles.revAmount}>
+                    {rev.toLocaleString()} Ft
+                  </Text>
+                </View>
+                <View style={styles.occBarTrack}>
+                  <View
+                    style={[
+                      styles.occBarFill,
+                      { width: `${pct}%`, backgroundColor: "#52b788" },
+                    ]}
+                  />
+                </View>
+                <View style={styles.revCardStats}>
+                  <View style={styles.revStat}>
+                    <Text style={styles.revStatVal}>{y.eladottJegyek}</Text>
+                    <Text style={styles.revStatLabel}>jegy</Text>
+                  </View>
+                  <View style={styles.revDivider} />
+                  <View style={styles.revStat}>
+                    <Text style={styles.revStatVal}>{y.foglalasokSzama}</Text>
+                    <Text style={styles.revStatLabel}>foglalás</Text>
+                  </View>
+                </View>
+              </View>
+            );
+          })
+        ))}
+
+      <Text style={[styles.sectionTitle, { marginTop: 20, marginBottom: 12 }]}>
         🏆 Top 3 film
       </Text>
       {topMovies.length === 0 ? (
@@ -840,6 +985,7 @@ function StatsTab({ token }) {
           </View>
         ))
       )}
+
       <View style={[styles.sectionHeader, { marginTop: 20, marginBottom: 8 }]}>
         <Text style={styles.sectionTitle}>Telítettség</Text>
       </View>
@@ -864,7 +1010,7 @@ function StatsTab({ token }) {
           </TouchableOpacity>
         ))}
       </View>
-      {list.map((item, i) => {
+      {occList.map((item, i) => {
         const pct = parseFloat(item.Telitettseg || item.telitettseg) || 0;
         const color = pct >= 80 ? "#E50914" : pct >= 50 ? "#E0AA3E" : "#00b4d8";
         return (
@@ -957,12 +1103,10 @@ export default function AdminScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header - fix */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>⚙️ Admin Panel</Text>
         <Text style={styles.headerSub}>Mozizz rendszerkezelés</Text>
       </View>
-      {/* Tab sor - fix, nem scrollozódik a tartalommal */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -990,7 +1134,6 @@ export default function AdminScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
-      {/* Tartalom - flex:1 hogy kitöltse a maradék helyet */}
       <View style={{ flex: 1 }}>
         {token && activeTab === "users" && <UsersTab token={token} />}
         {token && activeTab === "movies" && <MoviesTab token={token} />}

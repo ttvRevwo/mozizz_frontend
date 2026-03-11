@@ -329,4 +329,75 @@ export default StyleSheet.create({
     color: "#888",
     fontSize: 14,
   },
+  revRow: {
+    marginBottom: 14,
+  },
+  revLabel: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  revPeriod: {
+    color: "#aaa",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  revAmount: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  revSub: {
+    color: "#555",
+    fontSize: 12,
+    marginTop: 4,
+  },
+  revCard: {
+    backgroundColor: "#111",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#222",
+  },
+  revCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  revPeriod: {
+    color: "#aaa",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  revAmount: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  revCardStats: {
+    flexDirection: "row",
+    marginTop: 10,
+    justifyContent: "center",
+    gap: 24,
+  },
+  revStat: {
+    alignItems: "center",
+  },
+  revStatVal: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  revStatLabel: {
+    color: "#666",
+    fontSize: 12,
+    marginTop: 2,
+  },
+  revDivider: {
+    width: 1,
+    backgroundColor: "#333",
+    marginHorizontal: 8,
+  },
 });
