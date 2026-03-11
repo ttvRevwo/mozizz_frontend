@@ -47,17 +47,54 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
-    fetch(`${API_BASE}/Movie/GetMovies`)
-      .then((res) => res.json())
-      .then((data) => {
-        const list = Array.isArray(data) ? data : data.data || [];
-        const sorted = [...list].sort(
+    Promise.all([
+      fetch(`${API_BASE}/Movie/GetMovies`).then((r) => r.json()),
+      fetch(`${API_BASE}/Showtime/GetAllShowtimes`).then((r) => r.json()),
+    ])
+      .then(([moviesData, showtimesData]) => {
+        const list = Array.isArray(moviesData)
+          ? moviesData
+          : moviesData.data || [];
+        const showtimes = Array.isArray(showtimesData) ? showtimesData : [];
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+
+        const parseDate = (raw) => {
+          if (!raw) return null;
+          const s = String(raw).trim();
+          const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+          if (dmyMatch)
+            return new Date(+dmyMatch[3], +dmyMatch[2] - 1, +dmyMatch[1]);
+          const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+          if (isoMatch)
+            return new Date(+isoMatch[1], +isoMatch[2] - 1, +isoMatch[3]);
+          return null;
+        };
+
+        const activeTitles = new Set(
+          showtimes
+            .filter((st) => {
+              const dt = parseDate(st.Date || st.date);
+              if (!dt) return false;
+              return dt >= now;
+            })
+            .map((st) =>
+              (st.MovieTitle || st.movieTitle || "").toLowerCase().trim(),
+            )
+            .filter(Boolean),
+        );
+
+        const active = list.filter((m) =>
+          activeTitles.has((m.title || m.Title || "").toLowerCase().trim()),
+        );
+
+        const sorted = [...active].sort(
           (a, b) =>
             (b.movieId || b.MovieId || 0) - (a.movieId || a.MovieId || 0),
         );
         setMovies(sorted.slice(0, 6));
         setLoading(false);
-        const ids = list.map((m) => m.movieId || m.MovieId).filter(Boolean);
+        const ids = active.map((m) => m.movieId || m.MovieId).filter(Boolean);
         getImageVersions(ids).then(setImgVersions);
       })
       .catch(() => setLoading(false));
