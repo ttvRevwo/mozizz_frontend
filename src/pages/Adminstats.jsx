@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    RadialBarChart, RadialBar, Cell, PieChart, Pie, Legend
+    Cell, PieChart, Pie, Legend
 } from 'recharts';
 import { authFetch } from '../utils/auth';
 import '../Styles/AdminStats.css';
@@ -29,7 +29,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             {payload.map((p, i) => (
                 <p key={i} style={{ color: p.color || GOLD }}>
                     {p.name}: <strong>{typeof p.value === 'number' ? p.value.toLocaleString('hu-HU') : p.value}</strong>
-                    {p.name === 'Bevétel' ? ' Ft' : p.name === 'Telítettség' ? '%' : ''}
+                    {p.name === 'Bevétel' ? ' Ft' : ''}
                 </p>
             ))}
         </div>
@@ -37,26 +37,39 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const OccupancyRow = ({ item, index }) => {
-    const pct = parseFloat(item.telitettseg) || 0;
+    const film        = item.film        ?? item.Film        ?? '–';
+    const idopont     = item.idopont     ?? item.Idopont     ?? '–';
+    const telitettseg = item.telitettseg ?? item.Telitettseg ?? '0%';
+    const eladott     = item.eladottJegyek ?? item.EladottJegyek ?? 0;
+    const pct = parseFloat(telitettseg) || 0;
     const color = pct >= 80 ? RED : pct >= 50 ? GOLD : TEAL;
     return (
         <div className="astat-occ-row" style={{ animationDelay: `${index * 50}ms` }}>
             <div className="astat-occ-info">
-                <span className="astat-occ-film">{item.film}</span>
-                <span className="astat-occ-time">{item.idopont}</span>
+                <span className="astat-occ-film">{film}</span>
+                <span className="astat-occ-time">{idopont}</span>
             </div>
             <div className="astat-occ-bar-wrap">
                 <div className="astat-occ-bar-track">
-                    <div
-                        className="astat-occ-bar-fill"
-                        style={{ width: `${Math.min(pct, 100)}%`, background: color }}
-                    />
+                    <div className="astat-occ-bar-fill" style={{ width: `${Math.min(pct, 100)}%`, background: color }} />
                 </div>
-                <span className="astat-occ-pct" style={{ color }}>{item.telitettseg}</span>
+                <span className="astat-occ-pct" style={{ color }}>{telitettseg}</span>
             </div>
-            <span className="astat-occ-tickets">{item.eladottJegyek} jegy</span>
+            <span className="astat-occ-tickets">{eladott} jegy</span>
         </div>
     );
+};
+
+// "2026. 03. 11. 10:30:15" vagy "3/11/2026 10:30:15" → "2026-03-11"
+const parseDateStr = (str) => {
+    if (!str) return '';
+    // Magyar formátum: "2026. 03. 11."
+    const m = String(str).match(/(\d{4})[.\s]+(\d{1,2})[.\s]+(\d{1,2})/);
+    if (m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+    // ISO vagy egyéb
+    const d = new Date(str);
+    if (!isNaN(d)) return d.toISOString().slice(0, 10);
+    return '';
 };
 
 const AdminStats = () => {
@@ -69,24 +82,43 @@ const AdminStats = () => {
     useEffect(() => {
         const load = async () => {
             try {
-                const [dRes, tRes, oRes] = await Promise.all([
-                    authFetch('http://localhost:5083/api/Admin/DailyReport'),
+                const [tRes, oRes] = await Promise.all([
                     authFetch('http://localhost:5083/api/Admin/TopMovies'),
                     authFetch('http://localhost:5083/api/Admin/ShowtimeOccupancy'),
                 ]);
 
-                const occData = oRes.ok ? await oRes.json() : { aktivVetitesek: [], archivVetitesek: [] };
+                const occData = oRes.ok
+                    ? await oRes.json()
+                    : { aktivVetitesek: [], archivVetitesek: [] };
+
                 if (oRes.ok) setOccupancy(occData);
                 if (tRes.ok) setTopMovies(await tRes.json());
-                if (dRes.ok) {
-                    const d = await dRes.json();
-                    setDaily({
-                        Datum: d.datum,
-                        MaiBevetel: d.maiBevetel,
-                        EladottJegyek: d.eladottJegyek,
-                        FoglalasokSzama: d.foglalasokSzama,
-                    });
-                }
+
+                // Mai nap kiszámítása frontenden az occupancy adatokból.
+                // A DailyReport endpoint nem hívjuk – ott a "Confirmed" szűrő
+                // nem egyezik az adatbázis "confirmed" értékével, ezért 0-t ad.
+                const todayISO = new Date().toISOString().slice(0, 10);
+
+                const allShowtimes = [
+                    ...(occData.aktivVetitesek  ?? occData.AktivVetitesek  ?? []),
+                    ...(occData.archivVetitesek ?? occData.ArchivVetitesek ?? []),
+                ];
+
+                const todayShowtimes = allShowtimes.filter(s => {
+                    const idopont = s.idopont ?? s.Idopont ?? '';
+                    return parseDateStr(String(idopont)) === todayISO;
+                });
+
+                const todayTickets = todayShowtimes.reduce(
+                    (sum, s) => sum + (s.eladottJegyek ?? s.EladottJegyek ?? 0), 0
+                );
+
+                setDaily({
+                    Datum:           new Date().toLocaleDateString('hu-HU'),
+                    MaiBevetel:      (todayTickets * 2500).toLocaleString('hu-HU') + ' Ft',
+                    EladottJegyek:   todayTickets + ' db',
+                    FoglalasokSzama: todayShowtimes.length,
+                });
 
             } catch (e) {
                 console.error('Stats hiba:', e);
@@ -105,20 +137,22 @@ const AdminStats = () => {
     );
 
     const barData = topMovies.map(m => ({
-        name: (m.filmCim || m.FilmCim || '').length > 18 ? (m.filmCim || m.FilmCim || '').slice(0, 16) + '…' : (m.filmCim || m.FilmCim || ''),
-        fullName: m.filmCim || m.FilmCim,
-        Jegyek: m.jegyekSzama ?? m.JegyekSzama ?? 0,
+        name: (m.filmCim ?? m.FilmCim ?? '').length > 18
+            ? (m.filmCim ?? m.FilmCim ?? '').slice(0, 16) + '…'
+            : (m.filmCim ?? m.FilmCim ?? ''),
+        fullName: m.filmCim ?? m.FilmCim,
+        Jegyek:  m.jegyekSzama  ?? m.JegyekSzama  ?? 0,
         Bevétel: Number(m.bevetel ?? m.Bevetel) || 0,
     }));
 
     const pieData = topMovies.map(m => ({
-        name: m.filmCim || m.FilmCim,
+        name:  m.filmCim ?? m.FilmCim,
         value: m.jegyekSzama ?? m.JegyekSzama ?? 0,
     }));
     const PIE_COLORS = [GOLD, RED, TEAL];
 
-    const activeList  = occupancy.aktivVetitesek  || [];
-    const archiveList = occupancy.archivVetitesek || [];
+    const activeList  = occupancy.aktivVetitesek  ?? occupancy.AktivVetitesek  ?? [];
+    const archiveList = occupancy.archivVetitesek ?? occupancy.ArchivVetitesek ?? [];
 
     return (
         <div className="astat-root">
@@ -126,9 +160,9 @@ const AdminStats = () => {
             <section className="astat-section">
                 <h3 className="astat-section-title">Mai nap – {daily?.Datum ?? '–'}</h3>
                 <div className="astat-cards">
-                    <StatCard label="Bevétel"       value={daily?.MaiBevetel    ?? '0 Ft'}  accent={GOLD}  delay={0}   />
-                    <StatCard label="Eladott jegyek" value={daily?.EladottJegyek ?? '0 db'}  accent={TEAL}  delay={80}  />
-                    <StatCard label="Foglalások"     value={daily?.FoglalasokSzama ?? 0}     accent={GREEN} delay={160} />
+                    <StatCard label="Bevétel"        value={daily?.MaiBevetel      ?? '0 Ft'} accent={GOLD}  delay={0}   />
+                    <StatCard label="Eladott jegyek" value={daily?.EladottJegyek   ?? '0 db'} accent={TEAL}  delay={80}  />
+                    <StatCard label="Foglalások"      value={daily?.FoglalasokSzama ?? 0}      accent={GREEN} delay={160} />
                 </div>
             </section>
 
@@ -185,8 +219,10 @@ const AdminStats = () => {
                             {topMovies.map((m, i) => (
                                 <div key={i} className="astat-rev-row">
                                     <span className="astat-rev-rank" style={{ color: PIE_COLORS[i] }}>#{i + 1}</span>
-                                    <span className="astat-rev-title">{m.filmCim || m.FilmCim}</span>
-                                    <span className="astat-rev-amt">{(Number(m.bevetel ?? m.Bevetel) || 0).toLocaleString('hu-HU')} Ft</span>
+                                    <span className="astat-rev-title">{m.filmCim ?? m.FilmCim}</span>
+                                    <span className="astat-rev-amt">
+                                        {(Number(m.bevetel ?? m.Bevetel) || 0).toLocaleString('hu-HU')} Ft
+                                    </span>
                                 </div>
                             ))}
                         </div>
@@ -213,7 +249,6 @@ const AdminStats = () => {
                         </button>
                     </div>
                 </div>
-
                 <div className="astat-occ-list">
                     {(occTab === 'aktiv' ? activeList : archiveList).length === 0 ? (
                         <p className="astat-empty">Nincs adat.</p>

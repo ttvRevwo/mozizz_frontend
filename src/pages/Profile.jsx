@@ -211,7 +211,6 @@ const UserProfile = () => {
         { key: 'valid',     label: 'Érvényes' },
         { key: 'expired',   label: 'Lejárt' },
         { key: 'used',      label: 'Felhasznált' },
-        { key: 'cancelled', label: 'Lemondott' },
     ];
 
     const filteredTickets = tickets.filter(t => getTicketState(t) === activeTab);
