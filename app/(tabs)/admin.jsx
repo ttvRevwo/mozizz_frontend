@@ -737,7 +737,9 @@ function StatsTab({ token }) {
   const [tab, setTab] = useState("aktiv");
 
   useEffect(() => {
+    if (!token) return;
     const h = authH(token);
+    setLoading(true);
     Promise.all([
       fetch(`${API_BASE}/Admin/DailyReport`, { headers: h }).then((r) =>
         r.ok ? r.json() : null,
@@ -751,12 +753,12 @@ function StatsTab({ token }) {
     ])
       .then(([d, t, o]) => {
         if (d) setDaily(d);
-        if (t) setTopMovies(t);
+        if (Array.isArray(t)) setTopMovies(t);
         if (o) setOcc(o);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [token]);
 
   if (loading)
     return <ActivityIndicator color="#E0AA3E" style={{ marginTop: 40 }} />;
@@ -764,20 +766,24 @@ function StatsTab({ token }) {
   const cards = [
     {
       label: "Mai bevétel",
-      value: daily?.MaiBevetel ?? "0 Ft",
+      value: daily?.MaiBevetel ?? daily?.maiBevetel ?? "0 Ft",
       color: "#E0AA3E",
     },
     {
       label: "Eladott jegyek",
-      value: daily?.EladottJegyek ?? "0 db",
+      value: daily?.EladottJegyek ?? daily?.eladottJegyek ?? "0 db",
       color: "#00b4d8",
     },
     {
       label: "Foglalások",
-      value: daily?.FoglalasokSzama ?? 0,
+      value: daily?.FoglalasokSzama ?? daily?.foglalasokSzama ?? 0,
       color: "#52b788",
     },
-    { label: "Dátum", value: daily?.Datum ?? "—", color: "#888" },
+    {
+      label: "Dátum",
+      value: daily?.Datum ?? daily?.datum ?? "—",
+      color: "#888",
+    },
   ];
   const activeList = occ.AktivVetitesek || occ.aktivVetitesek || [];
   const archiveList = occ.ArchivVetitesek || occ.archivVetitesek || [];
@@ -786,7 +792,7 @@ function StatsTab({ token }) {
   return (
     <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
       <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>
-        Mai nap – {daily?.Datum ?? "—"}
+        Mai nap – {daily?.Datum ?? daily?.datum ?? "—"}
       </Text>
       <View style={styles.statGrid}>
         {cards.map((sc) => (
@@ -820,7 +826,7 @@ function StatsTab({ token }) {
               #{i + 1}
             </Text>
             <Text style={styles.topTitle} numberOfLines={1}>
-              {m.FilmCim || m.filmCim}
+              {m.FilmCim ?? m.filmCim ?? "—"}
             </Text>
             <Text style={styles.topCount}>
               {m.JegyekSzama ?? m.jegyekSzama ?? 0} jegy

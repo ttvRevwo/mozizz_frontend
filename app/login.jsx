@@ -26,7 +26,6 @@ function decodeJwtPayload(token) {
 
 export default function LoginScreen() {
   const router = useRouter();
-  // [2025-03-09] Redirect param - sikeres login után visszanavigál az előző oldalra
   const { redirect } = useLocalSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,7 +63,6 @@ export default function LoginScreen() {
         if (content.name) await AsyncStorage.setItem("userName", content.name);
         if (content.role) await AsyncStorage.setItem("role", content.role);
 
-        // [2025-03-09] Web: tracking prevention blokkolhatja az AsyncStorage-t, sessionStorage fallback
         if (Platform.OS === "web") {
           try {
             if (token) sessionStorage.setItem("token", token);
