@@ -1,24 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View, Text, Image, TouchableOpacity, TextInput,
-  ActivityIndicator, ScrollView
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import styles from '../../styles/catalogStyles';
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import styles from "../../styles/catalogStyles";
 
-const CLOUDINARY_BASE = 'https://res.cloudinary.com/dytjuv6qt/image/upload/';
-const API_BASE = 'http://192.168.137.1:5083/api';
+const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
+const API_BASE = "http://192.168.137.1:5083/api";
 
 export default function CatalogScreen() {
   const router = useRouter();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetch(`${API_BASE}/Movie/GetMovies`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setMovies(data.data || data);
         setLoading(false);
       })
@@ -27,12 +32,12 @@ export default function CatalogScreen() {
 
   const getImageUrl = (img) => {
     if (!img) return null;
-    if (img.startsWith('http')) return img;
+    if (img.startsWith("http")) return img;
     return `${CLOUDINARY_BASE}${img}`;
   };
 
-  const filtered = movies.filter(m =>
-    (m.title || '').toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = movies.filter((m) =>
+    (m.title || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -63,14 +68,20 @@ export default function CatalogScreen() {
                 onPress={() => router.push(`/movie/${movie.movieId}`)}
               >
                 {imgUrl ? (
-                  <Image source={{ uri: imgUrl }} style={styles.poster} resizeMode="cover" />
+                  <Image
+                    source={{ uri: imgUrl }}
+                    style={styles.poster}
+                    resizeMode="cover"
+                  />
                 ) : (
                   <View style={styles.noPoster}>
                     <Text style={styles.noPosterText}>Nincs kép</Text>
                   </View>
                 )}
                 <View style={styles.cardInfo}>
-                  <Text style={styles.cardTitle} numberOfLines={1}>{movie.title}</Text>
+                  <Text style={styles.cardTitle} numberOfLines={1}>
+                    {movie.title}
+                  </Text>
                   <Text style={styles.cardGenre}>{movie.genre}</Text>
                   <Text style={styles.cardRating}>{movie.rating}</Text>
                 </View>

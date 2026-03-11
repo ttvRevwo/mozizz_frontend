@@ -357,10 +357,14 @@ function MoviesTab({ token }) {
     );
     if (!isNew) fd.append("CreateDate", new Date().toISOString());
     if (pickedImage) {
-      const ext = pickedImage.uri.split(".").pop();
+      const ext = pickedImage.uri.split(".").pop().split("?")[0];
+      const safeName = (form.Title || "movie")
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase();
+      const uniqueName = `${safeName}_${isNew ? Date.now() : form.MovieId}.${ext}`;
       fd.append("imageFile", {
         uri: pickedImage.uri,
-        name: `movie.${ext}`,
+        name: uniqueName,
         type: `image/${ext}`,
       });
     }
