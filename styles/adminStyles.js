@@ -270,4 +270,63 @@ export default StyleSheet.create({
     fontWeight: "600",
   },
   helperRow: { color: "#aaa", fontSize: 11, marginBottom: 2 },
+
+  validateBox: {
+    gap: 10,
+    marginBottom: 20,
+  },
+  validateInput: {
+    backgroundColor: "#111",
+    borderWidth: 1,
+    borderColor: "#333",
+    borderRadius: 10,
+    color: "#fff",
+    padding: 14,
+    fontSize: 15,
+    fontFamily: "monospace",
+  },
+  validateBtn: {
+    backgroundColor: "#E0AA3E",
+    borderRadius: 10,
+    padding: 14,
+    alignItems: "center",
+  },
+  validateBtnText: {
+    color: "#111",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+  resultBox: {
+    borderWidth: 2,
+    borderRadius: 14,
+    padding: 20,
+    alignItems: "center",
+    backgroundColor: "#0a0a0a",
+    gap: 6,
+  },
+  resultIcon: {
+    fontSize: 48,
+  },
+  resultMsg: {
+    fontSize: 18,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  resultDetail: {
+    color: "#ccc",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  resetBtn: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#444",
+  },
+  resetBtnText: {
+    color: "#888",
+    fontSize: 14,
+  },
 });

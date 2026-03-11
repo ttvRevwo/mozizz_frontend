@@ -1,10 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { Link, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
+  Platform,
   RefreshControl,
   ScrollView,
   Text,
@@ -64,7 +65,6 @@ function TicketCard({ ticket, onCancel }) {
   const isUsed = state === "used";
   const isExpired = state === "expired";
 
-  // A backend elvégzi a 2 órás ellenőrzést, itt csak az alapfeltételeket nézzük
   const canCancel = !isUsed && !isExpired;
 
   const handleCancel = () => {
@@ -195,8 +195,16 @@ export default function ProfileScreen() {
   const fetchTickets = useCallback(async () => {
     try {
       setError(null);
-      const userId = await AsyncStorage.getItem("userId");
-      const token = await AsyncStorage.getItem("token");
+      const userId =
+        Platform.OS === "web"
+          ? sessionStorage.getItem("userId") ||
+            (await AsyncStorage.getItem("userId"))
+          : await AsyncStorage.getItem("userId");
+      const token =
+        Platform.OS === "web"
+          ? sessionStorage.getItem("token") ||
+            (await AsyncStorage.getItem("token"))
+          : await AsyncStorage.getItem("token");
 
       if (!token || !userId) {
         setIsLoggedIn(false);
@@ -205,7 +213,11 @@ export default function ProfileScreen() {
       }
       setIsLoggedIn(true);
 
-      const name = await AsyncStorage.getItem("userName");
+      const name =
+        Platform.OS === "web"
+          ? sessionStorage.getItem("userName") ||
+            (await AsyncStorage.getItem("userName"))
+          : await AsyncStorage.getItem("userName");
       if (name) setUserName(name);
 
       const headers = { Authorization: `Bearer ${token}` };
@@ -248,9 +260,11 @@ export default function ProfileScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchTickets();
-  }, [fetchTickets]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchTickets();
+    }, [fetchTickets]),
+  );
 
   const handleCancel = (id) =>
     setTickets((prev) => prev.filter((t) => t.reservationId !== id));
@@ -263,6 +277,11 @@ export default function ProfileScreen() {
         style: "destructive",
         onPress: async () => {
           await AsyncStorage.clear();
+          if (Platform.OS === "web") {
+            try {
+              sessionStorage.clear();
+            } catch {}
+          }
           setIsLoggedIn(false);
           setTickets([]);
           setUserName("");
@@ -287,6 +306,7 @@ export default function ProfileScreen() {
       </SafeAreaView>
     );
   }
+
   if (isLoggedIn === false) {
     return (
       <SafeAreaView style={styles.safeArea}>

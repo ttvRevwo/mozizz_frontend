@@ -1,24 +1,45 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Tabs } from "expo-router";
-import { useEffect, useState } from "react";
-import { Platform } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { AppState, Platform } from "react-native";
+
+async function getRole() {
+  try {
+    if (Platform.OS === "web") {
+      return (
+        sessionStorage.getItem("role") || (await AsyncStorage.getItem("role"))
+      );
+    }
+    return await AsyncStorage.getItem("role");
+  } catch {
+    return null;
+  }
+}
 
 export default function TabLayout() {
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const role =
-          Platform.OS === "web"
-            ? sessionStorage.getItem("role")
-            : await AsyncStorage.getItem("role");
-        setIsAdmin(role === "Admin");
-      } catch {}
-    };
-    load();
+  const checkRole = useCallback(async () => {
+    const role = await getRole();
+    setIsAdmin(role === "Admin");
   }, []);
+
+  useEffect(() => {
+    checkRole();
+  }, [checkRole]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") checkRole();
+    });
+    return () => sub.remove();
+  }, [checkRole]);
+
+  useEffect(() => {
+    const interval = setInterval(checkRole, 1000);
+    return () => clearInterval(interval);
+  }, [checkRole]);
 
   return (
     <Tabs
@@ -69,20 +90,25 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="validate"
+        options={{
+          title: "Érvényesítés",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="qr-code" size={size} color={color} />
+          ),
+          href: isAdmin ? undefined : null,
+          tabBarItemStyle: isAdmin ? {} : { display: "none", width: 0 },
+        }}
+      />
+      <Tabs.Screen
         name="admin"
         options={{
           title: "Admin",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings" size={size} color={color} />
           ),
-          tabBarItemStyle: isAdmin ? {} : { display: "none" },
-          tabBarStyle: isAdmin
-            ? {
-                backgroundColor: "#000",
-                borderTopColor: "#222",
-              }
-            : { display: "none" },
           href: isAdmin ? undefined : null,
+          tabBarItemStyle: isAdmin ? {} : { display: "none", width: 0 },
         }}
       />
     </Tabs>
