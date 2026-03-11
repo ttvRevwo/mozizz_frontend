@@ -1,7 +1,25 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Tabs } from "expo-router";
+import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 
 export default function TabLayout() {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const role =
+          Platform.OS === "web"
+            ? sessionStorage.getItem("role")
+            : await AsyncStorage.getItem("role");
+        setIsAdmin(role === "Admin");
+      } catch {}
+    };
+    load();
+  }, []);
+
   return (
     <Tabs
       screenOptions={{
@@ -57,6 +75,14 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings" size={size} color={color} />
           ),
+          tabBarItemStyle: isAdmin ? {} : { display: "none" },
+          tabBarStyle: isAdmin
+            ? {
+                backgroundColor: "#000",
+                borderTopColor: "#222",
+              }
+            : { display: "none" },
+          href: isAdmin ? undefined : null,
         }}
       />
     </Tabs>
