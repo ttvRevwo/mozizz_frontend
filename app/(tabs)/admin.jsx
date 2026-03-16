@@ -9,6 +9,7 @@ import {
   Modal,
   Platform,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -735,6 +736,344 @@ function ShowtimesTab({ token }) {
   );
 }
 
+const CATEGORIES = ["snack", "popcorn", "ital", "édesség", "menü"];
+const CLOUDINARY_BASE = "https://res.cloudinary.com/dytjuv6qt/image/upload/";
+
+function BuffetAdminTab({ token }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({});
+  const [pickedImage, setPickedImage] = useState(null);
+  const isNew = editId === "new";
+
+  const fetchItems = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch(`${API_BASE}/Buffet/AllItems`, {
+        headers: authH(token),
+      });
+      if (r.ok) setItems(await r.json());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (token) fetchItems();
+  }, [token]);
+
+  const openNew = () => {
+    setForm({
+      name: "",
+      description: "",
+      price: "",
+      category: "snack",
+      isAvailable: true,
+    });
+    setPickedImage(null);
+    setEditId("new");
+  };
+
+  const openEdit = (item) => {
+    setForm({ ...item, price: String(item.price) });
+    setPickedImage(null);
+    setEditId(item.itemId);
+  };
+
+  const closeEdit = () => {
+    setEditId(null);
+    setForm({});
+    setPickedImage(null);
+  };
+
+  const pickImage = async () => {
+    const { launchImageLibraryAsync, MediaType } =
+      await import("expo-image-picker");
+    const result = await launchImageLibraryAsync({
+      mediaTypes: MediaType ? [MediaType.Images] : ["images"],
+      quality: 0.8,
+    });
+    if (!result.canceled) setPickedImage(result.assets[0]);
+  };
+
+  const getImgUrl = (img) => {
+    if (!img) return null;
+    if (img.startsWith("http")) return img;
+    return CLOUDINARY_BASE + img;
+  };
+
+  const getItemImg = (item) => item.img || item.Img || null;
+
+  const save = async () => {
+    const fd = new FormData();
+    fd.append("name", form.name || "");
+    fd.append("description", form.description || "");
+    fd.append("price", String(parseInt(form.price) || 0));
+    fd.append("category", form.category || "snack");
+    fd.append("isAvailable", String(form.isAvailable ?? true));
+    if (pickedImage) {
+      const ext = pickedImage.uri.split(".").pop().split("?")[0];
+      const safeName = (form.name || "item")
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase();
+      fd.append("imageFile", {
+        uri: pickedImage.uri,
+        name: `${safeName}_${Date.now()}.${ext}`,
+        type: `image/${ext}`,
+      });
+    }
+    const url = isNew
+      ? `${API_BASE}/Buffet/NewItem`
+      : `${API_BASE}/Buffet/ModifyItem/${editId}`;
+    const r = await fetch(url, {
+      method: isNew ? "POST" : "PUT",
+      headers: authH(token),
+      body: fd,
+    });
+    if (r.ok) {
+      fetchItems();
+      closeEdit();
+      Alert.alert("Siker", isNew ? "Termék hozzáadva!" : "Módosítva!");
+    } else Alert.alert("Hiba", "Mentés sikertelen.");
+  };
+
+  const del = (id, name) => {
+    Alert.alert("Törlés", `Biztosan törlöd: ${name}?`, [
+      { text: "Mégsem", style: "cancel" },
+      {
+        text: "Törlés",
+        style: "destructive",
+        onPress: async () => {
+          const r = await fetch(`${API_BASE}/Buffet/DeleteItem/${id}`, {
+            method: "DELETE",
+            headers: authH(token),
+          });
+          if (r.ok) fetchItems();
+        },
+      },
+    ]);
+  };
+
+  if (loading)
+    return <ActivityIndicator color="#E0AA3E" style={{ marginTop: 40 }} />;
+
+  return (
+    <View style={{ flex: 1 }}>
+      <ScrollView style={styles.section}>
+        <TouchableOpacity style={styles.addBtn} onPress={openNew}>
+          <Text style={styles.addBtnText}>+ Új termék</Text>
+        </TouchableOpacity>
+        {items.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>Nincsenek termékek.</Text>
+          </View>
+        ) : (
+          items.map((item) => (
+            <View
+              key={item.itemId}
+              style={[styles.buffetRow, !item.isAvailable && { opacity: 0.5 }]}
+            >
+              <View style={styles.buffetRowTop}>
+                {item.img ? (
+                  <Image
+                    source={{ uri: getImgUrl(getItemImg(item)) }}
+                    style={styles.buffetThumb}
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.buffetThumb,
+                      {
+                        backgroundColor: "#222",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      },
+                    ]}
+                  >
+                    <Text style={{ color: "#666", fontSize: 10 }}>
+                      nincs kép
+                    </Text>
+                  </View>
+                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.buffetItemName}>{item.name}</Text>
+                  <Text style={styles.buffetItemMeta}>
+                    {item.category} · {item.price.toLocaleString()} Ft
+                  </Text>
+                  {!item.isAvailable && (
+                    <Text style={styles.buffetItemUnavail}>Nem elérhető</Text>
+                  )}
+                </View>
+              </View>
+              <View style={styles.buffetRowBtns}>
+                <TouchableOpacity
+                  onPress={() => openEdit(item)}
+                  style={styles.buffetEditBtn}
+                >
+                  <Text style={styles.buffetEditBtnText}>Szerkesztés</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => del(item.itemId, item.name)}
+                  style={styles.buffetDeleteBtn}
+                >
+                  <Text style={styles.buffetDeleteBtnText}>Törlés</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        )}
+        <View style={{ height: 40 }} />
+      </ScrollView>
+
+      {editId !== null && (
+        <Modal
+          visible
+          transparent
+          animationType="slide"
+          onRequestClose={closeEdit}
+        >
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.75)",
+              justifyContent: "flex-end",
+            }}
+          >
+            <TouchableOpacity
+              style={{ ...StyleSheet.absoluteFillObject }}
+              activeOpacity={1}
+              onPress={closeEdit}
+            />
+            <View style={styles.modalSheet}>
+              <Text style={styles.modalTitle}>
+                {isNew ? "Új termék" : "Termék szerkesztése"}
+              </Text>
+              <ScrollView keyboardShouldPersistTaps="handled">
+                {[
+                  {
+                    label: "Név *",
+                    key: "name",
+                    placeholder: "pl. Vajas Popcorn",
+                  },
+                  {
+                    label: "Leírás",
+                    key: "description",
+                    placeholder: "Rövid leírás",
+                  },
+                  {
+                    label: "Ár (Ft) *",
+                    key: "price",
+                    placeholder: "1200",
+                    keyboardType: "numeric",
+                  },
+                ].map((f) => (
+                  <View key={f.key} style={styles.formGroup}>
+                    <Text style={styles.formLabel}>{f.label}</Text>
+                    <TextInput
+                      style={styles.formInput}
+                      value={String(form[f.key] ?? "")}
+                      onChangeText={(v) =>
+                        setForm((p) => ({ ...p, [f.key]: v }))
+                      }
+                      placeholder={f.placeholder}
+                      placeholderTextColor="#444"
+                      keyboardType={f.keyboardType || "default"}
+                    />
+                  </View>
+                ))}
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>Kép</Text>
+                  <TouchableOpacity
+                    style={styles.imgPickerBtn}
+                    onPress={pickImage}
+                  >
+                    {pickedImage ? (
+                      <Image
+                        source={{ uri: pickedImage.uri }}
+                        style={styles.imgPreview}
+                      />
+                    ) : form.img || form.Img ? (
+                      <Image
+                        source={{ uri: getImgUrl(form.img || form.Img) }}
+                        style={styles.imgPreview}
+                      />
+                    ) : (
+                      <Text style={styles.imgPickerText}>
+                        📷 Kép kiválasztása
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>Kategória</Text>
+                  <View
+                    style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}
+                  >
+                    {CATEGORIES.map((cat) => (
+                      <TouchableOpacity
+                        key={cat}
+                        onPress={() =>
+                          setForm((p) => ({ ...p, category: cat }))
+                        }
+                        style={[
+                          styles.catChip,
+                          form.category === cat && styles.catChipActive,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.catChipText,
+                            form.category === cat && styles.catChipTextActive,
+                          ]}
+                        >
+                          {cat}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>Elérhető</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      setForm((p) => ({ ...p, isAvailable: !p.isAvailable }))
+                    }
+                    style={[
+                      styles.catChip,
+                      form.isAvailable && styles.catChipActive,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.catChipText,
+                        form.isAvailable && styles.catChipTextActive,
+                      ]}
+                    >
+                      {form.isAvailable ? "✓ Igen" : "✗ Nem"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.modalBtns}>
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={closeEdit}
+                  >
+                    <Text style={styles.cancelBtnText}>Mégse</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.saveBtn} onPress={save}>
+                    <Text style={styles.saveBtnText}>Mentés</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      )}
+    </View>
+  );
+}
+
 const HONAP_NEV = [
   "Jan",
   "Feb",
@@ -1045,6 +1384,7 @@ const TABS = [
   { key: "users", label: "👥 Userek" },
   { key: "movies", label: "🎬 Filmek" },
   { key: "showtimes", label: "🎥 Vetítések" },
+  { key: "buffet", label: "🍿 Büfé" },
   { key: "stats", label: "📊 Statisztika" },
 ];
 
@@ -1138,6 +1478,7 @@ export default function AdminScreen() {
         {token && activeTab === "users" && <UsersTab token={token} />}
         {token && activeTab === "movies" && <MoviesTab token={token} />}
         {token && activeTab === "showtimes" && <ShowtimesTab token={token} />}
+        {token && activeTab === "buffet" && <BuffetAdminTab token={token} />}
         {token && activeTab === "stats" && <StatsTab token={token} />}
       </View>
     </SafeAreaView>
