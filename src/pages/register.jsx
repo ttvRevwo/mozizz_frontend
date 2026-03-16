@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import '../styles/RegisterStyle.css';
+import '../styles/AuthStyle.css';
 import backgroundImage from '../../src/imgs/4.png';
 import { getManualLogoUrl } from '../utils/cloudinary';
 
@@ -29,7 +29,7 @@ const WaveInput = ({ type, placeholder, value, onChange, validate, required = tr
       />
       <label className="floating-label">
         {placeholder.split('').map((char, index) => (
-          <span key={index} style={{ transitionDelay: `${index * 50}ms` }}>
+          <span key={index} style={{ transitionDelay: `${index * 35}ms` }}>
             {char === ' ' ? '\u00A0' : char}
           </span>
         ))}
@@ -162,16 +162,12 @@ export default function Register() {
 
   return (
     <div 
-      className="app-container" 
+      className="auth-bg"
       style={{
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundPosition: 'center center',
         backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
-        width: '100%',
-        height: '100vh',
-        overflow: 'hidden',
       }}
     >
       <div className="register-container">
@@ -185,6 +181,7 @@ export default function Register() {
           </a>
         )}
         
+        <br/>
         <h2 className="register-title">Regisztráció</h2>
 
         {step === 'register' && (

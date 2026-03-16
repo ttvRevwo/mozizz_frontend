@@ -15,9 +15,10 @@ html, body, #root {
     min-height: 100vh;
     font-family: 'DM Sans', sans-serif;
     color: #e8e8e8;
-    background: #080808;
+    /* background szándékosan nincs — auth oldalakon inline style adja */
 }
 
+/* ── NAVBAR ── */
 .top-nav {
     position: fixed;
     top: 0;
@@ -134,96 +135,7 @@ html, body, #root {
 .logout-item { color: rgba(209,25,34,0.65); }
 .logout-item:hover { background: rgba(209,25,34,0.07); color: #d11922; }
 
-.auth-full-page {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: radial-gradient(ellipse at 50% 0%, rgba(199,156,15,0.05) 0%, transparent 55%), #080808;
-}
-
-.register-container, .login-container {
-    width: 100%;
-    max-width: 410px;
-    background: #0e0e0e;
-    border: 1px solid rgba(199,156,15,0.18);
-    border-radius: 10px;
-    padding: 42px 38px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-}
-
-.register-title, .login-title {
-    font-family: 'Bebas Neue', sans-serif;
-    color: #c79c0f;
-    text-align: center;
-    margin: 0 0 30px;
-    font-size: 2.1rem;
-    letter-spacing: 4px;
-}
-
-.form-group { margin-bottom: 17px; }
-
-.form-label {
-    display: block;
-    color: rgba(199,156,15,0.6);
-    margin-bottom: 6px;
-    font-size: 0.72rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.form-input {
-    width: 100%;
-    padding: 10px 13px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 5px;
-    color: #e8e8e8;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.93rem;
-    transition: border-color 0.2s;
-}
-.form-input:focus { outline: none; border-color: rgba(199,156,15,0.45); background: rgba(255,255,255,0.05); }
-
-.reg-button, .login-button, .save-btn {
-    width: 100%;
-    padding: 12px;
-    background: #c79c0f;
-    color: #000;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 700;
-    font-size: 0.85rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: background 0.2s, transform 0.15s;
-}
-.reg-button:hover, .login-button:hover { background: #d4a912; transform: translateY(-1px); }
-
-.delete-btn {
-    width: 100%;
-    padding: 11px;
-    background: transparent;
-    color: rgba(209,25,34,0.75);
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
-    border: 1px solid rgba(209,25,34,0.3);
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    margin-top: 10px;
-    transition: all 0.2s;
-}
-.delete-btn:hover { background: rgba(209,25,34,0.08); border-color: #d11922; color: #d11922; }
-
-.login-link { display: block; text-align: center; margin-top: 18px; color: rgba(255,255,255,0.25); text-decoration: none; font-size: 0.83rem; }
-.login-link span { color: #c79c0f; }
-
+/* ── HERO ── */
 .main-page-container { width: 100%; }
 
 .hero-slider-box {
@@ -358,3 +270,38 @@ html, body, #root {
     width: 100%;
     min-height: 100vh;
 }
+
+/* ── EGYÉB GOMBOK (más oldalak) ── */
+.save-btn {
+    width: 100%;
+    padding: 12px;
+    background: #c79c0f;
+    color: #000;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s, transform 0.15s;
+}
+.save-btn:hover { background: #d4a912; transform: translateY(-1px); }
+
+.delete-btn {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    color: rgba(209,25,34,0.75);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    border: 1px solid rgba(209,25,34,0.3);
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    margin-top: 10px;
+    transition: all 0.2s;
+}
+.delete-btn:hover { background: rgba(209,25,34,0.08); border-color: #d11922; color: #d11922; }

@@ -53,7 +53,6 @@ function Navigation() {
         <Link to="/" className="logo-link">
              <img src={LOGO_URL} alt="Logo" className="nav-logo"/>
         </Link>
-        <input type="text" placeholder="Keresés..." className="search-bar" />
       </div>
 
       <div className="nav-center">
@@ -239,7 +238,6 @@ function MainPage() {
   );
 }
 
-const AuthLayout = ({ children }) => <div className="auth-full-page">{children}</div>;
 
 const SimpleLayout = ({ children }) => (
   <div style={{ width: '100%', boxSizing: 'border-box' }}>
@@ -265,8 +263,8 @@ function App() {
         
         <Routes>
           <Route path="/" element={<MainPage />} />
-          <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
-          <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
           
           <Route path="/Catalog" element={<SimpleLayout><Catalog /></SimpleLayout>} />
           <Route path="/Buffet" element={<SimpleLayout><Buffet /></SimpleLayout>} />
