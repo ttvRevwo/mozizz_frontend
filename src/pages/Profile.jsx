@@ -137,68 +137,39 @@ const UserProfile = () => {
     useEffect(() => {
         const fetchTickets = async () => {
             try {
-                const reservationsRes = await authFetch(
-                    `http://localhost:5083/api/Booking/GetUserReservations/${currentUserId}`
-                );
-                if (!reservationsRes.ok) throw new Error("Nem sikerült betölteni a jegyeket.");
+                const [reservationsRes, ticketsRes] = await Promise.all([
+                    authFetch(`http://localhost:5083/api/Booking/GetUserReservations/${currentUserId}`),
+                    authFetch(`http://localhost:5083/api/Ticket/MyTickets/${currentUserId}`)
+                ]);
+
+                if (!reservationsRes.ok) throw new Error("Nem sikerült betölteni a foglalásokat.");
                 const resData = await reservationsRes.json();
                 const reservations = Array.isArray(resData) ? resData : [];
 
-                const ticketsRes = await authFetch(
-                    `http://localhost:5083/api/Ticket/MyTickets/${currentUserId}`
-                );
                 const ticketsData = ticketsRes.ok ? await ticketsRes.json() : [];
-                let fetchedTickets = Array.isArray(ticketsData) ? ticketsData : [];
+                const fetchedTickets = Array.isArray(ticketsData) ? ticketsData : [];
 
-                // Ha van olyan foglalás, amihez még nincs jegy, automatikusan confirmáljuk
-                const reservationsWithoutTicket = reservations.filter(res =>
-                    !fetchedTickets.some(t =>
-                        t.reservationId === res.reservationId ||
-                        t.ReservationId === res.reservationId
-                    )
+                const reservationsSorted = [...reservations].sort((a, b) =>
+                    (a.reservationId ?? 0) - (b.reservationId ?? 0)
+                );
+                const ticketsSorted = [...fetchedTickets].sort((a, b) =>
+                    new Date(a.issuedDate ?? 0) - new Date(b.issuedDate ?? 0)
                 );
 
-                for (const res of reservationsWithoutTicket) {
-                    try {
-                        await authFetch(
-                            `http://localhost:5083/api/Booking/ConfirmBooking/${res.reservationId}`,
-                            { method: 'POST' }
-                        );
-                    } catch {
-                        // ha már confirmed vagy lejárt, továbblépünk
-                    }
-                }
-
-                if (reservationsWithoutTicket.length > 0) {
-                    const refreshedRes = await authFetch(
-                        `http://localhost:5083/api/Ticket/MyTickets/${currentUserId}`
-                    );
-                    const refreshedData = refreshedRes.ok ? await refreshedRes.json() : [];
-                    fetchedTickets = Array.isArray(refreshedData) ? refreshedData : [];
-                }
-
-                const merged = reservations
-                    .filter(res => fetchedTickets.some(t =>
-                        t.reservationId === res.reservationId ||
-                        t.ReservationId === res.reservationId
-                    ))
-                    .map((res) => {
-                        const ticket = fetchedTickets.find(t =>
-                            t.reservationId === res.reservationId ||
-                            t.ReservationId === res.reservationId
-                        );
-                        return {
-                            ticketCode:    ticket?.ticketCode ?? `RES-${res.reservationId}`,
-                            issuedDate:    ticket?.issuedDate ?? null,
-                            isUsed:        ticket?.isUsed ?? false,
-                            status:        ticket?.status ?? res.status,
-                            movieTitle:    res.movieTitle,
-                            seats:         res.seats ?? [],
-                            showDate:      res.date,
-                            showTime:      res.time,
-                            reservationId: res.reservationId,
-                        };
-                    });
+                const merged = reservationsSorted.map((res, i) => {
+                    const ticket = ticketsSorted[i];
+                    return {
+                        ticketCode:    ticket?.ticketCode ?? `RES-${res.reservationId}`,
+                        issuedDate:    ticket?.issuedDate ?? null,
+                        isUsed:        ticket?.isUsed ?? false,
+                        status:        ticket?.status ?? res.status,
+                        movieTitle:    res.movieTitle,
+                        seats:         res.seats ?? [],
+                        showDate:      res.date,
+                        showTime:      res.time,
+                        reservationId: res.reservationId,
+                    };
+                });
 
                 setTickets(merged);
             } catch (err) {
