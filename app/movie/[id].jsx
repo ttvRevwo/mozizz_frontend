@@ -47,6 +47,7 @@ export default function MovieDetailScreen() {
   const [movie, setMovie] = useState(null);
   const [imgVersion, setImgVersion] = useState(null);
   const [showtimes, setShowtimes] = useState([]);
+  const [futureShowtimes, setFutureShowtimes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -72,22 +73,36 @@ export default function MovieDetailScreen() {
       .then((data) => {
         const all = Array.isArray(data) ? data : data.data || [];
         const now = new Date();
-        const future = all.filter((st) => {
-          const d = st.showDate || st.date || "";
-          const t = st.showTime1 || st.time || "00:00";
-          const dt = new Date(
-            `${String(d).split("T")[0]}T${String(t).slice(0, 5)}:00`,
-          );
-          return dt > now;
-        });
-        const sorted = future.sort((a, b) => {
-          const da =
-            (a.showDate || a.date || "") + (a.showTime1 || a.time || "");
-          const db =
-            (b.showDate || b.date || "") + (b.showTime1 || b.time || "");
-          return da.localeCompare(db);
-        });
-        setShowtimes(sorted);
+        const todayStr = now.toISOString().split("T")[0];
+
+        const todayShowtimes = all
+          .filter((st) => {
+            const d = String(st.showDate || st.date || "").split("T")[0];
+            const t = st.showTime1 || st.time || "00:00";
+            const dt = new Date(`${d}T${String(t).slice(0, 5)}:00`);
+            return d === todayStr && dt > now;
+          })
+          .sort((a, b) => {
+            const ta = a.showTime1 || a.time || "";
+            const tb = b.showTime1 || b.time || "";
+            return ta.localeCompare(tb);
+          });
+
+        const futureShowtimes = all
+          .filter((st) => {
+            const d = String(st.showDate || st.date || "").split("T")[0];
+            return d > todayStr;
+          })
+          .sort((a, b) => {
+            const da =
+              (a.showDate || a.date || "") + (a.showTime1 || a.time || "");
+            const db =
+              (b.showDate || b.date || "") + (b.showTime1 || b.time || "");
+            return da.localeCompare(db);
+          });
+
+        setShowtimes(todayShowtimes);
+        setFutureShowtimes(futureShowtimes);
         setLoading(false);
       })
       .catch((err) => {
@@ -212,7 +227,59 @@ export default function MovieDetailScreen() {
             </View>
           ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {showtimes.map((st) => {
+              {showtimes.length === 0 ? (
+                <Text style={styles.noShowtimeText}>
+                  Ma nincs több vetítés.
+                </Text>
+              ) : (
+                showtimes.map((st) => {
+                  const stId = st.showtimeId || st.ShowtimeId || st.id;
+                  const timeRaw = st.showTime1 || st.time || st.Time;
+                  const hallName = st.hallName || st.HallName;
+                  const formattedTime = timeRaw
+                    ? String(timeRaw).substring(0, 5)
+                    : "";
+                  return (
+                    <TouchableOpacity
+                      key={String(stId)}
+                      style={styles.showtimeCard}
+                      onPress={async () => {
+                        const token = await AsyncStorage.getItem("token");
+                        if (!token) {
+                          Alert.alert(
+                            "Bejelentkezés szükséges",
+                            "A jegyfoglaláshoz be kell jelentkezned!",
+                            [
+                              { text: "Mégsem", style: "cancel" },
+                              {
+                                text: "Bejelentkezés",
+                                onPress: () =>
+                                  router.push(`/login?redirect=/movie/${id}`),
+                              },
+                            ],
+                          );
+                          return;
+                        }
+                        router.push(`/booking/${stId}`);
+                      }}
+                    >
+                      <Text style={styles.showtimeTime}>{formattedTime}</Text>
+                      {hallName && (
+                        <Text style={styles.showtimeHall}>{hallName}</Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })
+              )}
+            </ScrollView>
+          )}
+        </View>
+
+        {futureShowtimes.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.showtimesTitle}>Közelgő vetítések</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {futureShowtimes.slice(0, 10).map((st) => {
                 const stId = st.showtimeId || st.ShowtimeId || st.id;
                 const timeRaw = st.showTime1 || st.time || st.Time;
                 const dateRaw = st.showDate || st.date || st.Date;
@@ -220,44 +287,24 @@ export default function MovieDetailScreen() {
                 const formattedTime = timeRaw
                   ? String(timeRaw).substring(0, 5)
                   : "";
-
+                const dateStr = String(dateRaw).split("T")[0];
                 return (
-                  <TouchableOpacity
-                    key={String(stId)}
-                    style={styles.showtimeCard}
-                    onPress={async () => {
-                      const token = await AsyncStorage.getItem("token");
-                      if (!token) {
-                        Alert.alert(
-                          "Bejelentkezés szükséges",
-                          "A jegyfoglaláshoz be kell jelentkezned!",
-                          [
-                            { text: "Mégsem", style: "cancel" },
-                            {
-                              text: "Bejelentkezés",
-                              onPress: () =>
-                                router.push(`/login?redirect=/movie/${id}`),
-                            },
-                          ],
-                        );
-                        return;
-                      }
-                      router.push(`/booking/${stId}`);
-                    }}
-                  >
-                    <Text style={styles.showtimeTime}>{formattedTime}</Text>
-                    <Text style={styles.showtimeDate}>
-                      {String(dateRaw).split("T")[0]}
+                  <View key={String(stId)} style={styles.showtimeCardFuture}>
+                    <Text style={[styles.showtimeTime, { color: "#aaa" }]}>
+                      {formattedTime}
                     </Text>
+                    <Text style={styles.showtimeSoon}>{dateStr}</Text>
                     {hallName && (
-                      <Text style={styles.showtimeHall}>{hallName}</Text>
+                      <Text style={[styles.showtimeHall, { color: "#555" }]}>
+                        {hallName}
+                      </Text>
                     )}
-                  </TouchableOpacity>
+                  </View>
                 );
               })}
             </ScrollView>
-          )}
-        </View>
+          </View>
+        )}
 
         <View style={[styles.section, styles.releaseRow]}>
           <Text style={styles.releaseText}>

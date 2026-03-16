@@ -56,9 +56,6 @@ export default function HomeScreen() {
           ? moviesData
           : moviesData.data || [];
         const showtimes = Array.isArray(showtimesData) ? showtimesData : [];
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-
         const parseDate = (raw) => {
           if (!raw) return null;
           const s = String(raw).trim();
@@ -71,12 +68,17 @@ export default function HomeScreen() {
           return null;
         };
 
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
         const activeTitles = new Set(
           showtimes
             .filter((st) => {
               const dt = parseDate(st.Date || st.date);
               if (!dt) return false;
-              return dt >= now;
+              return dt >= today && dt < tomorrow;
             })
             .map((st) =>
               (st.MovieTitle || st.movieTitle || "").toLowerCase().trim(),
