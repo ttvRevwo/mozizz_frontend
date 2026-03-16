@@ -135,6 +135,7 @@ const UserProfile = () => {
     const currentUserId = localStorage.getItem('userId');
     const [userInfo, setUserInfo] = useState(null);
 
+    // Felhasználó adatainak betöltése
     useEffect(() => {
         authFetch(`http://localhost:5083/api/UserProfile/${currentUserId}`)
             .then(r => r.ok ? r.json() : null)
@@ -156,29 +157,57 @@ const UserProfile = () => {
                     `http://localhost:5083/api/Ticket/MyTickets/${currentUserId}`
                 );
                 const ticketsData = ticketsRes.ok ? await ticketsRes.json() : [];
-                const fetchedTickets = Array.isArray(ticketsData) ? ticketsData : [];
+                let fetchedTickets = Array.isArray(ticketsData) ? ticketsData : [];
 
-                const reservationsSorted = [...reservations].sort((a, b) =>
-                    (a.reservationId ?? 0) - (b.reservationId ?? 0)
-                );
-                const ticketsSorted = [...fetchedTickets].sort((a, b) =>
-                    new Date(a.issuedDate ?? 0) - new Date(b.issuedDate ?? 0)
+                // Ha van olyan foglalás, amihez még nincs jegy, automatikusan confirmáljuk
+                const reservationsWithoutTicket = reservations.filter(res =>
+                    !fetchedTickets.some(t =>
+                        t.reservationId === res.reservationId ||
+                        t.ReservationId === res.reservationId
+                    )
                 );
 
-                const merged = reservationsSorted.map((res, i) => {
-                    const ticket = ticketsSorted[i];
-                    return {
-                        ticketCode:    ticket?.ticketCode ?? `RES-${res.reservationId}`,
-                        issuedDate:    ticket?.issuedDate ?? null,
-                        isUsed:        ticket?.isUsed ?? false,
-                        status:        ticket?.status ?? res.status,
-                        movieTitle:    res.movieTitle,
-                        seats:         res.seats ?? [],
-                        showDate:      res.date,
-                        showTime:      res.time,
-                        reservationId: res.reservationId,
-                    };
-                });
+                for (const res of reservationsWithoutTicket) {
+                    try {
+                        await authFetch(
+                            `http://localhost:5083/api/Booking/ConfirmBooking/${res.reservationId}`,
+                            { method: 'POST' }
+                        );
+                    } catch {
+                        // ha már confirmed vagy lejárt, továbblépünk
+                    }
+                }
+
+                if (reservationsWithoutTicket.length > 0) {
+                    const refreshedRes = await authFetch(
+                        `http://localhost:5083/api/Ticket/MyTickets/${currentUserId}`
+                    );
+                    const refreshedData = refreshedRes.ok ? await refreshedRes.json() : [];
+                    fetchedTickets = Array.isArray(refreshedData) ? refreshedData : [];
+                }
+
+                const merged = reservations
+                    .filter(res => fetchedTickets.some(t =>
+                        t.reservationId === res.reservationId ||
+                        t.ReservationId === res.reservationId
+                    ))
+                    .map((res) => {
+                        const ticket = fetchedTickets.find(t =>
+                            t.reservationId === res.reservationId ||
+                            t.ReservationId === res.reservationId
+                        );
+                        return {
+                            ticketCode:    ticket?.ticketCode ?? `RES-${res.reservationId}`,
+                            issuedDate:    ticket?.issuedDate ?? null,
+                            isUsed:        ticket?.isUsed ?? false,
+                            status:        ticket?.status ?? res.status,
+                            movieTitle:    res.movieTitle,
+                            seats:         res.seats ?? [],
+                            showDate:      res.date,
+                            showTime:      res.time,
+                            reservationId: res.reservationId,
+                        };
+                    });
 
                 setTickets(merged);
             } catch (err) {
@@ -241,16 +270,41 @@ const UserProfile = () => {
 
                     <div className="profile-user-info">
                         <div className="profile-info-item">
-                            <div className="info-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#C9A84C" strokeWidth={1.5} width={13} height={13}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg></div>
-                            <div className="info-content"><span className="info-label">Email</span><span className="info-value">{userInfo?.email ?? localStorage.getItem('userEmail') ?? '—'}</span></div>
+                            <div className="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#C9A84C" strokeWidth={1.5} width={13} height={13}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                                </svg>
+                            </div>
+                            <div className="info-content">
+                                <span className="info-label">Email</span>
+                                <span className="info-value">{userInfo?.email ?? localStorage.getItem('userEmail') ?? '—'}</span>
+                            </div>
                         </div>
                         <div className="profile-info-item">
-                            <div className="info-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#C9A84C" strokeWidth={1.5} width={13} height={13}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg></div>
-                            <div className="info-content"><span className="info-label">Telefon</span><span className="info-value">{userInfo?.phone || '—'}</span></div>
+                            <div className="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#C9A84C" strokeWidth={1.5} width={13} height={13}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                                </svg>
+                            </div>
+                            <div className="info-content">
+                                <span className="info-label">Telefon</span>
+                                <span className="info-value">{userInfo?.phone || '—'}</span>
+                            </div>
                         </div>
                         <div className="profile-info-item">
-                            <div className="info-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#C9A84C" strokeWidth={1.5} width={13} height={13}><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg></div>
-                            <div className="info-content"><span className="info-label">Tag azóta</span><span className="info-value">{userInfo?.createdAt ? new Date(userInfo.createdAt).toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}</span></div>
+                            <div className="info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#C9A84C" strokeWidth={1.5} width={13} height={13}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                </svg>
+                            </div>
+                            <div className="info-content">
+                                <span className="info-label">Tag azóta</span>
+                                <span className="info-value">
+                                    {userInfo?.createdAt
+                                        ? new Date(userInfo.createdAt).toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' })
+                                        : '—'}
+                                </span>
+                            </div>
                         </div>
                     </div>
 

@@ -1,0 +1,214 @@
+.pedit-page {
+    min-height: 100dvh;
+    width: 100%;
+    background: #0f0f0f;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 100px 24px 60px;
+    box-sizing: border-box;
+}
+
+.pedit-back-btn {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 30;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(201,168,76,0.3);
+    background: rgba(8,8,8,0.85);
+    color: rgba(201,168,76,0.75);
+    border-radius: 20px;
+    padding: 7px 14px 7px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.pedit-back-btn:hover { border-color: #C9A84C; background: rgba(201,168,76,0.08); color: #C9A84C; }
+.pedit-back-btn svg { transition: transform 0.2s; flex-shrink: 0; }
+.pedit-back-btn:hover svg { transform: translateX(-2px); }
+
+.pedit-wrapper {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.pedit-card {
+    background: #151515;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 32px 28px;
+    box-sizing: border-box;
+}
+
+.pedit-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #C9A84C;
+    margin: 0 0 6px;
+    letter-spacing: 0.3px;
+}
+
+.pedit-card-desc {
+    font-size: 0.75rem;
+    color: #555;
+    margin: 0 0 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #222;
+    line-height: 1.4;
+}
+
+.pedit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.pedit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.pedit-field label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.pedit-field input {
+    width: 100%;
+    padding: 11px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    color: #e8e2d9;
+    font-family: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    box-sizing: border-box;
+}
+.pedit-field input:focus {
+    border-color: rgba(201,168,76,0.45);
+    background: rgba(201,168,76,0.03);
+}
+
+.pedit-strength {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+}
+.pedit-strength-track {
+    flex: 1;
+    height: 3px;
+    background: #2a2a2a;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.pedit-strength-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s, background 0.3s;
+}
+.pedit-strength span {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    min-width: 48px;
+}
+
+.pedit-hint {
+    font-size: 0.68rem;
+    color: #444;
+    margin: 0;
+    line-height: 1.4;
+}
+.pedit-mismatch {
+    font-size: 0.72rem;
+    color: rgba(209,25,34,0.8);
+}
+
+.pedit-message {
+    font-size: 0.8rem;
+    padding: 11px 14px;
+    border-radius: 8px;
+    line-height: 1.4;
+}
+.pedit-message.error   { background: rgba(209,25,34,0.07); border: 1px solid rgba(209,25,34,0.25); color: #e05560; }
+.pedit-message.success { background: rgba(82,183,136,0.07); border: 1px solid rgba(82,183,136,0.25); color: #52b788; }
+
+.pedit-submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #C9A84C;
+    color: #000;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.76rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    margin-top: 4px;
+}
+.pedit-submit-btn:hover:not(:disabled) {
+    background: #d4b050;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(201,168,76,0.2);
+}
+.pedit-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+@media (max-width: 720px) {
+    .pedit-wrapper { grid-template-columns: 1fr; }
+    .pedit-page { padding: 80px 14px 40px; }
+    .pedit-card { padding: 24px 18px; }
+}
+
+.pedit-field input.valid   { border-color: rgba(82,183,136,0.5); }
+.pedit-field input.invalid { border-color: rgba(209,25,34,0.4); }
+
+.pedit-phone-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+.pedit-country-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.04)
+        url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C9A84C' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")
+        no-repeat right 6px center / 13px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    color: #C9A84C;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 11px 26px 11px 10px;
+    outline: none;
+    cursor: pointer;
+    width: 76px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+.pedit-country-select:focus { border-color: rgba(201,168,76,0.45); }
+.pedit-country-select option { background: #111; color: #e8e2d9; }

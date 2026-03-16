@@ -15,10 +15,8 @@ html, body, #root {
     min-height: 100vh;
     font-family: 'DM Sans', sans-serif;
     color: #e8e8e8;
-    /* background szándékosan nincs — auth oldalakon inline style adja */
 }
 
-/* ── NAVBAR ── */
 .top-nav {
     position: fixed;
     top: 0;
@@ -135,7 +133,6 @@ html, body, #root {
 .logout-item { color: rgba(209,25,34,0.65); }
 .logout-item:hover { background: rgba(209,25,34,0.07); color: #d11922; }
 
-/* ── HERO ── */
 .main-page-container { width: 100%; }
 
 .hero-slider-box {
@@ -271,7 +268,6 @@ html, body, #root {
     min-height: 100vh;
 }
 
-/* ── EGYÉB GOMBOK (más oldalak) ── */
 .save-btn {
     width: 100%;
     padding: 12px;

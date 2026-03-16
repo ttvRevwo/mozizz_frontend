@@ -10,6 +10,7 @@ import NewMovie from './pages/NewMovie';
 import Buffet from './pages/Buffet';
 import Catalog from './pages/Catalog';
 import Profile from './pages/Profile';
+import ProfileEdit from './pages/ProfileEdit';
 import ViewMovie from './pages/ViewMovie';
 import Showtimes from './pages/Showtimes';
 import ShowtimeDetails from './pages/ShowtimeDetails';
@@ -238,6 +239,7 @@ function MainPage() {
   );
 }
 
+const AuthLayout = ({ children }) => <div className="auth-full-page">{children}</div>;
 
 const SimpleLayout = ({ children }) => (
   <div style={{ width: '100%', boxSizing: 'border-box' }}>
@@ -263,12 +265,13 @@ function App() {
         
         <Routes>
           <Route path="/" element={<MainPage />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
+          <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
           
           <Route path="/Catalog" element={<SimpleLayout><Catalog /></SimpleLayout>} />
           <Route path="/Buffet" element={<SimpleLayout><Buffet /></SimpleLayout>} />
           <Route path="/Profile" element={<SimpleLayout><Profile /></SimpleLayout>} />
+          <Route path="/profile/edit" element={<SimpleLayout><ProfileEdit /></SimpleLayout>} />
           <Route path="/booking/:showtimeId" element={<SeatBooking />} />
           <Route path="/buffet/product/:id" element={<ProductDetail />} />
 
