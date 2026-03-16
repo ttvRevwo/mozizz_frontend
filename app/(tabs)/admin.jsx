@@ -612,7 +612,7 @@ function ShowtimesTab({ token }) {
           MovieId: parseInt(form.MovieId),
           HallId: parseInt(form.HallId),
           ShowDate: form.ShowDate,
-          ShowTime1: form.ShowTime1,
+          ShowTime1: form.ShowTime1 + ":00",
           CreatedAt: new Date().toISOString(),
         }),
       },
@@ -624,7 +624,7 @@ function ShowtimesTab({ token }) {
       Alert.alert("Siker", isNew ? "Hozzáadva!" : "Módosítva!");
     } else {
       const d = await r?.json().catch(() => ({}));
-      Alert.alert("Hiba", d?.hiba || "Nem sikerült.");
+      Alert.alert("Hiba", d?.title || d?.hiba || "Nem sikerült.");
     }
   };
 
