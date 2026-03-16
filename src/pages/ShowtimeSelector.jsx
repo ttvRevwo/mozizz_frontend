@@ -1,6 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const parseShowtimeDate = (dateRaw, timeRaw) => {
+    if (!dateRaw || !timeRaw) return null;
+    try {
+        let isoDate = dateRaw;
+        const huMatch = String(dateRaw).match(/(\d{4})[.\s]+(\d{1,2})[.\s]+(\d{1,2})/);
+        if (huMatch) {
+            isoDate = `${huMatch[1]}-${huMatch[2].padStart(2,'0')}-${huMatch[3].padStart(2,'0')}`;
+        } else {
+            const slashMatch = String(dateRaw).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (slashMatch) {
+                isoDate = `${slashMatch[3]}-${slashMatch[1].padStart(2,'0')}-${slashMatch[2].padStart(2,'0')}`;
+            }
+        }
+        const timeStr = String(timeRaw).substring(0, 5);
+        return new Date(`${isoDate}T${timeStr}:00`);
+    } catch {
+        return null;
+    }
+};
+
+const isShowtimeBookable = (dateRaw, timeRaw) => {
+    const showDT = parseShowtimeDate(dateRaw, timeRaw);
+    if (!showDT) return true;
+    const cutoff = new Date(showDT.getTime() + 30 * 60 * 1000);
+    return cutoff > new Date();
+};
+
 const ShowtimeSelector = ({ movieId, movieTitle }) => {
     const navigate = useNavigate();
     const [showtimes, setShowtimes] = useState([]);
@@ -27,14 +54,20 @@ const ShowtimeSelector = ({ movieId, movieTitle }) => {
                     return false;
                 });
 
-                filtered.sort((a, b) => { 
+                // Csak azok a vetítések ahol a kezdés + 30 perc még a jövőben van
+                const bookable = filtered.filter(st => {
+                    const dateRaw = st.date || st.Date;
+                    const timeRaw = st.time || st.Time;
+                    return isShowtimeBookable(dateRaw, timeRaw);
+                });
+
+                bookable.sort((a, b) => { 
                     const dateStrA = (a.date || a.Date || "") + (a.time || a.Time || "");
                     const dateStrB = (b.date || b.Date || "") + (b.time || b.Time || "");
-                    
                     return dateStrA.localeCompare(dateStrB);
                 });
 
-                setShowtimes(filtered);
+                setShowtimes(bookable);
                 setLoading(false);
             })
             .catch(err => {
@@ -60,7 +93,10 @@ const ShowtimeSelector = ({ movieId, movieTitle }) => {
                 color: '#aaa',
                 border: '1px solid rgba(255,255,255,0.1)'
             }}>
-                Jelenleg nincs meghirdetett vetítés ehhez a filmhez.
+                Jelenleg nincs elérhető vetítés ehhez a filmhez.<br/>
+                <span style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px', display: 'block' }}>
+                    A már elkezdett vagy 30 percen belül kezdődő vetítésekre nem lehet jegyet foglalni.
+                </span>
             </div>
         );
     }
