@@ -4,20 +4,13 @@ import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, Navigate 
 import Register from './pages/register'
 import Login from './pages/login'
 import Admin from './pages/Admin'
-import UserDetails from "./pages/UserDetails"
-import MovieDetails from './pages/MovieDetails';
-import NewMovie from './pages/NewMovie';
 import Buffet from './pages/Buffet';
 import Catalog from './pages/Catalog';
 import Profile from './pages/Profile';
 import ProfileEdit from './pages/ProfileEdit';
 import ViewMovie from './pages/ViewMovie';
-import Showtimes from './pages/Showtimes';
-import ShowtimeDetails from './pages/ShowtimeDetails';
-import NewShowtime from './pages/NewShowtime';
 import SeatBooking from './pages/SeatBooking';
 import ProductDetail from './pages/ProductDetails';
-import UserBookings from './pages/UserBookings';
 import { getStoredRoleId, isUserLoggedIn } from './utils/auth';
 import { CLOUDINARY_BASE, getManualLogoUrl } from './utils/cloudinary';
 
@@ -274,55 +267,14 @@ function App() {
           <Route path="/profile/edit" element={<SimpleLayout><ProfileEdit /></SimpleLayout>} />
           <Route path="/booking/:showtimeId" element={<SeatBooking />} />
           <Route path="/buffet/product/:id" element={<ProductDetail />} />
-
           <Route path="/movie/:id" element={<ViewMovie />} />
 
           {/* ADMIN ÚTVONALAK */}
-          
           <Route path="/admin" element={
             <AdminRoute>
               <SimpleLayout><Admin /></SimpleLayout>
             </AdminRoute>
           } />
-
-          <Route path="/user/:userId" element={
-            <AdminRoute>
-              <SimpleLayout><UserDetails /></SimpleLayout>
-            </AdminRoute>
-          } />
-
-          <Route path="/user-bookings/:userId" element={
-            <AdminRoute>
-              <SimpleLayout><UserBookings /></SimpleLayout>
-            </AdminRoute>
-          } />
-
-          <Route path="/admin/movie/:id" element={
-            <AdminRoute>
-              <SimpleLayout><MovieDetails /></SimpleLayout>
-            </AdminRoute>
-          } />
-
-          <Route path="/movie/new" element={
-            <AdminRoute>
-              <SimpleLayout><NewMovie /></SimpleLayout>
-            </AdminRoute>
-          } />
-
-          {/* VETÍTÉSSEL KAPCSOLATOS*/}
-          <Route path="/admin/showtime/new" element={
-            <AdminRoute>
-              <SimpleLayout><NewShowtime /></SimpleLayout>
-            </AdminRoute>
-          } />
-
-          <Route path="/admin/showtime/:id" element={
-            <AdminRoute>
-              <SimpleLayout><ShowtimeDetails /></SimpleLayout>
-            </AdminRoute>
-          } />
-
-
         </Routes>
       </div>
     </BrowserRouter>

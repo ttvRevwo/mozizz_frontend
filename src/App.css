@@ -54,6 +54,25 @@ html, body, #root {
 .search-bar::placeholder { color: rgba(255,255,255,0.2); }
 .search-bar:focus { border-color: rgba(199,156,15,0.4); background: rgba(255,255,255,0.06); }
 
+.admin-search {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: #e8e8e8;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    transition: border-color 0.2s, background 0.2s;
+}
+.admin-search::placeholder { color: rgba(255,255,255,0.25); }
+.admin-search:focus {
+    border-color: rgba(199,156,15,0.5);
+    background: rgba(255,255,255,0.06);
+}
+
 .nav-center { flex: 2; display: flex; justify-content: center; }
 .nav-slogan {
     font-family: 'Bebas Neue', sans-serif;

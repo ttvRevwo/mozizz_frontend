@@ -161,19 +161,22 @@ const UserProfile = () => {
                 const reservationsSorted = [...reservations].sort((a, b) =>
                     (a.reservationId ?? 0) - (b.reservationId ?? 0)
                 );
-                const ticketsSorted = [...fetchedTickets].sort((a, b) =>
-                    new Date(a.issuedDate ?? 0) - new Date(b.issuedDate ?? 0)
-                );
+                const ticketsSorted = [...fetchedTickets].sort((a, b) => {
+                    if (!a.issuedDate && !b.issuedDate) return 0;
+                    if (!a.issuedDate) return 1;
+                    if (!b.issuedDate) return -1;
+                    return new Date(a.issuedDate) - new Date(b.issuedDate);
+                });
 
                 const merged = reservationsSorted.map((res, i) => {
-                    const ticket = ticketsSorted[i];
+                    const ticket = ticketsSorted[i]; 
                     return {
-                        ticketCode:    ticket?.ticketCode ?? `RES-${res.reservationId}`,
+                        ticketCode:    ticket?.ticketCode ?? `MOZIZZ-${res.reservationId}`,
                         issuedDate:    ticket?.issuedDate ?? null,
-                        isUsed:        ticket?.isUsed ?? false,
-                        status:        ticket?.status ?? res.status,
+                        isUsed:        ticket?.isUsed     ?? false,
+                        status:        ticket?.status     ?? res.status,
                         movieTitle:    res.movieTitle,
-                        seats:         res.seats ?? [],
+                        seats:         res.seats          ?? [],
                         showDate:      res.date,
                         showTime:      res.time,
                         reservationId: res.reservationId,
@@ -181,7 +184,7 @@ const UserProfile = () => {
                 });
 
                 setTickets(merged);
-            } catch (err) {
+            } catch (err) { 
                 setError(err.message);
             } finally {
                 setLoading(false);

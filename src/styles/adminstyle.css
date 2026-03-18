@@ -151,3 +151,137 @@
     background: #c79c0f;
     color: #1a0606;
 }
+
+.buffet-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+}
+
+.buffet-modal {
+    background: #1a0606;
+    border: 1px solid #E0AA3E;
+    border-radius: 14px;
+    width: 480px;
+    max-width: 95vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(-16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+.buffet-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid #333;
+}
+
+.buffet-modal-header h3 {
+    margin: 0;
+    color: #E0AA3E;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
+
+.buffet-modal-close {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s;
+}
+
+.buffet-modal-close:hover { color: #fff; }
+
+.buffet-modal-body {
+    padding: 18px 22px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.buffet-modal-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #aaa;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-top: 10px;
+    display: block;
+}
+
+.buffet-modal-input {
+    width: 100%;
+    background: #2a1a1a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: #e8e8e8;
+    padding: 9px 12px;
+    font-size: 0.9rem;
+    margin-top: 4px;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.buffet-modal-input:focus {
+    outline: none;
+    border-color: #E0AA3E;
+}
+
+.buffet-modal-input option {
+    background: #2a1a1a;
+}
+
+.buffet-modal-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: #ccc;
+    font-size: 0.88rem;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-top: 14px;
+}
+
+.buffet-modal-checkbox-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #E0AA3E;
+    cursor: pointer;
+}
+
+.buffet-modal-error {
+    color: #e05c5c;
+    font-size: 0.85rem;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(224, 92, 92, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(224, 92, 92, 0.3);
+}
+
+.buffet-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 22px 18px;
+    border-top: 1px solid #333;
+}

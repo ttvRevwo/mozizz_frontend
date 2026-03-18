@@ -116,42 +116,53 @@ const SeatBooking = () => {
     };
 
     const handlePaymentConfirm = async () => {
-        const payload = {
-            userId: currentUserId,
-            showtimeId: parseInt(showtimeId),
-            seatIds: selectedSeats
-        };
-
-        try {
-            setLoading(true);
-            const response = await fetch('http://localhost:5083/api/Booking/CreateBooking', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result || "Hiba történt a foglalás során.");
-            }
-
-            setShowPayment(false);
-            setBookingMessage("Sikeres foglalás! Készítjük a jegyeidet...");
-            setSelectedSeats([]);
-
-            setTimeout(() => {
-                navigate('/Profile');
-            }, 2000);
-
-        } catch (err) {
-            setShowPayment(false);
-            alert(err.message);
-            window.location.reload();
-        } finally {
-            setLoading(false);
-        }
+    const payload = {
+        userId: currentUserId,
+        showtimeId: parseInt(showtimeId),
+        seatIds: selectedSeats
     };
+
+    try {
+        setLoading(true);
+
+        const response = await fetch('http://localhost:5083/api/Booking/CreateBooking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result?.hiba || "Hiba történt a foglalás során.");
+        }
+
+        const confirmResponse = await fetch(
+            `http://localhost:5083/api/Booking/ConfirmBooking/${result.reservationId}`,
+            { method: 'POST' }
+        );
+
+        if (!confirmResponse.ok) {
+            const confirmResult = await confirmResponse.json();
+            throw new Error(confirmResult?.hiba || "Hiba a véglegesítés során.");
+        }
+
+        setShowPayment(false);
+        setBookingMessage("Sikeres foglalás! A jegyet elküldtük emailben.");
+        setSelectedSeats([]);
+
+        setTimeout(() => {
+            navigate('/Profile');
+        }, 2000);
+
+    } catch (err) {
+        setShowPayment(false);
+        alert(err.message);
+        window.location.reload();
+    } finally {
+        setLoading(false);
+    }
+};
 
     if (loading && seats.length === 0) return <div className="booking-loading">Székek betöltése...</div>;
     if (error) return <div className="booking-error">Hiba: {error}</div>;
