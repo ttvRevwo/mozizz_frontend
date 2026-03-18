@@ -1,105 +1,154 @@
-.product-detail-container {
-    background-color: #121212;
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+.pd-page {
     min-height: 100vh;
-    padding: 40px;
-    color: #e0e0e0;
+    background: #0d0d0d;
+    background-image: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(224,170,62,0.07) 0%, transparent 70%);
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    padding: 80px 24px 48px;
+    font-family: 'DM Sans', sans-serif;
+    color: #e8e8e8;
+    position: relative;
 }
 
-.back-btn {
-    align-self: flex-start;
-    background: transparent;
-    border: none;
+.pd-back-btn {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 50;
+    background: rgba(0,0,0,0.7);
     color: #E0AA3E;
-    font-size: 16px;
+    border: 1px solid rgba(224,170,62,0.3);
+    padding: 8px 18px;
+    border-radius: 20px;
     cursor: pointer;
-    margin-bottom: 30px;
-    font-weight: bold;
-    transition: transform 0.2s;
+    font-weight: 600;
+    font-size: 0.82rem;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+}
+.pd-back-btn:hover {
+    background: #E0AA3E;
+    color: #000;
+    border-color: #E0AA3E;
 }
 
-.back-btn:hover {
-    transform: translateX(-5px);
-    text-decoration: underline;
-}
-
-.detail-content {
+.pd-card {
     display: flex;
-    gap: 50px;
-    max-width: 1000px;
+    gap: 48px;
+    max-width: 900px;
     width: 100%;
-    background-color: #1a1a1a;
+    background: linear-gradient(145deg, #161616, #1a1a1a);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
     padding: 40px;
-    border-radius: 15px;
-    border: 1px solid #333;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.7);
 }
 
-.detail-image-box {
-    flex: 1;
-    background-color: #2a2a2a;
-    min-height: 400px;
-    border-radius: 10px;
+.pd-image {
+    flex: 0 0 320px;
+    height: 320px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.06);
     display: flex;
-    justify-content: center;
     align-items: center;
-    font-size: 20px;
-    color: #555;
-    border: 2px dashed #444;
+    justify-content: center;
+}
+.pd-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.pd-no-img {
+    font-size: 4rem;
+    opacity: 0.3;
 }
 
-.detail-info-box {
+.pd-info {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    gap: 0;
 }
 
-.detail-info-box h1 {
+.pd-category {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+}
+
+.pd-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    letter-spacing: 3px;
     color: #E0AA3E;
-    font-size: 36px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #444;
-    padding-bottom: 15px;
+    margin: 0 0 16px;
+    line-height: 1;
+    text-shadow: 0 0 40px rgba(224,170,62,0.2);
 }
 
-.detail-desc {
-    font-size: 18px;
-    line-height: 1.6;
+.pd-desc {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #aaa;
+    margin: 0 0 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.pd-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.6rem;
+    letter-spacing: 2px;
+    color: #E0AA3E;
+    margin-bottom: 28px;
+}
+
+.pd-alert {
+    background: rgba(224,170,62,0.08);
+    border-left: 3px solid rgba(224,170,62,0.5);
+    padding: 12px 16px;
     color: #ccc;
-    margin-bottom: 30px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 14px;
 }
 
-.price-tag {
-    font-size: 28px;
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 30px;
-}
-
-.info-alert {
-    background-color: rgba(224, 170, 62, 0.1);
-    border-left: 4px solid #E0AA3E;
-    padding: 15px;
-    color: #ddd;
-    font-size: 14px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-}
-
-.allergen-info {
-    color: #666;
+.pd-allergen {
+    font-size: 0.75rem;
+    color: #444;
     font-style: italic;
+    margin: 0;
 }
 
-@media (max-width: 800px) {
-    .detail-content {
-        flex-direction: column;
-    }
-    
-    .detail-image-box {
-        min-height: 250px;
-    }
+.pd-loading {
+    min-height: 100vh;
+    background: #0d0d0d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: #888;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 750px) {
+    .pd-page { padding: 70px 16px 40px; align-items: flex-start; }
+    .pd-card { flex-direction: column; padding: 24px; gap: 24px; }
+    .pd-image { flex: none; width: 100%; height: 220px; }
+    .pd-title { font-size: 2rem; }
+    .pd-price { font-size: 2rem; }
 }

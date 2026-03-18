@@ -397,7 +397,7 @@ const BuffetModal = ({ item, onClose, onSaved }) => {
 
                     <label className="buffet-modal-label buffet-modal-checkbox-row">
                         <input type="checkbox" checked={form.isAvailable} onChange={e => setForm(f => ({ ...f, isAvailable: e.target.checked }))} />
-                        <span>Elérhető a büféban</span>
+                        <span>Elérhető a büfében</span>
                     </label>
 
                     {error && <div className="buffet-modal-error">{error}</div>}
