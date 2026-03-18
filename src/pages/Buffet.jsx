@@ -1,7 +1,7 @@
-import React, { useRef, useRef as useRefs, useState, useEffect, useRef as r } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/BuffetStyle.css';
-import { getManualLogoUrl } from '../utils/cloudinary';
+import { CLOUDINARY_BASE, getManualLogoUrl } from '../utils/cloudinary';
 
 const LOGO_URL = getManualLogoUrl();
 const API_BASE_URL = 'http://localhost:5083';
@@ -15,6 +15,12 @@ const CATEGORY_LABELS = {
 };
 
 const CATEGORY_ORDER = ['menü', 'popcorn', 'snack', 'édesség', 'ital'];
+
+const getImgUrl = (img) => {
+    if (!img) return null;
+    if (img.startsWith('http')) return img;
+    return `${CLOUDINARY_BASE}${img}`;
+};
 
 const Buffet = () => {
     const navigate = useNavigate();
@@ -101,20 +107,23 @@ const Buffet = () => {
                             className="product-scroll-container"
                             ref={el => scrollRefs.current[category] = el}
                         >
-                            {groupedItems[category].map(item => (
-                                <div key={item.itemId} className="product-card" onClick={() => handleCardClick(item.itemId)}>
-                                    <div className="card-image-placeholder">
-                                        {item.img
-                                            ? <img src={item.img} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            : <span>{item.name}</span>
-                                        }
+                            {groupedItems[category].map(item => {
+                                const imgUrl = getImgUrl(item.img);
+                                return (
+                                    <div key={item.itemId} className="product-card" onClick={() => handleCardClick(item.itemId)}>
+                                        <div className="card-image-placeholder">
+                                            {imgUrl
+                                                ? <img src={imgUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                : <span>{item.name}</span>
+                                            }
+                                        </div>
+                                        <div className="card-info">
+                                            <h3>{item.name}</h3>
+                                            <p className="price">{item.price} Ft</p>
+                                        </div>
                                     </div>
-                                    <div className="card-info">
-                                        <h3>{item.name}</h3>
-                                        <p className="price">{item.price} Ft</p>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                         <button className="nav-arrow right" onClick={() => scroll(category, 'right')}>&#10095;</button>
                     </div>

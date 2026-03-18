@@ -65,23 +65,32 @@ const NewMovieModal = ({ onClose, onSaved }) => {
 
     return (
         <div className="buffet-modal-overlay" onClick={onClose}>
-            <div className="buffet-modal" style={{ width: '600px' }} onClick={e => e.stopPropagation()}>
-
+            <div
+                className="buffet-modal"
+                style={{ width: '600px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
+                onClick={e => e.stopPropagation()}
+            >
                 <div className="buffet-modal-header">
                     <h3>Új film felvétele</h3>
                     <button className="buffet-modal-close" onClick={onClose}>✕</button>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="buffet-modal-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px' }}>
-
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                    <div
+                        className="buffet-modal-body"
+                        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px', overflowY: 'auto', flex: 1, minHeight: 0 }}
+                    >
                         <div style={{ gridColumn: 'span 2', marginBottom: '6px' }}>
                             <label className="buffet-modal-label">Borítókép</label>
                             <input className="buffet-modal-input" type="file" accept="image/*" onChange={handleFileChange} required />
                             {previewUrl && (
-                                <div style={{ marginTop: '10px', textAlign: 'center' }}>
-                                    <img src={previewUrl} alt="Előnézet" style={{ maxHeight: '120px', maxWidth: '100%', borderRadius: '8px', border: '1px solid #E0AA3E', objectFit: 'cover' }} />
-                                    <div style={{ fontSize: '0.72rem', color: '#888', marginTop: '4px' }}>Feltöltés mentéskor</div>
+                                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <img
+                                        src={previewUrl}
+                                        alt="Előnézet"
+                                        style={{ height: '60px', width: '45px', borderRadius: '6px', border: '1px solid #E0AA3E', objectFit: 'cover', flexShrink: 0 }}
+                                    />
+                                    <span style={{ fontSize: '0.72rem', color: '#888' }}>Feltöltés mentéskor történik</span>
                                 </div>
                             )}
                         </div>
