@@ -13,6 +13,36 @@
 .astat-root::-webkit-scrollbar-track { background: #1a0606; }
 .astat-root::-webkit-scrollbar-thumb { background: #E0AA3E; border-radius: 3px; }
 
+.astat-report-switcher {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #1e1e1e;
+    flex-shrink: 0;
+}
+.astat-report-tab {
+    background: transparent;
+    border: 1px solid #2a2a2a;
+    color: #555;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.astat-report-tab:hover {
+    border-color: #E0AA3E;
+    color: #E0AA3E;
+}
+.astat-report-tab.active {
+    background: rgba(224,170,62,0.12);
+    border-color: #E0AA3E;
+    color: #E0AA3E;
+}
+
 .astat-section {
     display: flex;
     flex-direction: column;
@@ -293,4 +323,5 @@
     .astat-cards        { grid-template-columns: 1fr 1fr; }
     .astat-charts-row   { grid-template-columns: 1fr; }
     .astat-occ-info     { min-width: 110px; }
+    .astat-report-switcher { flex-direction: column; }
 }
