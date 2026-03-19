@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AuthStyle.css';
-import backgroundImage from '../../src/imgs/4.png';
+import { getCloudinaryImageUrl } from '../utils/cloudinary';
+const backgroundImage = getCloudinaryImageUrl('4_igqnej.png');
 import { decodeJwtPayload, getRoleIdFromClaims } from '../utils/auth';
 import { getManualLogoUrl } from '../utils/cloudinary';
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import '../styles/AuthStyle.css';
-import backgroundImage from '../../src/imgs/4.png';
+import { getCloudinaryImageUrl } from '../utils/cloudinary';
+const backgroundImage = getCloudinaryImageUrl('4_igqnej.png');
 import { getManualLogoUrl } from '../utils/cloudinary';
 
 const LOGO_URL = getManualLogoUrl();
