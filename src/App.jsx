@@ -97,134 +97,145 @@ function Navigation() {
   );
 }
 
+const getShowtimeISO = (dateRaw) => {
+  if (!dateRaw) return '';
+  const huMatch = String(dateRaw).match(/(\d{4})[.\s]+(\d{1,2})[.\s]+(\d{1,2})/);
+  if (huMatch) return `${huMatch[1]}-${huMatch[2].padStart(2,'0')}-${huMatch[3].padStart(2,'0')}`;
+  return String(dateRaw).split('T')[0];
+};
+
 function MainPage() {
   const navigate = useNavigate();
-  const [movies, setMovies] = useState([]);
-  const [showtimes, setShowtimes] = useState([]);
+  const [slides, setSlides] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5083/api/Movie/GetMovies')
-      .then(res => res.json())
-      .then(data => {
-        const moviesList = data.data || data;
-        setMovies(moviesList.slice(0, 6));
-        setLoading(false);
+    const todayISO = new Date().toISOString().split('T')[0];
+
+    Promise.all([
+      fetch('http://localhost:5083/api/Movie/GetMovies').then(r => r.json()),
+      fetch('http://localhost:5083/api/Showtime/GetAllShowtimes').then(r => r.json()),
+    ])
+      .then(([moviesData, showtimesData]) => {
+        const moviesList    = moviesData.data || moviesData || [];
+        const showtimesList = Array.isArray(showtimesData) ? showtimesData : (showtimesData.data || []);
+
+        const todayShowtimes = showtimesList.filter(st => {
+          const d = getShowtimeISO(st.date || st.Date);
+          return d === todayISO;
+        });
+
+        const pool = todayShowtimes.length > 0
+          ? todayShowtimes
+          : showtimesList.sort((a, b) => {
+              const da = (a.date || a.Date || '') + (a.time || a.Time || '');
+              const db = (b.date || b.Date || '') + (b.time || b.Time || '');
+              return da.localeCompare(db);
+            });
+
+        const seen = new Set();
+        const picked = [];
+        for (const st of pool) {
+          const title = (st.movieTitle || st.MovieTitle || '').trim();
+          if (!title || seen.has(title)) continue;
+          seen.add(title);
+
+          const movie = moviesList.find(m =>
+            (m.title || m.Title || '').trim().toLowerCase() === title.toLowerCase()
+          );
+
+          const imgPath = movie?.img || movie?.Img || movie?.imageUrl || movie?.ImageUrl || '';
+          const imgUrl  = imgPath.startsWith('http') ? imgPath : imgPath ? `${CLOUDINARY_BASE}${imgPath}` : '';
+
+          picked.push({
+            showtimeId: st.showtimeId || st.ShowtimeId,
+            movieId:    movie?.movieId || movie?.MovieId || movie?.id || null,
+            title,
+            genre:       movie?.genre       || movie?.Genre       || '',
+            description: movie?.description || movie?.Description || '',
+            img:         imgUrl,
+            time:        (st.time || st.Time || '').substring(0, 5),
+            hallName:    st.hallName || st.HallName || '',
+          });
+
+          if (picked.length >= 6) break;
+        }
+
+        setSlides(picked);
       })
-      .catch(err => {
-        console.error("Hiba a filmek betöltésekor:", err);
-        setLoading(false);
-      });
+      .catch(err => console.error('Betöltési hiba:', err))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:5083/api/Showtime/GetAllShowtimes')
-      .then((res) => res.json())
-      .then((data) => {
-        const list = Array.isArray(data) ? data : (data.data || []);
-        setShowtimes(list);
-      })
-      .catch((err) => {
-        console.error("Hiba a vetítések betöltésekor:", err);
-      });
-  }, []);
-
-  const getShowtimeIdFromList = (movieData) => {
-    const movieTitle = (movieData?.title || movieData?.Title || movieData?.movie?.title || movieData?.movie?.Title || '').trim();
-
-    if (!movieTitle) return null;
-
-    const exactMatch = showtimes.find((st) => {
-      const stTitle = (st.movieTitle || st.MovieTitle || st.movie?.title || st.movie?.Title || st.Movie?.title || st.Movie?.Title || '').trim();
-      return stTitle === movieTitle;
-    });
-
-    if (exactMatch) {
-      return exactMatch.showtimeId || exactMatch.ShowtimeId;
-    }
-
-    return null;
-  };
-
-  const getShowtimeIdForMovie = async (movie) => {
-    return getShowtimeIdFromList(movie);
-  };
-
-  useEffect(() => {
-    if (movies.length === 0) return;
-
-    const slideInterval = setInterval(() => {
-      setCurrentSlide((prev) => (prev === movies.length - 1 ? 0 : prev + 1));
-    }, 10000); 
-    
-    return () => clearInterval(slideInterval);
-  }, [movies.length]);
+    if (slides.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev === slides.length - 1 ? 0 : prev + 1));
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [slides.length]);
 
   if (loading) {
     return <div className="main-page-container"><p style={{color:'white', textAlign:'center', paddingTop:'100px'}}>Filmek betöltése...</p></div>;
   }
 
-  if (movies.length === 0) {
+  if (slides.length === 0) {
     return <div className="main-page-container"><p style={{color:'white', textAlign:'center', paddingTop:'100px'}}>Nincsenek kiemelt filmek.</p></div>;
   }
 
   return (
     <div className="main-page-container">
       <div className="hero-slider-box">
-        {movies.map((movie, index) => {
-
-            let imageUrl = '';
-            if (movie.img && movie.img.startsWith('http')) {
-                imageUrl = movie.img;
-            } else if (movie.img) {
-                imageUrl = `${CLOUDINARY_BASE}${movie.img}`;
-            }
-
-            const isActive = index === currentSlide;
-
-            return (
-              <div 
-                key={movie.movieId || movie.MovieId || movie.movie_id || movie.id}
-                className={`hero-slide ${isActive ? 'active' : ''}`}
-                style={{ backgroundImage: `url(${imageUrl})` }}
-              >
-                <div className="hero-overlay"></div>
-                <div className="hero-content-slider">
-                  <span className="movie-genre">{movie.genre || movie.Genre}</span>
-                  <h2 className="movie-title">{movie.title || movie.Title}</h2>
-                  <p className="movie-description">{movie.description || movie.Description}</p>
-                  <div className="hero-buttons">
-                    <button
-                      className="btn-primary"
-                      onClick={() => {
-                        if (index !== currentSlide) return;
-                        const currentMovie = movies[currentSlide];
-                        const targetId = currentMovie.movieId || currentMovie.MovieId || currentMovie.movie_id || currentMovie.id;
-                        navigate(`/movie/${targetId}`);
-                      }}
+        {slides.map((slide, index) => {
+          const isActive = index === currentSlide;
+          return (
+            <div
+              key={`${slide.showtimeId}-${index}`}
+              className={`hero-slide ${isActive ? 'active' : ''}`}
+              style={{ backgroundImage: slide.img ? `url(${slide.img})` : 'none' }}
+            >
+              <div className="hero-overlay"></div>
+              <div className="hero-content-slider">
+                <span className="movie-genre">{slide.genre}</span>
+                <h2 className="movie-title">{slide.title}</h2>
+                {slide.time && (
+                  <p style={{ color: '#E0AA3E', fontSize: '1rem', fontWeight: 600, marginBottom: '6px', letterSpacing: '1px' }}>
+                    🕐 Ma {slide.time} — {slide.hallName}
+                  </p>
+                )}
+                <p className="movie-description">{slide.description}</p>
+                <div className="hero-buttons">
+                  <button
+                    className="btn-primary"
+                    onClick={() => {
+                      if (index !== currentSlide) return;
+                      navigate(`/booking/${slide.showtimeId}`);
+                    }}
+                  >
+                    Jegyfoglalás
+                  </button>
+                  {slide.movieId && (
+                    <Link
+                      to={`/movie/${slide.movieId}`}
+                      onClick={e => { if (index !== currentSlide) e.preventDefault(); }}
                     >
-                      Jegyfoglalás
-                    </button>
-                    <Link 
-                      to={`/movie/${movie.movieId || movie.MovieId || movie.movie_id || movie.id}`}
-                      onClick={(e) => {
-                        if (index !== currentSlide) {
-                          e.preventDefault();
-                        }
-                      }}
-                    >
-                        <button className="btn-secondary">Részletek</button>
+                      <button className="btn-secondary">Részletek</button>
                     </Link>
-                  </div>
+                  )}
                 </div>
               </div>
-            );
+            </div>
+          );
         })}
-        
+
         <div className="slider-dots">
-          {movies.map((_, index) => (
-            <div key={index} className={`dot ${index === currentSlide ? 'active' : ''}`} onClick={() => setCurrentSlide(index)}></div>
+          {slides.map((_, index) => (
+            <div
+              key={index}
+              className={`dot ${index === currentSlide ? 'active' : ''}`}
+              onClick={() => setCurrentSlide(index)}
+            />
           ))}
         </div>
       </div>
@@ -242,11 +253,7 @@ const SimpleLayout = ({ children }) => (
 
 const AdminRoute = ({ children }) => {
   const roleId = getStoredRoleId();
-  
-  if (roleId !== 1) {
-    return <Navigate to="/" replace />;
-  }
-
+  if (roleId !== 1) return <Navigate to="/" replace />;
   return children;
 };
 
@@ -269,7 +276,6 @@ function App() {
           <Route path="/buffet/product/:id" element={<ProductDetail />} />
           <Route path="/movie/:id" element={<ViewMovie />} />
 
-          {/* ADMIN ÚTVONALAK */}
           <Route path="/admin" element={
             <AdminRoute>
               <SimpleLayout><Admin /></SimpleLayout>
